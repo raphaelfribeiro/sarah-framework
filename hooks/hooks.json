@@ -1,5 +1,5 @@
 {
-  "description": "S.A.R.A.H. hooks. Every hook here is a sensor: it reports and never blocks. Each one exits 0 on any unexpected condition, so a missing tool, an unreadable file, or a project that does not use S.A.R.A.H. degrades to silence rather than to an error.",
+  "description": "S.A.R.A.H. hooks. Every hook here is a sensor: it reports and never blocks. Each one exits 0 on any unexpected condition, so a missing tool, an unreadable file, or a project that does not use S.A.R.A.H. degrades to silence rather than to an error. The commit and push checks exit immediately when the command is not the one they inspect.",
   "hooks": {
     "SessionStart": [
       {
@@ -7,6 +7,31 @@
           {
             "type": "command",
             "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-commit.sh\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/validate-push.sh\""
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/pre-compact.sh\""
           }
         ]
       }

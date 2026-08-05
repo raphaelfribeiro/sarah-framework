@@ -7,12 +7,12 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Build S.A.R.A.H. v0.1 — Phase A (foundation) complete, awaiting review |
+| **Current task** | Build S.A.R.A.H. v0.1 — Phases A, B and C complete; Phase C awaiting review |
 | **Task level** | 3 |
 
 ## In flight
 
-- Phase A delivered: manifests, license, changelog, `ARCHI.md`, three templates, `sarah-bootstrap`, `sarah-init`, `session-start` hook. Awaiting the maintainer's review before Phase B opens.
+- Phases A, B and C delivered. 15 skills, 10 agents, 3 hooks, one script, ~3,090 tokens always-on. Awaiting the maintainer's review before Phase D opens.
 
 ## Blocked
 
@@ -46,7 +46,11 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. Maintainer signs off on Phase A. Automated acceptance already passed: install and discovery, hook behavior across eight scenarios, greenfield `/sarah-init` end to end, the clobber guardrail, and Level 0 classification with no ceremony. One case remains and needs a human, because it is a judgment call rather than an assertion: **brownfield `/sarah-init` on a real codebase** — whether the analysis behind "I know your codebase" has real substance, and whether an existing README survives restructuring intact.
-2. Phase B — the ten agents, the seven phase skills, the gates, and the remaining templates.
-3. Phase C — TDD gate and test pyramid, adversarial review with fallback, commit and push hooks, and the four remaining commands.
-4. Phase D — full README, `docs/`, the two walkthroughs, CI, and community files.
+1. Maintainer signs off on Phase C.
+2. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
+3. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+
+## Carried into Phase D
+
+- **The Level 3 pipeline has never run end to end.** Levels 0 and 1 are verified; brainstorm through release as one continuous run is not. The Phase D walkthrough is the natural place to exercise it, since it has to be written anyway.
+- **`sarah-bootstrap` sits at ~1,838 tokens against its own 2,000 ceiling.** Anything added there in future now requires removing something.

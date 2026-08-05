@@ -37,6 +37,23 @@ for c in codex gemini llm aider cursor-agent; do command -v "$c" >/dev/null 2>&1
 
 > Runtime detection of a second model ships unexercised in v0.1: the framework's own maintainer runs Claude only, so this branch is written but never executed here. Treat it as untested until a contributor with a second CLI reports otherwise. The fresh-subagent path is tested on every review.
 
+## When no independent reviewer can run
+
+Sometimes neither path is available: subagents are disabled or refused in this session, and no second-model CLI exists. This is not a rare edge — a permission setting is enough to cause it.
+
+**The gate does not dissolve because a tool was unavailable.** A gate that silently downgrades whenever it is inconvenient stops being a gate on exactly the day it matters.
+
+Do this, in order:
+
+1. **Stop and say so, before reviewing anything.** Name what is unavailable and why the independent path failed.
+2. **Offer the ways out**, and let the user pick:
+   - Enable subagents for this session, then review properly. Recommend this one — it is usually a single setting, and it restores the gate rather than working around it.
+   - Review in a separate, clean session started by the user, with the diff and the plan as the only input.
+   - Proceed with a self-review, **accepted explicitly by the user as a known gap**.
+3. **If the user accepts a self-review**, do it honestly and label it for what it is. Record in `sarah/state.md` that gate 4 was not satisfied for this change, and say so again at merge and in the changelog entry. A gap that is written down can be paid off later; a gap that was mentioned once in a conversation is simply lost.
+
+Never report a self-review as a passed review. The author checking their own work is a useful habit and is not this gate — the whole mechanism is the reviewer not having watched the author reason.
+
 ## How it runs
 
 1. **Assemble what changed.** The diff, the approved plan, and the acceptance criteria. The reviewer needs the plan to detect drift from it.

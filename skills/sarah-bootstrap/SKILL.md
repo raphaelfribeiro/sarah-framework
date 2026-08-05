@@ -49,6 +49,11 @@ Load the phase skill. It brings its own specialists. **Never load the full roste
 | 6. Review | `sarah-phase-review` | Code Reviewer, Security Advisor |
 | 7. Release | `sarah-phase-release` | DevOps Engineer, Release Manager |
 
+Two requests do not belong on this ladder at all:
+
+- **Production is broken and cannot wait** → `sarah-hotfix`. Gates are skipped deliberately and the debt is recorded.
+- **A question about the system rather than a change to it** → `sarah-research`. It answers and changes nothing.
+
 For a **brownfield** project at any level, changes are expressed as delta-specs — `## ADDED`, `## MODIFIED`, `## REMOVED` requirements anchored to `ARCHI.md`. Never demand upfront documentation of a system that already works.
 
 ## 4. Non-negotiables
