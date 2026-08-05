@@ -46,7 +46,7 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. Maintainer reviews Phase A: install the plugin locally, then run the seven-step acceptance script — install and discovery, hook behavior, greenfield `/sarah-init`, brownfield `/sarah-init`, the clobber guardrail, level classification, and uninstall.
+1. Maintainer signs off on Phase A. Automated acceptance already passed: install and discovery, hook behavior across eight scenarios, greenfield `/sarah-init` end to end, the clobber guardrail, and Level 0 classification with no ceremony. One case remains and needs a human, because it is a judgment call rather than an assertion: **brownfield `/sarah-init` on a real codebase** — whether the analysis behind "I know your codebase" has real substance, and whether an existing README survives restructuring intact.
 2. Phase B — the ten agents, the seven phase skills, the gates, and the remaining templates.
 3. Phase C — TDD gate and test pyramid, adversarial review with fallback, commit and push hooks, and the four remaining commands.
 4. Phase D — full README, `docs/`, the two walkthroughs, CI, and community files.
