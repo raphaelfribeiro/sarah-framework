@@ -1,0 +1,9 @@
+# Local Claude Code settings. Written by the harness per machine, never shared.
+.claude/settings.local.json
+
+# Python bytecode, from scripts/
+__pycache__/
+*.py[cod]
+
+# OS noise
+.DS_Store
