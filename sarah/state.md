@@ -46,7 +46,7 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. Maintainer reviews Phase A: install the plugin locally and run `/sarah-init` in a throwaway directory. Full script in `docs/` once Phase D lands; for now it lives in the session transcript.
+1. Maintainer reviews Phase A: install the plugin locally, then run the seven-step acceptance script — install and discovery, hook behavior, greenfield `/sarah-init`, brownfield `/sarah-init`, the clobber guardrail, level classification, and uninstall.
 2. Phase B — the ten agents, the seven phase skills, the gates, and the remaining templates.
 3. Phase C — TDD gate and test pyramid, adversarial review with fallback, commit and push hooks, and the four remaining commands.
 4. Phase D — full README, `docs/`, the two walkthroughs, CI, and community files.
