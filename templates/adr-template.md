@@ -1,0 +1,1 @@
+../skills/sarah-phase-architecture/references/adr-template.md
