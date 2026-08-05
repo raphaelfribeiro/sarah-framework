@@ -96,7 +96,15 @@ Greenfield: fill what the interview established — purpose, stack, intended sha
 
 Brownfield: fill it from the code you actually read. Trace one real request end to end for the `How a request flows` section — this single trace teaches more than any component list. Populate `Sharp edges` and `Invariants` from the interview.
 
-**`README.md`** from `references/README-template.md`. If a README already exists, do not overwrite it: restructure it to the template, preserving every piece of real content, and show the user the diff before writing. Someone wrote those words on purpose.
+**`README.md`** from `references/README-template.md`, when there is no README yet.
+
+When one already exists, read it before deciding anything. Someone wrote those words on purpose, and a mature README is usually better than what a restructuring would produce. Judge it against the template's requirements rather than its literal headings, then propose the smallest change that closes the real gap:
+
+- **Already covers the required ground** — propose only the missing link to `ARCHI.md`, and leave every other line alone. This is the common case for an established project, and recommending it over a rewrite is the right answer, not a cop-out.
+- **Partially covers it** — propose adding the missing sections in place, keeping the existing structure and voice.
+- **Thin, stale, or a stub** — propose the full restructure, preserving every piece of real content.
+
+Whichever you propose, say which case you judged it to be and why, and show the diff before writing.
 
 **`sarah/state.md`** from `references/state-template.md`. Set phase, default level, mode, and the date. Leave the gate and decision sections empty — they fill in as work happens.
 
