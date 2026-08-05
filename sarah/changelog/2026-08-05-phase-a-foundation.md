@@ -21,5 +21,23 @@ and can initialize a project, though it cannot yet run a development phase.
 - MIT license, changelog, and this repository's own `ARCHI.md` and state files —
   the framework now runs on itself.
 
+**Fixed under acceptance testing.** The first build put templates in a root
+`templates/` directory and pointed the skill at them by absolute path. An
+installed plugin cannot read outside its own directory, so the reads were
+blocked — and rather than stopping, the skill paraphrased the templates from
+their descriptions, producing files with renamed sections, invented HTML
+comments, and a README that had dropped its badges, table of contents and
+License section. Templates now live in `skills/sarah-init/references/` as real
+files, the generation step orders a verbatim structural fill, and a new
+self-verification step greps its own output for leaked comments and unfilled
+placeholders before reporting success.
+
+**Verified end to end:** greenfield `/sarah-init` generates all nine `ARCHI.md`
+headings verbatim and in order, a `README.md` carrying every `standard-readme`
+section with License last, and zero leaked comments or placeholders across all
+three files. Re-running `/sarah-init` refuses to overwrite and offers three
+choices. A typo request is classified Level 0 and reaches the code with no plan,
+no spec, and no gate.
+
 **Not yet real:** the seven phase skills and the agent roster they load. Until
 Phase B lands, `sarah-bootstrap` routes to skills that do not exist.

@@ -133,6 +133,15 @@ authority.
   The five-command ceiling therefore constrains what a user must *memorize*, not
   what the menu can display. Documented rather than worked around; there is no
   platform mechanism to hide a skill.
+- **A skill can only read files inside its own directory.** An installed plugin
+  lives in `~/.claude/plugins/cache`, outside the session's working directory,
+  and Claude Code blocks reads there. Anything a skill must read at runtime
+  therefore lives in `skills/<name>/references/` as a **real file** — never an
+  absolute path, never `${CLAUDE_PLUGIN_ROOT}` (that is for executed scripts),
+  and never a symlink pointing outward, because permission falls on the target.
+  The root `templates/` directory is the reverse: symlinks into the skills, kept
+  for human browsing and never read at runtime. Found by testing; the first
+  version failed silently by paraphrasing the templates it could not open.
 - **Descriptions are the only trigger mechanism.** If a description is weak, the
   skill silently never fires and the framework appears to do nothing. There is
   no test that catches this — only real use.

@@ -75,25 +75,49 @@ Recommend by honest default: a new product is Level 3, an existing codebase rece
 
 ## Step 4 — Generate
 
-Templates ship with the plugin, at `${CLAUDE_PLUGIN_ROOT}/templates/` (equivalently, `../../templates/` relative to this file). Copy, fill, and strip every HTML comment — the comments are authoring guidance and must not survive into the generated file.
+Templates ship alongside this skill. Read them with paths relative to this file, exactly as written here — never as an absolute path, and never through `${CLAUDE_PLUGIN_ROOT}`. An installed plugin cannot read files outside its own directory, so an absolute path fails at exactly the moment it matters:
 
-**`ARCHI.md`** from `ARCHI-template.md`.
+- [references/ARCHI-template.md](references/ARCHI-template.md)
+- [references/README-template.md](references/README-template.md)
+- [references/state-template.md](references/state-template.md)
+
+**Read each template with the Read tool before writing the file it produces.** Do not generate from memory or from the descriptions in this skill. A template is a structure to be filled, not a description to be paraphrased — and paraphrasing it is the single most likely way this step goes wrong.
+
+Filling a template means, exactly:
+
+1. **Reproduce every heading verbatim and in its original order.** Do not rename, merge, reorder, or invent headings. The structure is the product; the prose is the filling.
+2. **Replace `{{PLACEHOLDER}}` markers with real content**, or delete the row or section entirely when it does not apply. No `{{` may survive.
+3. **Delete every HTML comment.** They are authoring guidance for you, not content for the user. No `<!--` may survive — and never write comments of your own to replace them.
+4. **Write in the project's language.** If the project's code, documentation, and team work in something other than English, generate in that language: translate the headings, keep the structure. Structure is fixed; language is the user's.
+
+**`ARCHI.md`** from `references/ARCHI-template.md`.
 
 Greenfield: fill what the interview established — purpose, stack, intended shape, decisions already made. Leave sections you genuinely cannot fill yet marked as pending rather than guessed. An honest gap is worth more than a plausible fabrication, and this file is about to become the project's memory.
 
 Brownfield: fill it from the code you actually read. Trace one real request end to end for the `How a request flows` section — this single trace teaches more than any component list. Populate `Sharp edges` and `Invariants` from the interview.
 
-**`README.md`** from `README-template.md`. If a README already exists, do not overwrite it: restructure it to the template, preserving every piece of real content, and show the user the diff before writing. Someone wrote those words on purpose.
+**`README.md`** from `references/README-template.md`. If a README already exists, do not overwrite it: restructure it to the template, preserving every piece of real content, and show the user the diff before writing. Someone wrote those words on purpose.
 
-**`sarah/state.md`** from `state-template.md`. Set phase, default level, mode, and the date. Leave the gate and decision sections empty — they fill in as work happens.
+**`sarah/state.md`** from `references/state-template.md`. Set phase, default level, mode, and the date. Leave the gate and decision sections empty — they fill in as work happens.
 
 **`sarah/changelog/`** — create the directory with a `.gitkeep`.
 
-## Step 5 — Confirm and hand over
+## Step 5 — Verify your own output
+
+Before reporting success, check the files you just wrote:
+
+```bash
+grep -c '<!--' ARCHI.md README.md sarah/state.md   # must be 0 everywhere
+grep -n '{{' ARCHI.md README.md sarah/state.md     # must return nothing
+```
+
+Then confirm against the templates you read that every heading survived, in order. A non-zero count or a missing section means you paraphrased instead of filling. Fix it before continuing — do not report a file as written when it does not match its template.
+
+## Step 6 — Confirm and hand over
 
 Show the user what was written, as a short list of paths with one line each. Then state the size of `ARCHI.md` against its budget: the hard ceiling is 10% of the context window, and `/sarah-compact` measures and compacts it when it drifts.
 
-Close with what happens next — the phase they are now in and the one command that moves them forward. Not a tour of all five.
+Close with what happens next: the phase they are now in and the first real task. Do not send them off to run another command — the phase skills fire on intent, so the honest instruction is simply to describe what they want to build next. Only five commands exist, and `/sarah-init` was one of them.
 
 ## Guardrails
 
