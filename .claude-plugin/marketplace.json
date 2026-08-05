@@ -1,0 +1,37 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "sarah-framework",
+  "description": "Home of S.A.R.A.H., a structured development workflow for Claude Code.",
+  "owner": {
+    "name": "Raphael Ribeiro",
+    "url": "https://github.com/raphaelfribeiro"
+  },
+  "plugins": [
+    {
+      "name": "sarah",
+      "source": "./",
+      "displayName": "S.A.R.A.H.",
+      "description": "Skills, Agents, Reviews & Adaptive Hierarchy. A structured development workflow for Claude Code that scales from a one-line fix to a whole product: specialist agents activate per phase, hard quality gates guard every merge, and every decision is presented to you as options with trade-offs.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Raphael Ribeiro",
+        "url": "https://github.com/raphaelfribeiro"
+      },
+      "homepage": "https://github.com/raphaelfribeiro/sarah-framework",
+      "repository": "https://github.com/raphaelfribeiro/sarah-framework",
+      "license": "MIT",
+      "category": "workflow",
+      "keywords": [
+        "workflow",
+        "sdlc",
+        "spec-driven-development",
+        "agents",
+        "code-review",
+        "quality-gates",
+        "tdd",
+        "brownfield",
+        "architecture"
+      ]
+    }
+  ]
+}

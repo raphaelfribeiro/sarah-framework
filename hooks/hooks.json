@@ -1,0 +1,15 @@
+{
+  "description": "S.A.R.A.H. hooks. Every hook here is a sensor: it reports and never blocks. Each one exits 0 on any unexpected condition, so a missing tool, an unreadable file, or a project that does not use S.A.R.A.H. degrades to silence rather than to an error.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/scripts/session-start.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}
