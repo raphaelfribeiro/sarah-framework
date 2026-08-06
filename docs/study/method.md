@@ -93,7 +93,19 @@ recorded as a separate measurement. It is recorded here, in advance, rather than
 discovered in the results.
 
 **Evidence or zero.** Every score above 0 must cite a file and line, or a
-command and its output. The rubric measures artefacts, not intentions.
+command and its output. An item a judge believes is probably fine but did not
+check scores 0, not 1. The rubric measures artefacts, not intentions.
+
+**Three judges per packet, reconciled by median.** One judge is a single draw
+from a non-deterministic scorer. Three make a lone outlier visible instead of
+decisive, and the spread between them is itself worth reporting: judges who
+disagree wildly about the same artefact are evidence that the rubric is loose,
+and that belongs in the writeup rather than hidden behind an average.
+
+**Judges run without the framework**, for the same reason the control arm does.
+A judge with the plugin loaded could invoke the framework's own reviewer and put
+S.A.R.A.H. inside its own evaluation. It also keeps every judge identical
+regardless of which arm produced the packet it is scoring.
 
 Cost, wall-clock, source and test volume, and commit structure are recorded and
 reported as measurements, never as rubric points. They are inputs and prices,
