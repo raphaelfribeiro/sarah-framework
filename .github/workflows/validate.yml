@@ -1,0 +1,88 @@
+name: validate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Plugin manifests are valid JSON
+        run: |
+          for f in .claude-plugin/*.json; do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+            echo "ok: $f"
+          done
+
+      - name: Hooks are POSIX sh and exit 0 on every path
+        run: |
+          sh -n hooks/scripts/*.sh
+          echo "ok: hook syntax"
+          # A hook is a sensor. One that exits non-zero breaks a user's session.
+          # Note: a grep that matches nothing returns 1, and these steps run
+          # under `bash -e`, so the test must be wrapped rather than chained.
+          fail=0
+          for f in hooks/scripts/*.sh; do
+            if grep -nE '^[[:space:]]*exit[[:space:]]+[1-9]' "$f"; then
+              echo "::error file=$f::hook exits non-zero; hooks must never block"
+              fail=1
+            else
+              echo "ok: $f never exits non-zero"
+            fi
+          done
+          exit $fail
+
+      - name: Every skill has the frontmatter that makes it loadable
+        run: |
+          fail=0
+          for f in skills/*/SKILL.md; do
+            head -1 "$f" | grep -q '^---$' || { echo "::error file=$f::missing frontmatter"; fail=1; continue; }
+            awk 'NR>1 && /^---$/{exit} NR>1' "$f" | grep -q '^name:' || { echo "::error file=$f::frontmatter has no name"; fail=1; }
+            awk 'NR>1 && /^---$/{exit} NR>1' "$f" | grep -q '^description:' || { echo "::error file=$f::frontmatter has no description"; fail=1; }
+          done
+          exit $fail
+
+      - name: Skill bodies stay under the 500-line ceiling
+        run: |
+          fail=0
+          for f in skills/*/SKILL.md; do
+            n=$(wc -l < "$f")
+            if [ "$n" -gt 500 ]; then
+              echo "::error file=$f::$n lines, ceiling is 500"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: sarah-bootstrap stays inside its context budget
+        run: |
+          # Injected into every session, so its size is charged to every task
+          # the user ever runs. The ceiling is roughly 2,000 tokens.
+          python3 - <<'PY'
+          import sys
+          text = open("skills/sarah-bootstrap/SKILL.md").read()
+          approx = len(text) / 4
+          print(f"sarah-bootstrap ~{approx:.0f} tokens (chars/4)")
+          if approx > 2000:
+              print("::error file=skills/sarah-bootstrap/SKILL.md::"
+                    f"~{approx:.0f} tokens, ceiling is 2000")
+              sys.exit(1)
+          PY
+
+      - name: Nothing references infrastructure that is not GitHub
+        run: |
+          # Public artefacts point at GitHub and nothing else. This file is
+          # excluded because it necessarily contains the very terms it hunts
+          # for; keep that in mind if you ever edit the step itself.
+          if grep -rniE 'a-git-forge|a-private-network|\.example\b' \
+               --exclude-dir=.git \
+               --exclude=validate.yml . ; then
+            echo "::error::internal infrastructure referenced in a public artefact"
+            exit 1
+          fi
+          echo "ok: no internal infrastructure referenced"
