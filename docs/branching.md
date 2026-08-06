@@ -94,6 +94,25 @@ the model is decoration.
 
 ---
 
+## Pull requests
+
+A pull request that does not follow this model is not accepted. Not negotiated,
+not fixed on merge — rejected, with the reason named. The model is only worth
+what is refused under it.
+
+A pull request must:
+
+1. **Target `develop`.** Never `main`. The one exception is a `hotfix/*`, which
+   targets `main` and is back-merged afterwards.
+2. **Branch from the right place.** `feature/*` from `develop`, `hotfix/*` from
+   `main`, named for the delivery.
+3. **Close gate 4.** Reviewed by someone who did not write it.
+4. **Close gate 5.** `ARCHI.md` if the architecture moved, `README.md` if
+   anything user-visible changed, and an entry in `sarah/changelog/`.
+5. **Pass the checks** in [`CLAUDE.md`](../CLAUDE.md): `claude plugin validate .
+   --strict` and `sh -n hooks/scripts/*.sh`.
+6. **Say what changed and why.** A diff answers what. Only you can answer why.
+
 ## Rules
 
 1. **Never commit directly to `main` or `develop`.** Both are protected by

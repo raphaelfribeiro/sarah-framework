@@ -26,6 +26,10 @@ neither did: `hooks/scripts/validate-push.sh` already listed `develop` among the
 protected-by-convention branches, and `README-template.md` already parameterised
 its base branch instead of hardcoding `main`.
 
-**Not addressed here:** contributions arriving through the public mirror. The
-model describes how work merges, not how an outside pull request reaches this
-repository. That belongs with the community files in Phase D.
+**Acceptance policy.** A pull request that does not follow the model is
+rejected, with the reason named — not renegotiated and not repaired on merge.
+Six requirements, written into `docs/branching.md`: target `develop`, branch
+from the right place, close gate 4, close gate 5, pass the checks, and say why.
+
+**Not addressed here:** the wording of the community files that will state this
+policy to contributors on arrival. Phase D.
