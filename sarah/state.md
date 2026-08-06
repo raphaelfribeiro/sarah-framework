@@ -48,9 +48,10 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. Maintainer signs off on Phase C.
-2. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
-3. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+1. **Re-run the Level 3 pipeline instrumented from step 1**, against a fresh project directory, to settle the two things the 2026-08-05 run could not: whether gate 3 ever runs red before the source exists, and whether `product-analyst`, `software-architect` and `ux-ui-designer` are actually spawned. Use `--output-format stream-json` on every step, not just the last three. Roughly 45 minutes.
+2. Maintainer signs off on Phase C.
+3. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
+4. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried into Phase D
 
