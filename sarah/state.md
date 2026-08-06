@@ -7,12 +7,12 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Build S.A.R.A.H. v0.1 — Phases A, B and C complete; Phase C awaiting review |
+| **Current task** | Build S.A.R.A.H. v0.1 — Phases A, B and C delivered and signed off; Phase D open |
 | **Task level** | 3 |
 
 ## In flight
 
-- Phases A, B and C delivered. 15 skills, 10 agents, 3 hooks, one script, ~3,090 tokens always-on. Awaiting the maintainer's review before Phase D opens.
+- Phases A, B and C delivered and signed off on 2026-08-06. 15 skills, 10 agents, 3 hooks, one script, ~3,090 tokens always-on. **Phase D is open.**
 - The Level 3 pipeline was exercised end to end on 2026-08-05 and held. See *Carried into Phase D* for what it proved and what it did not.
 - **2026-08-06, instrumented from step 1 — both open questions settled.** Gate 3 holds: eight test files written, the suite run five times, red every time with `ModuleNotFoundError`, and `src/` holding nothing but a three-line package `__init__`. The specialists fire unprompted: `product-analyst` (brainstorm), `software-architect` + `security-advisor` (architecture), `ux-ui-designer` (design), `test-engineer` + `developer` (implementation). Phase 6 was cut by a session rate limit and resumed, so this is not a clean uninterrupted run; the resumed half spawned no subagent, the orchestrator finished the code itself. Every prompt carried "do not ask me anything", which proves the automatic gates and cannot prove the human ones. Gate 4 stopped the delivery with four blocking findings, including `edit` writing through a symlink to outside the notes directory; the reviewers noted the 147 passing tests covered none of the four. Fixes produced twelve new tests — 159 passing, verified independently — and re-ran the reviewers unprompted. All eight phases completed: `v0.1.0` tagged, CI generated, $39.64 and ~90 minutes end to end. Logs outside the repository.
 
@@ -37,7 +37,7 @@ Nothing pending. Resolved on 2026-08-05:
 | Spec approved | approved | 2026-08-05 |
 | Plan approved | approved | 2026-08-05 |
 | Tests written first | n/a | Phase A ships no executable code beyond one hook, exercised across eight scenarios |
-| Review passed | pending | Phase C under review by the maintainer |
+| Review passed | approved | 2026-08-06 — Phase C signed off by the maintainer. `feature/commit-and-pr-are-part-of-done` reviewed separately by `sarah:code-reviewer` in a clean context, which blocked once and passed on re-verification. |
 | Documentation done | done | 2026-08-05 |
 
 ## Publication
@@ -49,9 +49,8 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. Maintainer signs off on Phase C, and on `feature/commit-and-pr-are-part-of-done` — the branch is committed and validated but not merged, because Gate 4 applies to it too.
-2. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
-3. **Phase E — the evidence study. Blocks v0.1.** Build the same minimal project
+1. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
+2. **Phase E — the evidence study. Blocks v0.1.** Build the same minimal project
    twice, once with S.A.R.A.H. and once without, under one instrumented harness,
    and publish the measured comparison in the repository. Real data, stated
    method, stated limitations. Charts where they carry the argument better than
@@ -70,10 +69,10 @@ links, and CI all reference GitHub and nothing else.
    tests present and passing, real coverage, requirements met, defects and
    security findings from blind judges, tokens and wall-clock from the
    stream-json, documentation volume, commits.
-4. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+3. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried into Phase D
 
-- **The Level 3 pipeline now runs end to end — with two things still unproven.** Exercised on 2026-08-05 against a real greenfield CLI: all eight steps from `/sarah-init` through release, 144 tests passing, three commits, `v0.1.0` tagged, CI workflow generated. Gate 4 held without a human in the loop — `code-reviewer` and `security-advisor` were both spawned unprompted, and the review produced three blockers and four minor findings that took their own commit to fix. **Still unproven:** gate 3 (tests before code) was never observed running red, and steps 1 to 5 ran without instrumentation, so whether `product-analyst`, `software-architect` and `ux-ui-designer` actually fired is unknown. Re-running instrumented from step 1 settles both. Evidence in the run logs, outside the repository.
+- **The Level 3 pipeline runs end to end, and the two open questions are closed.** Exercised twice: 2026-08-05 uninstrumented from step 1, and 2026-08-06 instrumented throughout. Gate 3 holds and gate 4 stops deliveries; every phase spawns its own specialists without being asked. What each run could and could not prove is recorded in `sarah/changelog/2026-08-05-level-3-pipeline-verified.md` and `sarah/changelog/2026-08-06-level-3-instrumented.md`. **What no run has proven:** the human gates, because headless prompts must say "do not ask me anything"; and whether the framework's contribution is separable from the model's, which is what Phase E exists to measure. Evidence in the run logs, outside the repository.
 - **`sarah-bootstrap` sits at ~1,574 tokens against its own 2,000 ceiling**, measured 2026-08-06. Anything added there still costs every session, so additions stay in words rather than lines.
 - **Gate 5 now requires a commit, and nothing enforces it at runtime.** Three instrumented runs ended implementation with a passing suite and no commits — the third collapsed eight phases into three commits at release time, one of them 2,849 lines with the review fixes fused into the code under review. The gate was rewritten and all seven phase skills now close their own loop. The framework is prose a model reads: whether phase-closing commits actually happen is measurable only by instrumenting another run, and that measurement is now part of what Phase E has to report.
