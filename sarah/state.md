@@ -13,6 +13,7 @@
 ## In flight
 
 - Phases A, B and C delivered. 15 skills, 10 agents, 3 hooks, one script, ~3,090 tokens always-on. Awaiting the maintainer's review before Phase D opens.
+- The Level 3 pipeline was exercised end to end on 2026-08-05 and held. See *Carried into Phase D* for what it proved and what it did not.
 
 ## Blocked
 
@@ -35,7 +36,7 @@ Nothing pending. Resolved on 2026-08-05:
 | Spec approved | approved | 2026-08-05 |
 | Plan approved | approved | 2026-08-05 |
 | Tests written first | n/a | Phase A ships no executable code beyond one hook, exercised across eight scenarios |
-| Review passed | pending | Phase A under review |
+| Review passed | pending | Phase C under review by the maintainer |
 | Documentation done | done | 2026-08-05 |
 
 ## Publication
@@ -53,5 +54,5 @@ links, and CI all reference GitHub and nothing else.
 
 ## Carried into Phase D
 
-- **The Level 3 pipeline has never run end to end.** Levels 0 and 1 are verified; brainstorm through release as one continuous run is not. The Phase D walkthrough is the natural place to exercise it, since it has to be written anyway.
+- **The Level 3 pipeline now runs end to end — with two things still unproven.** Exercised on 2026-08-05 against a real greenfield CLI: all eight steps from `/sarah-init` through release, 144 tests passing, three commits, `v0.1.0` tagged, CI workflow generated. Gate 4 held without a human in the loop — `code-reviewer` and `security-advisor` were both spawned unprompted, and the review produced three blockers and four minor findings that took their own commit to fix. **Still unproven:** gate 3 (tests before code) was never observed running red, and steps 1 to 5 ran without instrumentation, so whether `product-analyst`, `software-architect` and `ux-ui-designer` actually fired is unknown. Re-running instrumented from step 1 settles both. Evidence in the run logs, outside the repository.
 - **`sarah-bootstrap` sits at ~1,838 tokens against its own 2,000 ceiling.** Anything added there in future now requires removing something.
