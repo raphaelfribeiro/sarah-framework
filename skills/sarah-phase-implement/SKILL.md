@@ -72,4 +72,9 @@ Name what is deliberately not done.
 
 If it isn't documented, it isn't done.
 
+Then **commit** — on the feature branch, small and frequent while the work
+happens, and never a single commit for the whole phase. Code that passes its
+tests but sits uncommitted is not delivered: it survives no crash and can be
+bisected by nobody. If it isn't committed, it didn't happen.
+
 Then move to `sarah-phase-review`. You do not review your own work.

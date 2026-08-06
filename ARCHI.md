@@ -124,6 +124,10 @@ authority.
   every session; its size is charged to every task the user ever runs.
 - **The user decides.** No specialist commits to a consequential choice without
   presenting options and receiving an answer.
+- **Every phase that produces an artefact ends with a commit.** Work that exists
+  only in a working tree is not delivered, cannot be bisected, and survives no
+  crash. The pull request sits at the delivery boundary, not at every phase —
+  the approval gates already put a human at each step.
 
 ## 8. Sharp edges
 

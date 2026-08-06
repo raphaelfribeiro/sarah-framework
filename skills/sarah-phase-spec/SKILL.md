@@ -51,4 +51,4 @@ Never demand a specification of the whole existing system. That is the mistake t
 
 The machines propose. The human decides. No exceptions.
 
-Then write the spec to the project (`docs/specs/` or wherever the project keeps them), update `sarah/state.md`, and move to `sarah-phase-architecture` — or, when the change needs no architectural decision, straight to `sarah-phase-implement`.
+Then write the spec to the project (`docs/specs/` or wherever the project keeps them), update `sarah/state.md`, **commit both on the feature branch** — an approved spec that exists only in the working tree is not delivered — and move to `sarah-phase-architecture` — or, when the change needs no architectural decision, straight to `sarah-phase-implement`.
