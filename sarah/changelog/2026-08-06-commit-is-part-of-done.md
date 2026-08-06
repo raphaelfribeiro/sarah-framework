@@ -12,6 +12,17 @@ implementation phase with **147 tests passing and zero commits** — the same
 failure twice, from two independent runs, which makes it a defect in the
 framework rather than a bad day.
 
+Running the 2026-08-06 pipeline to completion sharpened the diagnosis. The
+framework does not fail to commit; it **defers everything to the release phase**
+and then catches up. Eight phases collapsed into three commits: one carrying
+spec, architecture, design and governance together, one carrying the entire
+implementation **and the review fixes fused into it** at 2,849 lines, and one
+for CI and release notes. A 2,849-line commit is the exact negation of "each one
+a point you could rewind to", and merging the review fixes into the code under
+review destroys the record of what the reviewer caught. Late bulk committing is
+the failure mode, and it is worse than none at all because it looks like
+compliance.
+
 **What changed:**
 
 - **Gate 5 is now "Documented and committed is part of done."** It carries a

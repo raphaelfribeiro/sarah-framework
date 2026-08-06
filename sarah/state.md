@@ -14,7 +14,7 @@
 
 - Phases A, B and C delivered. 15 skills, 10 agents, 3 hooks, one script, ~3,090 tokens always-on. Awaiting the maintainer's review before Phase D opens.
 - The Level 3 pipeline was exercised end to end on 2026-08-05 and held. See *Carried into Phase D* for what it proved and what it did not.
-- **2026-08-06, instrumented from step 1 — both open questions settled.** Gate 3 holds: eight test files written, the suite run five times, red every time with `ModuleNotFoundError`, and `src/` holding nothing but a three-line package `__init__`. The specialists fire unprompted: `product-analyst` (brainstorm), `software-architect` + `security-advisor` (architecture), `ux-ui-designer` (design), `test-engineer` + `developer` (implementation). Phase 6 was cut by a session rate limit and resumed, so this is not a clean uninterrupted run; the resumed half spawned no subagent, the orchestrator finished the code itself. Every prompt carried "do not ask me anything", which proves the automatic gates and cannot prove the human ones. 147 tests pass, verified by an independent run. Phases 7 and 8 not yet run — one phase at a time, on explicit approval. Logs outside the repository.
+- **2026-08-06, instrumented from step 1 — both open questions settled.** Gate 3 holds: eight test files written, the suite run five times, red every time with `ModuleNotFoundError`, and `src/` holding nothing but a three-line package `__init__`. The specialists fire unprompted: `product-analyst` (brainstorm), `software-architect` + `security-advisor` (architecture), `ux-ui-designer` (design), `test-engineer` + `developer` (implementation). Phase 6 was cut by a session rate limit and resumed, so this is not a clean uninterrupted run; the resumed half spawned no subagent, the orchestrator finished the code itself. Every prompt carried "do not ask me anything", which proves the automatic gates and cannot prove the human ones. Gate 4 stopped the delivery with four blocking findings, including `edit` writing through a symlink to outside the notes directory; the reviewers noted the 147 passing tests covered none of the four. Fixes produced twelve new tests — 159 passing, verified independently — and re-ran the reviewers unprompted. All eight phases completed: `v0.1.0` tagged, CI generated, $39.64 and ~90 minutes end to end. Logs outside the repository.
 
 ## Blocked
 
@@ -49,8 +49,7 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. **Re-run the Level 3 pipeline instrumented from step 1**, against a fresh project directory, to settle the two things the 2026-08-05 run could not: whether gate 3 ever runs red before the source exists, and whether `product-analyst`, `software-architect` and `ux-ui-designer` are actually spawned. Use `--output-format stream-json` on every step, not just the last three. Roughly 45 minutes.
-2. Maintainer signs off on Phase C.
+1. Maintainer signs off on Phase C, and on `feature/commit-and-pr-are-part-of-done` — the branch is committed and validated but not merged, because Gate 4 applies to it too.
 3. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
 4. **Phase E — the evidence study. Blocks v0.1.** Build the same minimal project
    twice, once with S.A.R.A.H. and once without, under one instrumented harness,
