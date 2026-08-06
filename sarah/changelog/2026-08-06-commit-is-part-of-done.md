@@ -28,9 +28,13 @@ compliance.
 - **Gate 5 is now "Documented and committed is part of done."** It carries a
   table of what committing means per level, and states that the pull request
   belongs at the delivery boundary rather than at every phase.
-- **Six phase skills close the loop themselves** — spec, architecture, design,
-  implementation, review and release each end by committing what they produced.
-  Brainstorm does not, because it writes nothing to disk.
+- **All seven phase skills close the loop themselves** — brainstorm, spec,
+  architecture, design, implementation, review and release each end by
+  committing what they produced. Brainstorm was initially excluded on the
+  grounds that it writes nothing to disk; review caught that this is false. Its
+  exit gate updates `sarah/state.md`, and on the path where the user kills the
+  idea there is no next phase to carry that record into a commit — the one place
+  where an uncommitted decision is lost outright.
 - **`sarah-bootstrap` non-negotiable 5** was rewritten to match, in words rather
   than lines: the file sits at roughly 1,570 tokens against its 2,000 ceiling.
 - **A new invariant in `ARCHI.md`**, because this is now a property of the

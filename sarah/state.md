@@ -50,8 +50,8 @@ links, and CI all reference GitHub and nothing else.
 ## Next
 
 1. Maintainer signs off on Phase C, and on `feature/commit-and-pr-are-part-of-done` — the branch is committed and validated but not merged, because Gate 4 applies to it too.
-3. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
-4. **Phase E — the evidence study. Blocks v0.1.** Build the same minimal project
+2. Phase D — the full README with the honest comparison against BMAD, Spec Kit, Superpowers, TRIP and OpenSpec; `docs/` including `extending.md` with the tracker extension contract; a Level 1 and a Level 3 walkthrough; GitHub Actions validation; `CONTRIBUTING.md` and issue and PR templates.
+3. **Phase E — the evidence study. Blocks v0.1.** Build the same minimal project
    twice, once with S.A.R.A.H. and once without, under one instrumented harness,
    and publish the measured comparison in the repository. Real data, stated
    method, stated limitations. Charts where they carry the argument better than
@@ -70,10 +70,10 @@ links, and CI all reference GitHub and nothing else.
    tests present and passing, real coverage, requirements met, defects and
    security findings from blind judges, tokens and wall-clock from the
    stream-json, documentation volume, commits.
-5. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+4. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried into Phase D
 
 - **The Level 3 pipeline now runs end to end — with two things still unproven.** Exercised on 2026-08-05 against a real greenfield CLI: all eight steps from `/sarah-init` through release, 144 tests passing, three commits, `v0.1.0` tagged, CI workflow generated. Gate 4 held without a human in the loop — `code-reviewer` and `security-advisor` were both spawned unprompted, and the review produced three blockers and four minor findings that took their own commit to fix. **Still unproven:** gate 3 (tests before code) was never observed running red, and steps 1 to 5 ran without instrumentation, so whether `product-analyst`, `software-architect` and `ux-ui-designer` actually fired is unknown. Re-running instrumented from step 1 settles both. Evidence in the run logs, outside the repository.
-- **`sarah-bootstrap` sits at ~1,838 tokens against its own 2,000 ceiling.** Anything added there in future now requires removing something.
-- **Gate 5 now requires a commit, and nothing enforces it at runtime.** Two instrumented runs ended implementation with a passing suite and zero commits, so the gate was rewritten and six phase skills now close their own loop. The framework is prose a model reads: whether phase-closing commits actually happen is measurable only by instrumenting another run, and that measurement is now part of what Phase E has to report.
+- **`sarah-bootstrap` sits at ~1,574 tokens against its own 2,000 ceiling**, measured 2026-08-06. Anything added there still costs every session, so additions stay in words rather than lines.
+- **Gate 5 now requires a commit, and nothing enforces it at runtime.** Three instrumented runs ended implementation with a passing suite and no commits — the third collapsed eight phases into three commits at release time, one of them 2,849 lines with the review fixes fused into the code under review. The gate was rewritten and all seven phase skills now close their own loop. The framework is prose a model reads: whether phase-closing commits actually happen is measurable only by instrumenting another run, and that measurement is now part of what Phase E has to report.

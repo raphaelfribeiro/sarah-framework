@@ -47,6 +47,6 @@ Use `AskUserQuestion` when the options are genuinely a choice between paths. Use
 
 The user agrees on the problem and picks a scope. Nothing is written to disk yet.
 
-Then update `sarah/state.md` — phase, level, and the scope that was chosen — and move to `sarah-phase-spec`.
+Then update `sarah/state.md` — phase, level, and the scope that was chosen — commit it, and move to `sarah-phase-spec`. The conversation produced no document, but the decision it reached is an artefact, and an uncommitted decision is one nobody can find later.
 
-If the user decides the idea is not worth building, that is a successful outcome for this phase. Record it and stop. Killing an idea in an afternoon is the highest-value thing that happens here.
+If the user decides the idea is not worth building, that is a successful outcome for this phase. Record it, **commit it**, and stop — this is the one path with no next phase to carry the record forward, so an uncommitted "we decided against it" is lost entirely. Killing an idea in an afternoon is the highest-value thing that happens here.
