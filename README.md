@@ -134,11 +134,16 @@ exist yet for any of these — including S.A.R.A.H.
 
 | | Scope | Runs on | Process weight |
 | --- | --- | --- | --- |
-| [**BMAD-METHOD**](https://github.com/bmad-code-org/BMAD-METHOD) | Full agile team simulation — Analyst, PM, Architect, Dev, QA, SM | Tool-agnostic | Heavy by design: detailed PRDs and architecture documents up front |
-| [**GitHub Spec Kit**](https://github.com/github/spec-kit) | Spec-driven: spec → plan → tasks → implement → review | 30+ agents | Spec-first on every change |
-| [**OpenSpec**](https://github.com/Fission-AI/OpenSpec) | Lightweight SDD: propose → apply → archive, with a living spec | 30+ agents | Light, spec-centred |
-| [**Superpowers**](https://github.com/obra/superpowers) | Composable skills: TDD, systematic debugging, subagent review | Claude Code | Disciplined: red-green-refactor enforced |
-| **S.A.R.A.H.** | Phase pipeline with per-phase specialists and five gates | Claude Code | Adaptive: levels 0–3 decide how much process applies |
+| [**BMAD-METHOD**](https://github.com/bmad-code-org/BMAD-METHOD) | Agile team simulation with specialist agent personas | Tool-agnostic | Heavy by design: detailed PRDs and architecture documents up front |
+| [**GitHub Spec Kit**](https://github.com/github/spec-kit) | Spec-driven: spec → plan → tasks → implement → review | Many agents | Spec-first on every change |
+| [**OpenSpec**](https://github.com/Fission-AI/OpenSpec) | Lightweight SDD: propose → apply → archive, with a living spec | Many agents | Light, spec-centred |
+| [**Superpowers**](https://github.com/obra/superpowers) | Composable skills: TDD, systematic debugging, subagent review | Many harnesses, including Claude Code | Disciplined: red-green-refactor enforced |
+| **S.A.R.A.H.** | Phase pipeline with per-phase specialists and five gates | Claude Code only | Adaptive: levels 0–3 decide how much process applies |
+
+<sub>Checked against each project's own documentation on 2026-08-06. These
+projects move; if something here is out of date or unfair,
+[tell us](https://github.com/raphaelfribeiro/sarah-framework/issues) and it gets
+corrected.</sub>
 
 **What is genuinely different here:** the scale level. BMAD, Spec Kit and
 OpenSpec apply their process to the work in front of them; S.A.R.A.H. first
@@ -147,18 +152,17 @@ it. The second difference is the context budget treated as a hard constraint —
 never loading the full agent roster, and a session-injected orientation skill
 capped at roughly 2,000 tokens, enforced in CI.
 
-**Where the others are ahead.** Superpowers is the closest relative and is
-mature, widely installed, and carries 20+ battle-tested skills; S.A.R.A.H. is
-unreleased. Spec Kit has GitHub behind it and runs on 30+ agents. OpenSpec is
-lighter to adopt and also agent-portable. BMAD covers more roles and has a real
-extension ecosystem. **S.A.R.A.H. runs on Claude Code only**, by design — it is
-built on the plugin API, skills, and subagents — which is a genuine limitation
-if your team is not on Claude Code.
+**Where the others are ahead.** Superpowers is the closest relative — composable
+skills, enforced TDD, subagent review — and it is mature, widely installed, and
+runs across many harnesses while S.A.R.A.H. is unreleased and runs on one. Spec
+Kit has GitHub behind it. OpenSpec is lighter to adopt. BMAD has a real
+extension ecosystem. **S.A.R.A.H. runs on Claude Code only**, because it is
+built on the plugin API, skills, and subagents — a real limitation, not a design
+virtue, if your team is not on Claude Code.
 
-If you want spec-driven development portable across many agents, one of the
-others is likely the better fit. S.A.R.A.H. is for people who want the process
-to shrink when the work is small and to bring the right specialist when it is
-not.
+If you want a workflow portable across many agents, one of the others is the
+better fit today. S.A.R.A.H. is for people who want the process to shrink when
+the work is small and to bring the right specialist when it is not.
 
 ## Documentation
 
