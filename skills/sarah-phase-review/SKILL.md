@@ -81,6 +81,14 @@ On a pass, the documentation gate must also be closed before merge:
 - **Level 0–1:** `sarah/state.md` current.
 - **Level 2+:** also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and an entry in `sarah/changelog/`.
 
+Review fixes are commits of their own, on the same feature branch — never
+amended into the commits under review, which would erase what the reviewer
+caught.
+
+Once the gate closes, the delivery goes to the permanent branch **the way the
+project's branching model says**: under gitflow, a pull request into `develop`.
+The pull request is the delivery boundary, and a human merges it.
+
 If a tracker MCP is connected, offer to sync the card or issue — as an option, never automatically. If none is connected, never mention it.
 
 Every gate has a guardian. Every merge has a human behind it.

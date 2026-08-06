@@ -64,7 +64,7 @@ These hold at every level unless the row says otherwise. Full text: `docs/qualit
 2. **Plan approved** before implementing. Do not implement without an approved plan.
 3. **Test first** at Level 2+. No production code without a failing test. Wrote the code first? Delete it and start over. At Level 0–1, tests afterward are acceptable if the user chooses that.
 4. **The author never reviews.** Review happens in a separate context before merge.
-5. **Documentation is part of done.** Level 0–1: `sarah/state.md` updated. Level 2+: also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and a short entry in `sarah/changelog/`. If it isn't documented, it isn't done.
+5. **Documented and committed is part of done.** Level 0–1: `sarah/state.md` updated. Level 2+: also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and a short entry in `sarah/changelog/`. Every phase that produces an artefact ends with a commit on a `feature/*` branch; the pull request comes at delivery. If it isn't documented, it isn't done — if it isn't committed, it didn't happen.
 
 Every gate has a guardian. Every merge has a human behind it.
 

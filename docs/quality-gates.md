@@ -79,11 +79,11 @@ This is the gate the framework leans on hardest. A reviewer who watched the impl
 
 ---
 
-## Gate 5 — Documentation is part of done
+## Gate 5 — Documented and committed is part of done
 
 **Applies at:** every level, proportionally.
 
-**If it isn't documented, it isn't done.**
+**If it isn't documented, it isn't done. If it isn't committed, it didn't happen.**
 
 Documentation here is not a favour to a future reader. `ARCHI.md` is what the next task reads *instead of* the codebase, so letting it go stale does not merely lose information — it actively misleads the next piece of work.
 
@@ -110,6 +110,31 @@ Name what is deliberately not done.
 ```
 
 These entries are what release notes are generated from. Writing them at merge time, while the work is fresh, is the only moment they are cheap.
+
+### Committed, the gitflow way
+
+Uncommitted work is not delivered work. It survives no crash, appears in no
+history, and can be bisected by nobody.
+
+**Every phase that produces an artefact ends with a commit.** The spec, the
+architecture decisions, the design, the code, the review fixes, the release
+notes — each lands in the history at the moment it is finished, not swept into
+one commit at the end. A single commit for a day of work throws away the ability
+to find, later, which decision caused which consequence.
+
+| Level | Required |
+| --- | --- |
+| **0–1** | Work happens on a `feature/*` branch and is committed. A pull request when the project's branching model asks for one. |
+| **2–3** | A `feature/*` branch off `develop`; one commit per completed phase; a pull request into `develop` once the review gate closes. |
+
+The pull request sits at the **delivery** boundary, not at every phase. Gates 1,
+2 and 4 already put a human in the loop at each step — a pull request per phase
+would be a second approval mechanism bolted onto the same control point, which
+buys ceremony rather than rigour.
+
+Projects that have adopted a different branching model follow theirs. What does
+not vary: the work is on a branch, each finished phase is a commit, and nothing
+reaches the permanent branches without a human merging it.
 
 ---
 

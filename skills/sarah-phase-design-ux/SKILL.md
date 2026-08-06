@@ -45,4 +45,4 @@ A slightly worse pattern used everywhere beats a slightly better one used once. 
 
 ## Exit gate
 
-**The user approves the flows and states.** Then update `sarah/state.md` and move to `sarah-phase-implement`.
+**The user approves the flows and states.** Then update `sarah/state.md`, commit the design and the state on the feature branch, and move to `sarah-phase-implement`.

@@ -50,5 +50,6 @@ Every layer of indirection is paid on every future change. When the architect pr
 - ADRs written for the decisions that matter.
 - `ARCHI.md` updated: structure, boundaries, invariants, decisions table.
 - `sarah/state.md` updated.
+- **All three committed on the feature branch.** A decision nobody can find in the history will be relitigated by whoever comes next.
 
 Next is `sarah-phase-design-ux` when there is a user-facing surface, otherwise `sarah-phase-implement`.
