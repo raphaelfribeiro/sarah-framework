@@ -135,8 +135,8 @@ exist yet for any of these — including S.A.R.A.H.
 | | Scope | Runs on | Process weight |
 | --- | --- | --- | --- |
 | [**BMAD-METHOD**](https://github.com/bmad-code-org/BMAD-METHOD) | Agile team simulation with specialist agent personas | Tool-agnostic | Heavy by design: detailed PRDs and architecture documents up front |
-| [**GitHub Spec Kit**](https://github.com/github/spec-kit) | Spec-driven: spec → plan → tasks → implement → review | Many agents | Spec-first on every change |
-| [**OpenSpec**](https://github.com/Fission-AI/OpenSpec) | Lightweight SDD: propose → apply → archive, with a living spec | Many agents | Light, spec-centred |
+| [**GitHub Spec Kit**](https://github.com/github/spec-kit) | Spec-driven: spec → plan → tasks → implement → review | 30+ agents | Spec-first on every change |
+| [**OpenSpec**](https://github.com/Fission-AI/OpenSpec) | Lightweight SDD: propose → apply → archive, with a living spec | 30+ agents | Light, spec-centred |
 | [**Superpowers**](https://github.com/obra/superpowers) | Composable skills: TDD, systematic debugging, subagent review | Many harnesses, including Claude Code | Disciplined: red-green-refactor enforced |
 | **S.A.R.A.H.** | Phase pipeline with per-phase specialists and five gates | Claude Code only | Adaptive: levels 0–3 decide how much process applies |
 
@@ -153,10 +153,9 @@ never loading the full agent roster, and a session-injected orientation skill
 capped at roughly 2,000 tokens, enforced in CI.
 
 **Where the others are ahead.** Superpowers is the closest relative — composable
-skills, enforced TDD, subagent review — and it is mature, widely installed, and
-runs across many harnesses while S.A.R.A.H. is unreleased and runs on one. Spec
-Kit has GitHub behind it. OpenSpec is lighter to adopt. BMAD has a real
-extension ecosystem. **S.A.R.A.H. runs on Claude Code only**, because it is
+skills, enforced TDD, subagent review — and it is released and runs across many
+harnesses, while S.A.R.A.H. is neither. Spec Kit has GitHub behind it. OpenSpec
+is lighter to adopt. BMAD has a real extension ecosystem. **S.A.R.A.H. runs on Claude Code only**, because it is
 built on the plugin API, skills, and subagents — a real limitation, not a design
 virtue, if your team is not on Claude Code.
 
