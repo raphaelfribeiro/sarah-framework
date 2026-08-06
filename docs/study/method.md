@@ -77,6 +77,21 @@ which arm produced it, and not told that two arms exist. They score by reading
 and running the code, never by reading run logs — logs reveal the arm
 immediately.
 
+**Blinding requires stripping the process artefacts, and that has a cost worth
+stating.** A framework-arm project contains `sarah/state.md`, `ARCHI.md` and a
+changelog directory; a control-arm project does not. Any judge seeing those
+knows the arm at a glance, and the blinding becomes theatre. So each artefact is
+packaged for judging as the software only — source, tests, README, packaging and
+configuration — with framework state files and process documents removed, and
+git history removed along with them.
+
+This deliberately discards something real. If the framework arm produces better
+process documentation, that advantage does not appear in the rubric score. The
+trade is accepted because a score from an unblinded judge is worth less than a
+narrower score from a blind one, and because documentation volume is already
+recorded as a separate measurement. It is recorded here, in advance, rather than
+discovered in the results.
+
 **Evidence or zero.** Every score above 0 must cite a file and line, or a
 command and its output. The rubric measures artefacts, not intentions.
 
