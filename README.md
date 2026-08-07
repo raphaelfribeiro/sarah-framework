@@ -115,17 +115,33 @@ wrote outside the notes directory, and the reviewers noted that the 147 passing
 tests covered none of the four scenarios. Details in
 [the Level 3 walkthrough](docs/walkthrough-level-3.md).
 
-**Not measured, and not claimed.** No controlled comparison exists yet. Nothing
-published here separates what the framework contributed from what the model
-would have done anyway, and the runs above cannot settle that because they have
-no control arm. The human gates have never been exercised either: driving the
-CLI headlessly requires telling it not to ask questions, which is precisely what
-gates 1 and 2 are made of.
+**Attempted and inconclusive.** A controlled study was run on 2026-08-07: the
+same brief built three times with S.A.R.A.H. and three times with plain Claude
+Code, scored blind by three judges per artefact against a rubric fixed in
+advance. **The rubric saturated** — every artefact scored 43 or 44 out of 44 —
+so it could not detect a difference in either direction. That is a flaw in the
+instrument, not a verdict on the framework, and the study says so.
 
-**A comparative study is a release requirement for v0.1** — the same brief built
-with and without the framework, scored blind, with the method and its limits
-published alongside the numbers. Until that exists, treat the five commitments
-above as design intent rather than demonstrated results.
+One finding survives independently, because it does not require comparing the
+arms: on the four security requirements the brief deliberately never states —
+timing-safe comparison, replay window, idempotency, raw-body signing — **plain
+Claude Code scored full marks in all three runs**. The implicit-requirement gap
+that process is often sold to close was already closed here.
+
+Two measurements are reliable regardless of the rubric: the framework cost more
+($46.28 against $29.19 median), and its cost was far less predictable — a 2.7×
+spread across its runs against 1.06× for the control.
+
+Read [the results](docs/study/results.md), [the method](docs/study/method.md)
+committed before any run, [the incident log](docs/study/incidents.md) including
+two errors of the author's own, and [the raw scores](docs/study/scores/).
+
+**What remains unmeasured.** The human gates have never been exercised: driving
+the CLI headlessly requires telling it not to ask questions, which is precisely
+what gates 1 and 2 are made of. Blinding also stripped every ADR, spec and plan
+from the judged packets — the framework's most distinctive output could not be
+scored at all. Treat the five commitments above as design intent, not
+demonstrated results.
 
 ## How it compares
 
