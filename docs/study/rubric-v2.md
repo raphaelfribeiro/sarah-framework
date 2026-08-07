@@ -34,7 +34,17 @@ Three rules that v1 lacked, and whose absence is why it saturated:
 3. **Do not grade on effort.** More code, more commands and more configuration
    are costs. Section P scores them as costs.
 
-**Total: 48 points across 24 items.**
+**Total: 56 points across 28 items.**
+
+Revised 2026-08-07 after calibration against a deliberately mediocre artefact,
+which scored 8/48 on the original draft — inside the 8-12 target band, so the
+instrument discriminates. The calibration also exposed four faults, all fixed
+above: the admission gate would have refused to score the calibration floor at
+all; four core security properties were gated rather than scored and therefore
+worth zero points; four items awarded full marks for *absence of surface* rather
+than quality, which a do-nothing artefact could max; and one false README claim
+could fire in three sections at once. On the revised instrument the same
+artefact lands at **2-4/56**.
 
 ## What changed from v1, and why
 
@@ -60,12 +70,34 @@ instrument assumes a working receiver.
       returns 2xx.
 - [ ] Rejects an invalid signature.
 - [ ] Persists the event somewhere durable, behind a swappable handler seam.
-- [ ] Signature comparison is timing-safe; the signature covers the raw body;
-      the timestamp is used for a replay window; duplicates are keyed on
-      delivery identity.
 
 All six current artefacts pass this gate. That is the finding v1 bought, and it
 does not need buying twice.
+
+**The gate applies to artefacts under study, never to a calibration floor.** A
+deliberately bad artefact exists to prove the instrument discriminates, and
+declaring it "not scoreable" defeats the exercise. Score the floor against every
+item and report the number.
+
+### The four core security properties are scored, not gated
+
+Timing-safe comparison, signature over the raw body, an enforced replay window,
+and dedup keyed on delivery identity were originally admission criteria. That
+was wrong: gated properties are worth zero points, so an artefact could regress
+on all four and its score would not move.
+
+Score each, 2 points apiece, **on demonstration rather than presence**:
+
+| | 0 | 1 | 2 |
+| --- | --- | --- | --- |
+| **S5** Timing-safe comparison | `==` or `!=` on the digest | constant-time function used, nothing prevents the next change reverting it | used, **and** a test or review check would fail if it were replaced |
+| **S6** Signature covers the raw body | signature computed over re-serialised or parsed input | raw body signed, undocumented | raw body signed **and** a test proves re-serialisation breaks verification |
+| **S7** Replay window enforced | timestamp parsed and never compared, or absent | compared, tolerance hardcoded and unstated | compared, tolerance stated where an operator reads it, **and** a test proves a stale delivery is rejected |
+| **S8** Dedup identifies a delivery | keyed on payload content, or absent | keyed on a delivery identifier without sender scoping | keyed on delivery identity **scoped per sender**, with a test proving two senders' identical payloads both run |
+
+S8's floor matters: content-keyed dedup silently drops a genuine second delivery
+with identical content, and lets one sender suppress another's. That is worse
+than no dedup, and it must not score above 0.
 
 ---
 
@@ -186,9 +218,14 @@ six current artefacts it is taken from a header the signature does not cover.
 
 - **0** — A broken or deprecated primitive (MD5, SHA-1) is selectable.
 - **1** — The digest is configurable with a safe default and no explicit
-  allowlist bounding it.
-- **2** — Strong primitives only, enforced — an unknown or weak scheme name is
-  rejected at config load with a named error.
+  allowlist bounding it; **or** the digest is not configurable at all, so
+  nothing is reachable and nothing is demonstrated.
+- **2** — Strong primitives only, **enforced by a mechanism you can run**: an
+  unknown or weak scheme name is rejected at config load with a named error,
+  proven by a test or a startup check.
+
+An artefact with no configuration caps at 1. Having no knob is not the same as
+guarding one, and the 2 must be earned by a demonstration, never by absence.
 
 ### S3 — No unauthenticated surface beyond the sender paths exposes operational data
 
@@ -276,17 +313,24 @@ someone enjoyed writing it.
 Count top-level subcommands, including nested action groups.
 
 - **0** — 7 or more, **or** any subcommand that neither the brief nor a named
-  failure mode requires.
+  failure mode requires, **or** no way at all to inspect or recover a delivery.
 - **1** — 4 to 6, each with a stated justification.
-- **2** — 3 or fewer, each traceable to the brief or to running the service.
+- **2** — 3 or fewer, each traceable to the brief or to running the service,
+  **and** an operator can inspect and recover a delivery.
+
+**Restraint is not the same as not having got there.** An artefact that ships no
+operational surface scores 0 here, not 2 — it has not exercised judgement, it
+has left the job unfinished, and item O3 will show the consequence.
 
 ### P2 — Configuration surface is proportionate
 
 Count distinct settable keys in the shipped example configuration.
 
-- **0** — More than 35.
+- **0** — More than 35, **or** fewer than 3 — an artefact with nothing to
+  configure has not been made operable, and secrets are almost certainly
+  hardcoded.
 - **1** — 21 to 35.
-- **2** — 20 or fewer.
+- **2** — 3 to 20.
 
 ### P3 — No capability ships that the brief did not ask for and the design does not require
 
@@ -357,6 +401,14 @@ Check every checkable number and guarantee: test counts, durability claims,
 exclusivity guarantees, ordering guarantees, "nothing is interpreted before the
 signature verifies".
 
+**Score each false claim once, in one section only.** A README written from
+intent rather than from code can otherwise fire on M3, M4 and a behavioural item
+at the same time, costing six points for one mistake and letting a rewrite move
+the total without changing behaviour. Assign each false claim to the section
+that best describes it — behavioural items when the behaviour is wrong, M3 when
+an invariant is contradicted, M4 when the claim is merely unverifiable — and
+note the reassignment in the evidence.
+
 - **0** — A load-bearing claim is false — a durability promise the storage
   configuration does not provide, an exclusivity guarantee reproducibly
   violated, a contract the command's own behaviour contradicts.
@@ -386,11 +438,16 @@ unrecoverable while the sender is told 200 duplicate (packet D).*
 ### O2 — Re-entrant and destructive operations are guarded
 
 - **0** — A replay or requeue command re-invokes the handler on an already
-  completed delivery with no status guard, no confirmation and exit code 0.
+  completed delivery with no status guard, no confirmation and exit code 0;
+  **or no such operation exists**, so a stuck delivery cannot be recovered at
+  all and the guarantee is untestable.
 - **1** — Guarded by a status check, but a typo in an argument produces a
   green no-op indistinguishable from success.
 - **2** — Guarded, with unknown arguments refused and a dry-run that differs
   meaningfully from execution.
+
+The absent case scores 0, never 2. "Nothing unguarded" is trivially true of an
+artefact that does nothing, and reading it as full marks would reward the gap.
 
 ### O3 — A failure in the storage or handler path cannot silently lose a delivery
 
