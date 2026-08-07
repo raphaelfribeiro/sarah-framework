@@ -127,9 +127,16 @@
   new contributor would otherwise violate without knowing it.
 
   State each one as a rule, and say what breaks if it is violated.
+
+  The consequence is the part that earns its keep, and the most valuable one to
+  write down is the failure no test would catch. "Violating this breaks the
+  build" needs no invariant - the build already says so. "Violating this
+  silently drops one sender's deliveries as duplicates of another's, and with a
+  single sender configured no test notices" is the line that saves someone a
+  week.
 -->
 
-- {{Rule.}} Violating this {{consequence}}.
+- {{Rule.}} Violating this {{consequence, ideally one no test would catch}}.
 - {{Rule.}} Violating this {{consequence}}.
 
 ## 8. Sharp edges
