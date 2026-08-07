@@ -70,7 +70,14 @@ echo "$probe" > "$LOGDIR/isolation-probe.txt"
 run_step() {
   n="$1"; label="$2"; cont="$3"; prompt="$4"
   out="$LOGDIR/step-$n-$label.jsonl"
-  [ -s "$out" ] && grep -q '"type":"result"' "$out" && { say "step $n ($label) already done, skipping"; return 0; }
+  # A step counts as done only if its result line reports success. A 429 also
+  # writes a result line - with "is_error":true - and the previous check treated
+  # that as completion, silently skipping the step on resume. One study run was
+  # packaged and judged as a framework artefact having never had its review
+  # phase, because its review died at a rate limit and was marked complete.
+  if [ -s "$out" ] && grep -q '"type":"result"' "$out" && ! grep -q '"is_error":true' "$out"; then
+    say "step $n ($label) already done, skipping"; return 0
+  fi
 
   say "step $n: $label"
   : > "$out"

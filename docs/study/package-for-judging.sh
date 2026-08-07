@@ -51,11 +51,39 @@ rm -rf "$DEST/.git" \
        "$DEST/.pytest_cache" \
        "$DEST/.coverage" 2>/dev/null || true
 
-# Any remaining file that names the framework would give it away.
+# Neutralise references to stripped paths WITHOUT deleting lines.
+#
+# The previous version deleted any line naming a stripped path. Only the
+# framework arm cross-references its own documents, so the deletion fired on
+# three packets and none of the others - truncating prose mid-sentence and
+# handing judges "dangling reference" defects that the study itself created.
+# Roughly 15% of the evidence base was instrument noise, perfectly correlated
+# with one arm.
+#
+# Substituting a token preserves every line and every sentence.
+for f in $(grep -rlI . "$DEST" 2>/dev/null); do
+  sed -i -E \
+    -e 's#\[([^]]*)\]\((\.\./)*(docs/(specs|adr|plans|design)|ARCHI\.md|CLAUDE\.md)[^)]*\)#\1#g' \
+    -e 's#(sarah/|docs/(specs|adr|plans|design)/|ARCHI\.md|CLAUDE\.md)#the project documentation#g' \
+    -e 's#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#g' \
+    "$f"
+done
+
+# Symmetric integrity check: line counts must be unchanged from the source.
+mismatch=0
+for f in $(cd "$DEST" && grep -rlI . . 2>/dev/null); do
+  [ -f "$SRC/$f" ] || continue
+  a=$(wc -l < "$SRC/$f"); b=$(wc -l < "$DEST/$f")
+  if [ "$a" != "$b" ]; then
+    echo "  LINE COUNT CHANGED in $f: $a -> $b"
+    mismatch=1
+  fi
+done
+[ "$mismatch" = 0 ] && echo "  line counts intact"
+
 if grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null | grep -q .; then
-  echo "WARNING: files still mention the framework by name:"
+  echo "WARNING: files still name the framework:"
   grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null
-  echo "Review these by hand before judging - blinding is not optional."
 fi
 
 # Record the mapping where judges will never see it.

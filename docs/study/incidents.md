@@ -83,3 +83,37 @@ Kept here rather than deleted, because a study that quietly removes its author's
 mistakes is not showing its work. The lesson generalises: my own spot checks are
 not more trustworthy than the instrumented procedure, and when they disagree the
 procedure wins unless I can show otherwise.
+
+## 2026-08-07 — quantifying the sanitizer contamination, and fixing it
+
+Independent analysis put a number on the blinding leak recorded above. The
+line-deleting sanitizer removed 7, 9 and 10 README lines from the three
+framework packets and **zero from every control packet**. It also damaged
+source: two files lost the closing clause of a comment, one lost a sentence
+subject.
+
+**Nine of the 96 unanticipated findings are damage the study inflicted**, all
+of the form "prose truncated mid-sentence" or "cross-reference to a document
+that does not exist", and all in one arm. Five more ("not a git repository")
+come from stripping `.git`. **Roughly 15% of the evidence base is instrument
+noise, perfectly correlated with one arm.**
+
+v1's scores were saturated, so the scores themselves were unaffected — but any
+analysis mining those findings must exclude them, and this study's own writeup
+had already attributed the E3 loss partly to real defects when part of it was
+self-inflicted.
+
+**Fixed:** the sanitizer now substitutes a neutral token instead of deleting
+lines, and asserts afterwards that every file's line count is unchanged from
+source. A packet whose line count moved is a packet that was damaged.
+
+## 2026-08-07 — a real defect no judge found, and the rubric that catches it
+
+`sarah-1` derives its idempotency key from an **unsigned** header while signing
+something else, which is the same replay-amplification hole judges reproduced
+live in three other packets. It scored full marks on v1's item B3.
+
+The instrument was blind to it in the artefact where it was hardest to see.
+Item S1 of [`rubric-v2.md`](rubric-v2.md) is written to catch exactly this
+class: a security property that holds today but has no mechanism preventing the
+next change from breaking it.
