@@ -25,6 +25,8 @@ Nothing else. This is a briefing, not an audit. Reading the codebase to prepare 
 
 **3. Open and blocked.** Pending decisions with how long they have waited, blockers with what they wait on, and gates still open. If a decision has been pending for days, say how many — an aging decision is usually the real bottleneck, and nobody notices without the number.
 
+Put this block in a table once there is more than one item. Three blockers in prose is three paragraphs somebody skims; three rows is three blockers somebody reads.
+
 **4. Priorities for today — as options.** Two or three coherent plans for the day, not a task list. Each one says what it would accomplish and what it defers. Recommend one, with reasons.
 
 Use `AskUserQuestion` for the fourth block. The user approves one, mixes them, or throws them out and states their own — and any of those is a success. This is the ask → options → approve protocol applied to the day itself.
