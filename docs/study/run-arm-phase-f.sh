@@ -16,7 +16,10 @@ set -u
 ARM="${1:?usage: run-arm.sh <sarah|plain> <n>}"
 N="${2:?usage: run-arm.sh <sarah|plain> <n>}"
 
-BASE=<HOME>/dev/sarah-runs/phase-f
+# Runs live outside this repository - they are large, disposable, and contain
+# full transcripts. Point STUDY_BASE at wherever you keep them; nothing here
+# hardcodes one machine's layout.
+BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
 DIR="$BASE/runs/$ARM-$N"
 LOGDIR="$BASE/logs/$ARM-$N"
 STATUS="$BASE/logs/status.txt"
@@ -24,8 +27,26 @@ STATUS="$BASE/logs/status.txt"
 TOOLS="Read,Write,Edit,Glob,Grep,Bash,Task,Agent,TodoWrite,Skill"
 STEP_TIMEOUT=2400
 
+# The arms must differ by the framework and by nothing else.
+#
+# Phase E got this wrong. The control ran with --setting-sources project and the
+# framework arm ran with the default, which also loads USER settings - so one arm
+# received the maintainer's own CLAUDE.md, with its language rule and its
+# unrelated standing instructions, and the other received none of it. The
+# comparison was framework-plus-personal-context against a bare CLI. It showed:
+# two of three framework-arm artefacts came out written in Portuguese and none of
+# the control's, which is a confound and a blinding leak at once.
+#
+# Both arms now load the same sources. The only difference is --plugin-dir.
+PLUGIN_DIR="${STUDY_PLUGIN_DIR:-$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)}"
+case "$PLUGIN_DIR" in
+  *[[:space:]]*) echo "STUDY_PLUGIN_DIR must not contain spaces: $PLUGIN_DIR"; exit 2 ;;
+esac
+[ -d "$PLUGIN_DIR/.claude-plugin" ] || {
+  echo "no plugin at $PLUGIN_DIR (expected .claude-plugin/) - set STUDY_PLUGIN_DIR"; exit 2; }
+
 case "$ARM" in
-  sarah) SETTINGS="" ;;
+  sarah) SETTINGS="--setting-sources project --plugin-dir $PLUGIN_DIR" ;;
   plain) SETTINGS="--setting-sources project" ;;
   *) echo "arm must be sarah or plain"; exit 2 ;;
 esac
@@ -60,10 +81,36 @@ snapshot_tests() {
   } >> "$LOGDIR/test-snapshots.log" 2>&1
 }
 
+# Did the step actually succeed? The exit code alone cannot say.
+#
+# A rate-limited turn is the case that matters: the CLI finishes the turn and
+# exits 0, reporting the failure in-band as is_error on the result event. Read
+# only $? and that step is recorded as done, the run continues, and COMPLETE is
+# written over an artefact whose change never happened. That is the Phase E
+# defect - an artefact judged as having a step it never had - on a new path.
+#
+# Grepping the file for is_error is not the answer either: a tool_result carries
+# is_error too, so any failed bash command inside a perfectly good step would
+# match. Only the terminal result event is authoritative. No result event at all
+# means the step died mid-turn, which is also not success.
+step_errored() {
+  python3 - "$1" <<'PYEOF' 2>/dev/null || echo 1
+import json,sys
+found=bad=0
+for line in open(sys.argv[1],errors="replace"):
+    try: ev=json.loads(line)
+    except Exception: continue
+    if ev.get("type")=="result":
+        found=1
+        bad=1 if ev.get("is_error") else 0
+print(1 if (not found or bad) else 0)
+PYEOF
+}
+
 run_step() {
   n="$1"; label="$2"; prompt="$3"
   out="$LOGDIR/step-$n-$label.jsonl"
-  if [ -s "$out" ] && grep -q '"type":"result"' "$out" && ! grep -q '"is_error":true' "$out"; then
+  if [ -s "$out" ] && [ "$(step_errored "$out")" = "0" ]; then
     say "step $n ($label) already done, skipping"; return 0
   fi
   say "step $n: $label"
@@ -74,6 +121,12 @@ run_step() {
   rc=$?
   echo "[step $n exit=$rc at $(date +%H:%M:%S)]" >> "$out"
   snapshot_tests "after step $n ($label)"
+
+  # Stop before the run can continue past a step that only looks finished.
+  if [ "$rc" -eq 0 ] && [ "$(step_errored "$out")" != "0" ]; then
+    say "step $n ended in-band without succeeding (rate limit or failed turn) - rerun to resume"
+    exit 5
+  fi
 
   # Availability is not use. The isolation probe proves the skills are loadable;
   # it cannot prove the model invoked any. A framework-arm step that routed
@@ -120,9 +173,21 @@ PYEOF
   if [ "$rc" -ne 0 ]; then say "step $n FAILED (exit=$rc) - rerun to resume"; exit "$rc"; fi
 }
 
-BRIEF=$(sed -n '/^---$/,$p' <HOME>/dev/sarah-runs/phase-e/brief.md | sed '1d')
+# Phase F reuses Phase E's brief unchanged - the same software, so the two
+# phases stay comparable. Override STUDY_BRIEF to point elsewhere.
+BRIEF_FILE="${STUDY_BRIEF:-$BASE/brief.md}"
+[ -f "$BRIEF_FILE" ] || { echo "no brief at $BRIEF_FILE - set STUDY_BRIEF"; exit 2; }
+BRIEF=$(sed -n '/^---$/,$p' "$BRIEF_FILE" | sed '1d')
 
 NOASK="Do not ask me anything and do not stop for approval. Decide anything I left open and state what you decided."
+
+# Said to both arms, so neither inherits a language from somewhere the other
+# cannot see. An artefact whose language identifies its arm is not blind.
+LANGUAGE="Write the code, its comments, the documentation and any commit messages in English."
+
+RULES="$NOASK
+
+$LANGUAGE"
 
 # The framework arm adopts the framework first, exactly as a real user does:
 # once, at the start of a project. Every LATER session is cold and unaided -
@@ -137,28 +202,28 @@ $BRIEF
 Set the project up, then build it properly. Take as long as you need and do the
 job well.
 
-$NOASK"
+$RULES"
 else
   run_step 0 "build" "$BRIEF
 
 Build this properly. Take as long as you need and do the job well.
 
-$NOASK"
+$RULES"
 fi
 
 snapshot_tests "baseline before change 1"
 
 run_step 1 "new-sender" "We're onboarding a new partner, Globex. Their platform signs the payload on its own - no timestamp in the signed string, and they send the digest base64 rather than hex. Everyone else stays as they are. Get them working.
 
-$NOASK"
+$RULES"
 
 run_step 2 "duplicates" "Support is seeing the same delivery processed twice for one customer, maybe once a week. It's costing us money downstream. Make it stop.
 
-$NOASK"
+$RULES"
 
 run_step 3 "retention" "Disk on the box is filling up. We need old stuff cleared out, but we can't break the duplicate protection while doing it.
 
-$NOASK"
+$RULES"
 
 say "COMPLETE"
 echo done > "$LOGDIR/COMPLETE"
