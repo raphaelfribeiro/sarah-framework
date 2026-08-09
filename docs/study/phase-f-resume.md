@@ -13,7 +13,13 @@ harness skips steps whose log holds a successful result line.
 
 ## To resume one run
 
-    sh ~/dev/sarah-runs/phase-f/run-arm.sh sarah 1
+Runs live outside this repository. Point `STUDY_BASE` at wherever you keep them
+and, if the brief is not at `$STUDY_BASE/brief.md`, `STUDY_BRIEF` at the brief:
+
+    STUDY_BASE=/path/to/phase-f sh docs/study/run-arm-phase-f.sh sarah 1
+
+If you keep a working copy of the harness beside the runs, re-copy it before
+resuming — this repository's version is the one that gets fixed.
 
 ## To resume everything
 
@@ -26,7 +32,8 @@ loop.
 ## What this study measures
 
 Build once, then three changes in COLD SESSIONS (no --continue). See
-`changes.md`. Each change walks into a decision the first build had to make:
+`changes-phase-f.md`. Each change walks into a decision the first build had to
+make:
 
 1. A sender that signs differently — trap: relaxing the canonical string
    globally removes replay protection from everyone.
