@@ -129,7 +129,7 @@ links, and CI all reference GitHub and nothing else.
 ## Next
 
 1. **Decide what v0.1 says about the evidence.** The study is inconclusive for two independent reasons now — a saturated rubric and confounded arms — and both are stated plainly in `README.md`. The options are to ship v0.1 with that as the honest result, or to run Phase F first with the fixed instruments and let it speak. Nothing is pushed, and the first push is the publication.
-2. **Resume the Phase F study** — see `docs/study/phase-f-resume.md`; the harness takes `STUDY_BASE` rather than a hardcoded path. Two runs are partial (build step only) and resume from where they stopped. Roughly $280 to finish.
+2. **Run the Phase F study.** One unattended command in `docs/study/phase-f-resume.md`; `run-phase-f.sh` chains all six runs in pair order, waits out rate limits, and resumes if interrupted. **The two 2026-08-07 partial runs cannot be resumed** — they were built before the setting-sources fix, and `sarah-1` came out in Portuguese, which is the confound itself. The orchestrator archives them. Roughly $280 from zero.
 3. **Decide what an inconclusive Phase E means for v0.1.** The comparison ran, cost $280.76, and could not discriminate: the rubric saturated at 43-44 out of 44 for every artefact in both arms. Options are to ship v0.1 with the study published as the honest inconclusive result it is, or to build a discriminating rubric and re-run before releasing. This is the maintainer's call and nothing should move until it is made.
 4. **Make the framework's output to the human short.** Every skill that reports
    back — `ill-be-back`, `sarah-status`, the phase skills, the review gate —
