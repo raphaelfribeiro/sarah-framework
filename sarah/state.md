@@ -26,8 +26,19 @@
   a not-tested hand-off with no receiver, and a rubric whose evidence described a
   48-point instrument that no longer existed. **The reviewers also cleared the
   branch's main risk:** the four prose changes are purely additive, and nothing
-  doing security work was cut by the subtractive pass. Re-review of the fixes is
-  the open item.
+  doing security work was cut by the subtractive pass.
+- **The re-review blocked too, and both findings were mine.** The blinding
+  substitution only matched dotted capitals, so an ordinary `/sarah-init` shipped
+  to judges in plain text while the script exited 0 — I had written the
+  case-insensitive fix and then reverted it as out of scope, which it was not.
+  And the path fix reached two scripts while three siblings kept the same
+  hardcoded home directory; this file claimed the finding was closed while it was
+  open in three tracked files. Both fixed. The second round also found hardlinks
+  leaking content past the symlink refusal and an unquoted `--plugin-dir`
+  expansion that a demonstrated PoC used to inject a flag. **The CI guard was the
+  root cause of the path leak**: it hunted `a-git-forge|a-private-network|.example` and never
+  looked for a home directory, so it would not have caught the originals or a
+  regression. It does now. A third review round is the open item.
 - **The two study arms differed by more than the framework.** Found while
   repricing the rubric, not by any instrument. The harness gave the control
   `--setting-sources project` and the framework arm the default, which also loads
@@ -75,7 +86,14 @@ links, and CI all reference GitHub and nothing else.
 1. **Re-review the fix commits on `feature/framework-v2-lean`, then merge.** Gate 4 ran and blocked; the fixes are committed on the same branch and have not themselves been reviewed. No merge until they pass. The documentation gate then needs a changelog entry for the delivery.
 2. **Resume the Phase F study** — see `docs/study/phase-f-resume.md`; the harness takes `STUDY_BASE` rather than a hardcoded path. Two runs are partial (build step only) and resume from where they stopped. Roughly $280 to finish.
 3. **Decide what an inconclusive Phase E means for v0.1.** The comparison ran, cost $280.76, and could not discriminate: the rubric saturated at 43-44 out of 44 for every artefact in both arms. Options are to ship v0.1 with the study published as the honest inconclusive result it is, or to build a discriminating rubric and re-run before releasing. This is the maintainer's call and nothing should move until it is made.
-4. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+4. **Make the framework's output to the human short.** Every skill that reports
+   back — `ill-be-back`, `sarah-status`, the phase skills, the review gate —
+   should summarise rather than narrate: tables where a table fits, the decision
+   the human has to make stated as a decision, and what to do next. Long reports
+   are how a thirty-second instrument becomes one nobody runs. Raised by the
+   maintainer 2026-08-09 against this session's own output, which is the
+   evidence: the framework produced exactly the wall of prose it warns against.
+5. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried forward
 

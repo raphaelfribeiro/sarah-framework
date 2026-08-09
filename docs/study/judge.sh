@@ -19,7 +19,7 @@ set -eu
 
 LABEL="${1:?usage: judge.sh <packet-label>}"
 
-BASE=<HOME>/dev/sarah-runs/phase-e
+BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
 PACKET="$BASE/judging/packet-$LABEL"
 RUBRIC="$BASE/rubric.md"
 OUT="$BASE/judging/scores"

@@ -75,12 +75,43 @@ rm -rf "$DEST/.git" \
 # preserves it as a live link. The packet is handed to judges who build a venv
 # and run the suite inside it; anything that opens the link follows it out of
 # the packet. Refuse to ship one rather than carry it.
-if find "$DEST" -type l | grep -q .; then
-  echo "REFUSING: symlinks in the packet - they point outside it once opened:"
-  find "$DEST" -type l -exec ls -ld {} +
+#
+# The check is by exclusion, not by enumeration. Refusing symlinks specifically
+# left FIFOs, sockets and device nodes walking through untouched - cp -a
+# preserves those too, find -type f never selects them, and a judge's `cat` on a
+# FIFO blocks forever. An artefact tree is regular files and directories; refuse
+# whatever else appears rather than maintain a list of what to fear.
+if find "$DEST" ! -type f ! -type d | grep -q .; then
+  echo "REFUSING: the packet holds something other than files and directories:"
+  find "$DEST" ! -type f ! -type d -exec ls -ld {} +
   rm -rf "$DEST"
   exit 1
 fi
+
+# A hardlink survives differently: cp -a dereferences a link to a file outside
+# the source tree, so the packet gets the CONTENT with nothing left to detect.
+# The link count is only visible on the source side, and only the paths that
+# survived the strip are worth checking - .venv routinely hardlinks and is
+# removed above, so checking $SRC wholesale would refuse every real run.
+HARDLINKS=$(mktemp)
+export SRC DEST HARDLINKS
+find "$DEST" -type f -exec sh -c '
+  for d do
+    rel=${d#"$DEST/"}
+    [ -f "$SRC/$rel" ] || continue
+    if [ -n "$(find "$SRC/$rel" -maxdepth 0 -links +1 -print 2>/dev/null)" ]; then
+      echo "  $rel" >> "$HARDLINKS"
+    fi
+  done
+' sh {} +
+if [ -s "$HARDLINKS" ]; then
+  echo "REFUSING: hardlinked files in the run - their content would be copied in blind:"
+  cat "$HARDLINKS"
+  rm -f "$HARDLINKS"
+  rm -rf "$DEST"
+  exit 1
+fi
+rm -f "$HARDLINKS"
 
 # Substituting a token preserves every line and every sentence.
 #
@@ -92,7 +123,7 @@ fi
 find "$DEST" -type f -exec grep -Iq . {} ';' -exec sed -i -E \
   -e 's#\[([^]]*)\]\((\.\./)*(docs/(specs|adr|plans|design)|ARCHI\.md|CLAUDE\.md)[^)]*\)#\1#g' \
   -e 's#(sarah/|docs/(specs|adr|plans|design)/|ARCHI\.md|CLAUDE\.md)#the project documentation#g' \
-  -e 's#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#g' \
+  -e 's#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#gI' \
   {} +
 
 # Symmetric integrity check: line counts must be unchanged from the source.
@@ -118,9 +149,20 @@ fi
 rm -f "$MISMATCH"
 echo "  line counts intact"
 
+# This was a WARNING that exited 0, which meant a packet naming the framework in
+# plain text shipped to judges while the script reported success. Two rounds of
+# review found it, the second time as a live leak: the substitution above only
+# matched dotted capitals, so an ordinary "/sarah-init" in a README walked
+# straight through and the warning scrolled past.
+#
+# The substitution is case-insensitive now, and this check refuses rather than
+# warns. Blinding is not optional, and a check that cannot stop the thing it
+# detects is decoration.
 if grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null | grep -q .; then
-  echo "WARNING: files still name the framework:"
+  echo "REFUSING: files still name the framework - blinding is not optional:"
   grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null
+  rm -rf "$DEST"
+  exit 1
 fi
 
 # Record the mapping where judges will never see it.

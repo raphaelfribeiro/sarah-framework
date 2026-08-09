@@ -18,7 +18,7 @@
 # have made every blind score meaningless.
 set -eu
 
-BASE=<HOME>/dev/sarah-runs/phase-e
+BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
 
 for packet in "$BASE"/judging/packet-*; do
   [ -d "$packet" ] || continue

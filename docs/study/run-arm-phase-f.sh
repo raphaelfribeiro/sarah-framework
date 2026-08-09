@@ -39,8 +39,23 @@ STEP_TIMEOUT=2400
 #
 # Both arms now load the same sources. The only difference is --plugin-dir.
 PLUGIN_DIR="${STUDY_PLUGIN_DIR:-$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)}"
+
+# $SETTINGS is expanded unquoted at the call site, deliberately, because it has
+# to become several arguments. That makes this path a command line rather than a
+# string: a guard against spaces alone is not enough.
+#
+# A glob character splits it into multiple words at expansion, and a file with a
+# flag-shaped name sitting in the matched directory then arrives as its own flag
+# - a review demonstrated exactly that, injecting a permissions flag this harness
+# has no business ever passing. A leading dash does the same without any glob.
+# Refuse anything that is not a plain absolute path.
 case "$PLUGIN_DIR" in
-  *[[:space:]]*) echo "STUDY_PLUGIN_DIR must not contain spaces: $PLUGIN_DIR"; exit 2 ;;
+  /*) ;;
+  *) echo "STUDY_PLUGIN_DIR must be an absolute path: $PLUGIN_DIR"; exit 2 ;;
+esac
+case "$PLUGIN_DIR" in
+  *[!A-Za-z0-9/._-]*)
+    echo "STUDY_PLUGIN_DIR must contain only [A-Za-z0-9/._-]: $PLUGIN_DIR"; exit 2 ;;
 esac
 [ -d "$PLUGIN_DIR/.claude-plugin" ] || {
   echo "no plugin at $PLUGIN_DIR (expected .claude-plugin/) - set STUDY_PLUGIN_DIR"; exit 2; }
