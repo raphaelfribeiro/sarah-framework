@@ -467,50 +467,105 @@ Predictions made by reading the artefacts and the 18 judge score files, with
 file and line for each. Packet labels are v1's blind labels; run identities are
 shown because this table is calibration, not scoring.
 
+**Who scored this, and the bias that carries.** Sections H through O were
+predicted 2026-08-07; S5-S8 were scored 2026-08-09, when moving those four items
+from gate to score left the totals here describing a 48-point instrument that no
+longer existed. Both passes were done by the author, with the arm visible. That
+is acceptable for calibration — the question is whether the *instrument* spreads
+artefacts out, and a biased scorer who produces a spread has still shown the
+scale has room — and it is not acceptable for scoring. Phase F's artefacts go to
+blind judges who never see an arm label, exactly as Phase E's did.
+
 ### Section totals
 
-| Run | Packet | H (6) | R (6) | S (8) | X (6) | P (8) | M (8) | O (6) | **Total (48)** | **%** |
+| Run | Packet | H (6) | R (6) | S (16) | X (6) | P (8) | M (8) | O (6) | **Total (56)** | **%** |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| plain-1 | E | 2 | 2 | 5 | 3 | 2 | 2 | 3 | **19** | 40% |
-| plain-2 | A | 4 | 4 | 2 | 5 | 2 | 3 | 1 | **21** | 44% |
-| plain-3 | C | 2 | 3 | 1 | 4 | 1 | 3 | 2 | **16** | 33% |
-| sarah-1 | B | 2 | 2 | 5 | 2 | 5 | 6 | 2 | **24** | 50% |
-| sarah-2 | F | 4 | 1 | 6 | 2 | 5 | 8 | 2 | **28** | 58% |
-| sarah-3 | D | 4 | 2 | 5 | 1 | 6 | 5 | 1 | **24** | 50% |
+| plain-1 | E | 2 | 2 | 12 | 3 | 2 | 2 | 3 | **26** | 46% |
+| plain-2 | A | 4 | 4 | 8 | 5 | 2 | 3 | 1 | **27** | 48% |
+| plain-3 | C | 2 | 3 | 7 | 4 | 1 | 3 | 2 | **22** | 39% |
+| sarah-1 | B | 2 | 2 | 12 | 2 | 5 | 6 | 2 | **31** | 55% |
+| sarah-2 | F | 4 | 1 | 13 | 2 | 5 | 8 | 2 | **35** | 63% |
+| sarah-3 | D | 4 | 2 | 11 | 1 | 6 | 5 | 1 | **30** | 54% |
+
+Section S is 16 points: S1-S4 (security under change, 8) plus S5-S8 (the four
+core properties, 8), which were moved from gate to score after the calibration
+run. The S column above is the sum; S5-S8 break down as:
+
+| Run | S5 timing-safe | S6 raw body | S7 replay window | S8 dedup identity | **S5-S8** |
+| --- | --- | --- | --- | --- | --- |
+| plain-1 | 1 | 2 | 2 | 2 | **7** |
+| plain-2 | 1 | 1 | 2 | 2 | **6** |
+| plain-3 | 1 | 1 | 2 | 2 | **6** |
+| sarah-1 | 2 | 2 | 2 | 1 | **7** |
+| sarah-2 | 2 | 1 | 2 | 2 | **7** |
+| sarah-3 | 2 | 2 | 1 | 1 | **6** |
+
+**S5 is the item that best justifies scoring these rather than gating them.**
+Every artefact uses `hmac.compare_digest`, so presence would have given all six
+full marks. Demonstration separates them: no test suite in any of the six would
+fail if the call were replaced by `==` — timing is not unit-testable — so the
+score turns on whether a *review check* exists. Three artefacts have one and
+three do not. `sarah-1`'s plan names `T-U-06 a comparação é hmac.compare_digest`
+with "comparison by `==`" listed as the risk it guards; `sarah-2` and `sarah-3`
+state it as an architectural invariant. The other three mention the function in
+a README, which records the choice without protecting it.
+
+S8 costs `sarah-1` and `sarah-3` a point each: both scope the key per sender in
+the schema, and neither has a test proving two senders' identical payloads both
+run, which is the property that breaks silently.
 
 ### Predicted spread
 
 | | v1 (actual) | v2 (predicted) |
 | --- | --- | --- |
-| Scale | 44 | 48 |
-| Range | 43-44 | 16-28 |
-| Spread | 1 point (**2.3%** of scale) | 12 points (**25%** of scale) |
-| Mean | 43.5 (**99%**) | 22.0 (**46%**) |
-| Highest scorer | 100% of scale | **58%** of scale |
-| Items at ceiling for all six | 20 of 22 | **0 of 24** |
+| Scale | 44 | 56 |
+| Range | 43-44 | 22-35 |
+| Spread | 1 point (**2.3%** of scale) | 13 points (**23%** of scale) |
+| Mean | 43.5 (**99%**) | 28.5 (**51%**) |
+| Highest scorer | 100% of scale | **63%** of scale |
+| Items at ceiling for all six | 20 of 22 | **0 of 28** |
 
-**No artefact reaches 60%.** The requirement was that a competent-but-
-unremarkable artefact lands mid-scale; these six are competent-but-unremarkable,
-and they land at 33-58%, centred on 46%. The instrument has room above them for
-an artefact that is actually good and room below for one that is bad.
+**No artefact reaches two thirds of the scale.** The requirement was that a
+competent-but-unremarkable artefact lands mid-scale; these six are
+competent-but-unremarkable, and they land at 39-63%, centred on 51%. The
+instrument has room above them for an artefact that is actually good and room
+below for one that is bad.
+
+Adding S5-S8 raised every artefact — they are properties all six largely have —
+but it did not flatten the instrument: the spread held at 13 points against 12,
+and the four new items are themselves split 7/6/6 against 7/7/6 rather than
+sitting at the ceiling. That was the risk in scoring properties every competent
+artefact satisfies, and it did not materialise.
 
 ### The sections disagree, which is the point
+
+> **These six artefacts cannot support a claim about the framework.** The Phase E
+> harness gave the control `--setting-sources project` and the framework arm the
+> default, which also loads user settings — so one arm ran with the maintainer's
+> own `CLAUDE.md` and the other ran without it. Every difference below is a
+> difference between *framework plus that context* and a bare CLI, and there is
+> no way to separate the two after the fact. See `incidents.md`, 2026-08-09.
+>
+> The table stays because it is what this instrument does to real artefacts, and
+> that is what calibration needs to show: seven axes moving in different
+> directions rather than one number at the ceiling. Read it as evidence about
+> **the rubric**, never as evidence about the framework.
 
 | Section | plain | S.A.R.A.H. | Direction |
 | --- | --- | --- | --- |
 | H hostile input | 2, 4, 2 | 2, 4, 4 | wash |
-| R resources | 2, 4, 3 | 2, 1, 2 | **plain better** |
-| S security under change | 5, 2, 1 | 5, 6, 5 | **S.A.R.A.H. better** |
-| X docs that execute | 3, 5, 4 | 2, 2, 1 | **plain better** |
-| P restraint | 2, 2, 1 | 5, 5, 6 | **S.A.R.A.H. better** |
-| M maintainability | 2, 3, 3 | 6, 8, 5 | **S.A.R.A.H. better** |
+| R resources | 2, 4, 3 | 2, 1, 2 | plain higher |
+| S security under change | 12, 8, 7 | 12, 13, 11 | S.A.R.A.H. higher |
+| X docs that execute | 3, 5, 4 | 2, 2, 1 | plain higher |
+| P restraint | 2, 2, 1 | 5, 5, 6 | S.A.R.A.H. higher |
+| M maintainability | 2, 3, 3 | 6, 8, 5 | S.A.R.A.H. higher |
 | O operator failure | 3, 1, 2 | 2, 2, 1 | wash |
 
 A single saturated number said nothing. Seven axes that point in different
-directions say something specific and falsifiable: on this brief, the framework
-arm was more restrained and more reconstructible, and the control arm shipped
-documentation that actually ran and stores that were actually bounded. Either
-finding is more useful than a one-point median gap, and both are checkable.
+directions say something specific and falsifiable — which is the property the
+instrument needed and v1 lacked. Whether any particular direction is *caused* by
+the framework is a question these runs cannot answer, and Phase F is the run
+built to answer it, with both arms loading the same setting sources.
 
 ### Item-level justification
 
@@ -829,9 +884,15 @@ counts, probes, reproductions. M2 ("can a decision be reconstructed") and P3
 unknown until measured. Report per-item judge spread for these two specifically;
 if judges disagree by more than a point, the items need tightening or dropping.
 
-**The floor.** These six artefacts cluster at 33-58%. The rubric has never been
-run against a deliberately bad artefact, which is exactly the calibration
-`results.md` said should come first. **Before using this instrument, score a
-deliberately mediocre receiver — no retention, no tests for hostile input, one
-commit, a README that does not run.** It should land near 8-12 of 48. If it
-scores above 20, this rubric is not ready either.
+**The floor.** These six artefacts cluster at 39-63%. The calibration
+`results.md` asked for has since been run: a deliberately mediocre receiver — no
+retention, no tests for hostile input, one commit, a README that does not run —
+scored 8/48 on the draft and **2-4/56** on the revised instrument, well below the
+six real artefacts and inside the target band. That is what makes the spread
+above meaningful rather than merely wide.
+
+**Re-run that floor whenever an item is added or reworded.** S5-S8 were added
+after the calibration and scored against the six real artefacts but never against
+the floor; the floor's 2-4 is therefore a lower bound that four untested items
+could only raise. If a revised instrument ever puts the floor above 20 of 56, it
+has stopped discriminating and is not ready.
