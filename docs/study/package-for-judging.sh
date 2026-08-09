@@ -19,7 +19,18 @@ ARM="${1:?usage: package-for-judging.sh <arm> <n> <label>}"
 N="${2:?}"
 LABEL="${3:?}"
 
-BASE=<HOME>/dev/sarah-runs/phase-e
+# Every argument becomes part of a path that gets rm -rf'd and cp'd into. A
+# label of "../../elsewhere" would copy the artefact outside the study tree and,
+# on the second run with the same label, delete that directory first. Nothing
+# downstream validates these, so they are validated here.
+for v in "$ARM" "$N" "$LABEL"; do
+  case "$v" in
+    ''|*[!A-Za-z0-9_-]*)
+      echo "arguments must contain only [A-Za-z0-9_-]: got '$v'"; exit 2 ;;
+  esac
+done
+
+BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
 SRC="$BASE/runs/$ARM-$N"
 DEST="$BASE/judging/packet-$LABEL"
 
@@ -60,26 +71,52 @@ rm -rf "$DEST/.git" \
 # Roughly 15% of the evidence base was instrument noise, perfectly correlated
 # with one arm.
 #
+# A symlink in the artefact tree points wherever the build put it, and cp -a
+# preserves it as a live link. The packet is handed to judges who build a venv
+# and run the suite inside it; anything that opens the link follows it out of
+# the packet. Refuse to ship one rather than carry it.
+if find "$DEST" -type l | grep -q .; then
+  echo "REFUSING: symlinks in the packet - they point outside it once opened:"
+  find "$DEST" -type l -exec ls -ld {} +
+  rm -rf "$DEST"
+  exit 1
+fi
+
 # Substituting a token preserves every line and every sentence.
-for f in $(grep -rlI . "$DEST" 2>/dev/null); do
-  sed -i -E \
-    -e 's#\[([^]]*)\]\((\.\./)*(docs/(specs|adr|plans|design)|ARCHI\.md|CLAUDE\.md)[^)]*\)#\1#g' \
-    -e 's#(sarah/|docs/(specs|adr|plans|design)/|ARCHI\.md|CLAUDE\.md)#the project documentation#g' \
-    -e 's#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#g' \
-    "$f"
-done
+#
+# The file list comes from find, not from an unquoted $(grep -rl). A single
+# space in an artefact filename word-splits that substitution, and with set -eu
+# the script dies here - after the rewrite has already touched some files and
+# before the integrity check below ever runs. The safety net cannot be the thing
+# that fails first.
+find "$DEST" -type f -exec grep -Iq . {} ';' -exec sed -i -E \
+  -e 's#\[([^]]*)\]\((\.\./)*(docs/(specs|adr|plans|design)|ARCHI\.md|CLAUDE\.md)[^)]*\)#\1#g' \
+  -e 's#(sarah/|docs/(specs|adr|plans|design)/|ARCHI\.md|CLAUDE\.md)#the project documentation#g' \
+  -e 's#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#g' \
+  {} +
 
 # Symmetric integrity check: line counts must be unchanged from the source.
-mismatch=0
-for f in $(cd "$DEST" && grep -rlI . . 2>/dev/null); do
-  [ -f "$SRC/$f" ] || continue
-  a=$(wc -l < "$SRC/$f"); b=$(wc -l < "$DEST/$f")
-  if [ "$a" != "$b" ]; then
-    echo "  LINE COUNT CHANGED in $f: $a -> $b"
-    mismatch=1
-  fi
-done
-[ "$mismatch" = 0 ] && echo "  line counts intact"
+MISMATCH=$(mktemp)
+export SRC DEST MISMATCH
+find "$DEST" -type f -exec grep -Iq . {} ';' -exec sh -c '
+  for d do
+    rel=${d#"$DEST/"}
+    [ -f "$SRC/$rel" ] || continue
+    a=$(wc -l < "$SRC/$rel"); b=$(wc -l < "$d")
+    if [ "$a" != "$b" ]; then
+      echo "  LINE COUNT CHANGED in $rel: $a -> $b"
+      echo x >> "$MISMATCH"
+    fi
+  done
+' sh {} +
+if [ -s "$MISMATCH" ]; then
+  rm -f "$MISMATCH"
+  echo "REFUSING: the sanitiser changed line counts - this is the Phase E leak again"
+  rm -rf "$DEST"
+  exit 1
+fi
+rm -f "$MISMATCH"
+echo "  line counts intact"
 
 if grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null | grep -q .; then
   echo "WARNING: files still name the framework:"
