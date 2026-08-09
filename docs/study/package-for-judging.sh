@@ -32,7 +32,13 @@ done
 
 BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
 SRC="$BASE/runs/$ARM-$N"
-DEST="$BASE/judging/packet-$LABEL"
+FINAL="$BASE/judging/packet-$LABEL"
+
+# Built under a name no judge would be handed, and moved into place only after
+# every check passes. A trap cannot catch SIGKILL, so a killed run leaves a
+# half-sanitised directory behind no matter what - this way it is called
+# .building-X and nobody mistakes it for a packet.
+DEST="$BASE/judging/.building-$LABEL"
 
 [ -d "$SRC" ] || { echo "no such run: $SRC"; exit 1; }
 
@@ -47,7 +53,13 @@ mkdir -p "$DEST"
 trap 'rm -rf "$DEST"' EXIT INT TERM
 
 # Copy everything, then remove what identifies the arm.
-cp -a "$SRC/." "$DEST/"
+#
+# Not cp -a. That is --preserve=ALL, which carries extended attributes across -
+# and an xattr naming the framework rode into a packet past every check, because
+# nothing reads xattrs and sed cannot rewrite them. Preserving mode and
+# timestamps is all a judge needs; -d keeps symlinks as symlinks so the check
+# below can still see them, instead of silently dereferencing them into copies.
+cp -dR --preserve=mode,timestamps "$SRC/." "$DEST/"
 
 # The strip is SYMMETRIC: the same paths are removed from both arms, whether or
 # not they exist there. Removing "the framework's directories" from one arm and
@@ -176,7 +188,11 @@ export RENAMED
 find "$DEST" -depth \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \) -exec sh -c '
   for p do
     d=$(dirname -- "$p"); b=$(basename -- "$p")
-    nb=$(printf %s "$b" | sed -E "s#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#gI")
+    # No trailing \.? here, unlike the content expression. On a name it eats the
+    # extension separator: sarah.md became "the frameworkmd", shipped with exit
+    # 0 because no "sarah" remained to trip the gate, and the judge got a file
+    # nothing can open.
+    nb=$(printf %s "$b" | sed -E "s#[Ss]\.?A\.?R\.?A\.?H#the framework#gI")
     [ "$nb" = "$b" ] && continue
     if [ -e "$d/$nb" ]; then
       echo "  COLLISION: $b and $nb" >> "$RENAMED"
@@ -212,14 +228,44 @@ if grep -rl -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null | grep -q .; then
   grep -rl -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null
   exit 1
 fi
+
+# Four rounds of review found four ways past this gate, each one a check that
+# skipped exactly what it was built to catch: dotted capitals only, a warning
+# that could not refuse, filenames sed never sees, binaries grep -I skips. The
+# fourth was UTF-16 - the bytes of "sarah" interleaved with NULs match no ASCII
+# pattern, so a file naming the framework in plain sight passed both the rewrite
+# and this gate.
+#
+# Enumerating encodings would be the fifth version of the same mistake. The
+# checks that never came back are the ones written by exclusion - refuse what is
+# not known-good, rather than list what is known-bad. An artefact tree from this
+# study is UTF-8 text; anything else is not cleanable by a sed expression and
+# must not be waved through because it was unreadable.
+NOTTEXT=$(mktemp)
+export DEST NOTTEXT
+find "$DEST" -type f -size +0 -exec sh -c '
+  for f do
+    grep -Iq . "$f" 2>/dev/null || echo "  ${f#"$DEST/"}" >> "$NOTTEXT"
+  done
+' sh {} +
+if [ -s "$NOTTEXT" ]; then
+  echo "REFUSING: files the sanitiser cannot read as text, so it cannot blind them:"
+  cat "$NOTTEXT"; rm -f "$NOTTEXT"
+  exit 1
+fi
+rm -f "$NOTTEXT"
 if find "$DEST" \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \) | grep -q .; then
   echo "REFUSING: a path still names the framework:"
   find "$DEST" \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \)
   exit 1
 fi
 
-# The packet survived every check. From here it is a deliverable, not a
-# work-in-progress, so stop deleting it on the way out.
+# The packet survived every check. Move it under the name judges are handed -
+# one rename, so a packet either exists complete or does not exist - and stop
+# deleting it on the way out.
+rm -rf "$FINAL"
+mv "$DEST" "$FINAL"
+DEST="$FINAL"
 trap - EXIT INT TERM
 
 # Record the mapping where judges will never see it.

@@ -7,7 +7,7 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Framework v2 on `feature/framework-v2-lean`: three review rounds, each blocking, all findings fixed; fourth round pending. Phase F study paused at 2 partial runs |
+| **Current task** | Framework v2 on `feature/framework-v2-lean`: four review rounds, each blocking, all findings fixed; fifth round pending. Phase F study paused at 2 partial runs |
 | **Task level** | 3 |
 
 ## In flight
@@ -54,6 +54,21 @@
   `docs/study/scores/`, scrubbed from a captured pytest `rootdir` line with the
   score, evidence and verdict untouched — which let the CI guard drop its only
   exclusion.
+- **Round 4, and the lesson worth keeping from all four.** Three more: UTF-16
+  content whose bytes match no ASCII pattern, an extended attribute `cp -a`
+  carried across that nothing reads, and a rename that ate the extension
+  separator — `sarah.md` became `the frameworkmd` and shipped, because no
+  "sarah" remained to trip the gate. **Four rounds, four ways past the same
+  gate, every one a check that skipped exactly what it was built to catch.** The
+  fixes that never came back are the ones written by exclusion: refuse anything
+  that is not a regular file, refuse anything not readable as text, do not
+  preserve attributes nobody inspects. The ones that kept failing enumerated
+  what to fear. Packets now build under `.building-<label>` and move into place
+  in one rename, because a trap cannot catch SIGKILL. **Residual scope, accepted
+  rather than fixed:** unicode homoglyph and zero-width filenames evade the name
+  gate. The risk here is accidental deblinding by a coding agent, not an
+  adversary, and an agent does not spontaneously name a file in mathematical
+  alphanumerics.
 - **The two study arms differed by more than the framework.** Found while
   repricing the rubric, not by any instrument. The harness gave the control
   `--setting-sources project` and the framework arm the default, which also loads
@@ -86,7 +101,7 @@ Nothing pending. Resolved on 2026-08-05:
 | Spec approved | approved | 2026-08-05 |
 | Plan approved | approved | 2026-08-05 |
 | Tests written first | n/a | Phase A ships no executable code beyond one hook, exercised across eight scenarios |
-| Review passed | **open** | 2026-08-09 — three rounds on `feature/framework-v2-lean`, each returning **changes required**: 7 findings, then 2, then 5. All fixed; the fixes from round 3 have not been reviewed. The gate does not close until a round comes back clean. Phase C remains signed off from 2026-08-06. |
+| Review passed | **open** | 2026-08-09 — four rounds on `feature/framework-v2-lean`, each returning **changes required**: 7 findings, then 2, then 5, then 3. All fixed; the fixes from round 4 have not been reviewed. The gate does not close until a round comes back clean. Phase C remains signed off from 2026-08-06. |
 | Documentation done | done | 2026-08-05 |
 
 ## Publication
