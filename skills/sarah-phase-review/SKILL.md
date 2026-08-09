@@ -57,6 +57,12 @@ Never report a self-review as a passed review. The author checking their own wor
 ## How it runs
 
 1. **Assemble what changed.** The diff, the approved plan, and the acceptance criteria. The reviewer needs the plan to detect drift from it.
+
+   **Bring the not-tested list with it.** The implement phase produces one, with
+   a reason and a compensating control for each gap. It arrives here because a
+   gap only counts as accepted once a human has seen it — an untested edge that
+   was never surfaced is not a decision, it is an omission with a paper trail.
+   If the change has no such list, that absence is the first finding.
 2. **Spawn the `code-reviewer`** in a clean context with the diff and the plan.
 3. **Spawn the `security-advisor`** in parallel when the change touches auth, secrets, input handling, personal data, or an external boundary.
 4. **Probe, do not only read.** Reviewers write throwaway scripts that call the
@@ -97,6 +103,11 @@ finding defects.
 **Pass**, or **changes required** with specific blocking items.
 
 Changes required means back to `sarah-phase-implement` for those items, then review again — the fixes get reviewed too.
+
+**Present the not-tested list to the human before the gate closes**, each entry
+with its reason and what covers it instead. They accept it, or they send an
+entry back for a test. Reporting it as reviewed without that answer defeats the
+purpose of carrying it here.
 
 On a pass, the documentation gate must also be closed before merge:
 
