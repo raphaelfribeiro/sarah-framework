@@ -7,7 +7,7 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Framework v2 on `feature/framework-v2-lean`: gate 4 passed on round six, ready to merge into `develop`. Phase F study paused at 2 partial runs |
+| **Current task** | Framework v2 merged into `develop`, unpushed. Two decisions open: what v0.1 says about the evidence, and whether to run Phase F. |
 | **Task level** | 3 |
 
 ## In flight
@@ -128,7 +128,7 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. **Merge `feature/framework-v2-lean` into `develop`.** Gate 4 passed on round six and the documentation gate is closed. Under gitflow this is a pull request into `develop`, merged by a human. Nothing is pushed yet — the repository mirrors publicly, so the first push is the publication.
+1. **Decide what v0.1 says about the evidence.** The study is inconclusive for two independent reasons now — a saturated rubric and confounded arms — and both are stated plainly in `README.md`. The options are to ship v0.1 with that as the honest result, or to run Phase F first with the fixed instruments and let it speak. Nothing is pushed, and the first push is the publication.
 2. **Resume the Phase F study** — see `docs/study/phase-f-resume.md`; the harness takes `STUDY_BASE` rather than a hardcoded path. Two runs are partial (build step only) and resume from where they stopped. Roughly $280 to finish.
 3. **Decide what an inconclusive Phase E means for v0.1.** The comparison ran, cost $280.76, and could not discriminate: the rubric saturated at 43-44 out of 44 for every artefact in both arms. Options are to ship v0.1 with the study published as the honest inconclusive result it is, or to build a discriminating rubric and re-run before releasing. This is the maintainer's call and nothing should move until it is made.
 4. **Make the framework's output to the human short.** Every skill that reports
