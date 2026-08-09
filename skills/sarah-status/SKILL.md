@@ -17,7 +17,9 @@ If `sarah/state.md` does not exist, say the project is not initialized and offer
 
 ## What to report
 
-Half a page, maximum:
+Half a page, maximum. **Use a table wherever there is more than one of anything** — gates, blockers, pending decisions. Prose describing three gates is an essay about three gates; three rows are three gates.
+
+Mark anything waiting on the user as waiting on the user, in those words. The whole value of this command is that they see the stop signs without reading for them.
 
 1. **Phase and level.** Where the work is, and at what scale.
 2. **In flight.** What is actually being worked on. "Nothing in flight" is a complete and healthy answer.

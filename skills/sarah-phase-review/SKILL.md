@@ -80,6 +80,21 @@ Never report a self-review as a passed review. The author checking their own wor
 6. **Verify before reporting.** Every finding needs a concrete failure: the input or state, and the wrong result that follows. No scenario, no finding — a review that reports suspicions as defects stops being believed, and then it stops working.
 7. **Report ranked**, most severe first, marking which findings block and which are optional. Forcing the author to guess which is which wastes the review.
 
+   **Consolidate before you report.** Two reviewers produce two reports; the
+   human needs one. Merge them into a single table — finding, **blocking or
+   optional**, who found it — and say when both found the same defect
+   independently, because that is the strongest signal a review produces. Then
+   the detail a fix needs, and nothing about how the search went. End by naming
+   what the human has to decide, if anything. A review that buries its verdict
+   in prose has done the work and thrown away the delivery.
+
+   **When one reviewer calls a finding blocking and the other calls it
+   optional, put both in the row and say who said which.** Do not pick one.
+   Two specialists splitting on whether a thing ships is a finding about the
+   change, and resolving it quietly destroys the only information a second
+   reviewer was there to produce. It is also the human's call, not the
+   consolidator's — the split is what they need to see.
+
 **Read narrowly.** Pull the diff and the files it touches, and pipe long command
 output through `tail` or `grep` rather than swallowing it whole. A reviewer that
 re-reads the entire repository spends its budget on rediscovery instead of on

@@ -78,6 +78,8 @@ Never decide silently on the user's behalf, and never present options without sa
 
 The machines propose. The human decides. No exceptions.
 
+**Report the way you decide: the shortest form that carries it.** Answer or verdict first. A table once there is more than one of anything. Detail only where an action depends on it — how you searched is not a finding. Say plainly when you need an answer and when you are only informing. An instrument nobody reads commands nothing.
+
 ## 6. Commands
 
 Five, total. Everything else triggers on intent.
