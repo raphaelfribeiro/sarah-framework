@@ -7,7 +7,7 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Framework v2 on `feature/framework-v2-lean`: five review rounds, each blocking, all findings fixed; sixth round pending. Phase F study paused at 2 partial runs |
+| **Current task** | Framework v2 on `feature/framework-v2-lean`: gate 4 passed on round six, ready to merge into `develop`. Phase F study paused at 2 partial runs |
 | **Task level** | 3 |
 
 ## In flight
@@ -116,8 +116,8 @@ Nothing pending. Resolved on 2026-08-05:
 | Spec approved | approved | 2026-08-05 |
 | Plan approved | approved | 2026-08-05 |
 | Tests written first | n/a | Phase A ships no executable code beyond one hook, exercised across eight scenarios |
-| Review passed | **open** | 2026-08-09 — five rounds on `feature/framework-v2-lean`, each returning **changes required**: 7 findings, then 2, then 5, then 3, then 1. All fixed; the fixes from round 5 have not been reviewed. Round 5 was clean on the security side, which recommended merge. The gate does not close until a round comes back clean. Phase C remains signed off from 2026-08-06. |
-| Documentation done | done | 2026-08-05 |
+| Review passed | approved | 2026-08-09 — six rounds on `feature/framework-v2-lean`, returning 7 findings, then 2, then 5, then 3, then 1, then **clean**. Both `code-reviewer` and `security-advisor` signed off on round six, each verifying by execution. Phase C remains signed off from 2026-08-06. |
+| Documentation done | done | 2026-08-09 — `README.md` corrected to state both reasons Phase E was inconclusive, changelog entry written, `ARCHI.md` unchanged because the architecture did not move: v2 changed what the gates do, not what the components are. |
 
 ## Publication
 
@@ -128,7 +128,7 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. **Re-review the fix commits on `feature/framework-v2-lean`, then merge.** Gate 4 ran and blocked; the fixes are committed on the same branch and have not themselves been reviewed. No merge until they pass. The documentation gate then needs a changelog entry for the delivery.
+1. **Merge `feature/framework-v2-lean` into `develop`.** Gate 4 passed on round six and the documentation gate is closed. Under gitflow this is a pull request into `develop`, merged by a human. Nothing is pushed yet — the repository mirrors publicly, so the first push is the publication.
 2. **Resume the Phase F study** — see `docs/study/phase-f-resume.md`; the harness takes `STUDY_BASE` rather than a hardcoded path. Two runs are partial (build step only) and resume from where they stopped. Roughly $280 to finish.
 3. **Decide what an inconclusive Phase E means for v0.1.** The comparison ran, cost $280.76, and could not discriminate: the rubric saturated at 43-44 out of 44 for every artefact in both arms. Options are to ship v0.1 with the study published as the honest inconclusive result it is, or to build a discriminating rubric and re-run before releasing. This is the maintainer's call and nothing should move until it is made.
 4. **Make the framework's output to the human short.** Every skill that reports
