@@ -83,3 +83,73 @@ Kept here rather than deleted, because a study that quietly removes its author's
 mistakes is not showing its work. The lesson generalises: my own spot checks are
 not more trustworthy than the instrumented procedure, and when they disagree the
 procedure wins unless I can show otherwise.
+
+## 2026-08-07 — quantifying the sanitizer contamination, and fixing it
+
+Independent analysis put a number on the blinding leak recorded above. The
+line-deleting sanitizer removed 7, 9 and 10 README lines from the three
+framework packets and **zero from every control packet**. It also damaged
+source: two files lost the closing clause of a comment, one lost a sentence
+subject.
+
+**Nine of the 96 unanticipated findings are damage the study inflicted**, all
+of the form "prose truncated mid-sentence" or "cross-reference to a document
+that does not exist", and all in one arm. Five more ("not a git repository")
+come from stripping `.git`. **Roughly 15% of the evidence base is instrument
+noise, perfectly correlated with one arm.**
+
+v1's scores were saturated, so the scores themselves were unaffected — but any
+analysis mining those findings must exclude them, and this study's own writeup
+had already attributed the E3 loss partly to real defects when part of it was
+self-inflicted.
+
+**Fixed:** the sanitizer now substitutes a neutral token instead of deleting
+lines, and asserts afterwards that every file's line count is unchanged from
+source. A packet whose line count moved is a packet that was damaged.
+
+## 2026-08-07 — a real defect no judge found, and the rubric that catches it
+
+`sarah-1` derives its idempotency key from an **unsigned** header while signing
+something else, which is the same replay-amplification hole judges reproduced
+live in three other packets. It scored full marks on v1's item B3.
+
+The instrument was blind to it in the artefact where it was hardest to see.
+Item S1 of [`rubric-v2.md`](rubric-v2.md) is written to catch exactly this
+class: a security property that holds today but has no mechanism preventing the
+next change from breaking it.
+
+## 2026-08-09 — the arms differed by more than the framework
+
+Found while reviewing `feature/framework-v2-lean`, not by an instrument. The
+harness gave the control `--setting-sources project` and the framework arm the
+default, which also loads **user** settings. So one arm received the maintainer's
+own `CLAUDE.md` — a language rule and a set of standing instructions unrelated to
+this study — and the other received none of it.
+
+**The comparison was framework-plus-personal-context against a bare CLI**, not
+framework against no framework. Every result in Phase E carries this, including
+the cost figures: the arm with more always-on instructions is also the arm that
+cost more and varied more.
+
+**The visible symptom:** `sarah-1` and `sarah-3` are written in Portuguese —
+README, test names, docstrings — and all three control artefacts are in English.
+The user `CLAUDE.md` says to answer in Portuguese; only one arm could see it.
+That is simultaneously a confound and a **blinding leak the sanitizer cannot
+catch**, because it strips names and paths, not languages. A judge holding six
+packets, two of them in a different language, has a signal correlated with the
+arm.
+
+Nobody reported it. Three judges per packet, eighteen score files, and an
+author's spot check all missed it, because everyone was reading for defects in
+the software rather than for differences between packets.
+
+**Fixed for Phase F:** both arms now load the same setting sources, and the
+framework reaches its arm through `--plugin-dir` alone. Both arms are told, in
+the same words, to write in English. The isolation probe still verifies that the
+framework is visible in one arm and absent in the other.
+
+**What it costs Phase E:** the comparison was already inconclusive because the
+rubric saturated. This is a second, independent reason it cannot support a claim
+in either direction, and it is the more serious of the two — a saturated
+instrument measures nothing, but a confounded one measures the wrong thing while
+looking like it worked.

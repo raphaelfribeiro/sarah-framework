@@ -118,9 +118,24 @@ tests covered none of the four scenarios. Details in
 **Attempted and inconclusive.** A controlled study was run on 2026-08-07: the
 same brief built three times with S.A.R.A.H. and three times with plain Claude
 Code, scored blind by three judges per artefact against a rubric fixed in
-advance. **The rubric saturated** — every artefact scored 43 or 44 out of 44 —
-so it could not detect a difference in either direction. That is a flaw in the
-instrument, not a verdict on the framework, and the study says so.
+advance. It failed twice over, and both failures are the author's.
+
+**The rubric saturated** — every artefact scored 43 or 44 out of 44 — so it
+could not detect a difference in either direction. **And the arms were
+confounded**: the harness ran the control with `--setting-sources project` and
+the framework arm with the default, which also loads user settings, so one arm
+received the maintainer's own `CLAUDE.md` and the other received none of it. The
+comparison was framework-plus-personal-context against a bare CLI. It went
+unnoticed through eighteen blind scores and was found on 2026-08-09, while
+reviewing something else; the visible symptom had been sitting in the artefacts
+the whole time, two of three framework-arm builds written in Portuguese and none
+of the control's.
+
+Neither failure is a verdict on the framework, and the second is the more
+serious: a saturated instrument measures nothing, but a confounded one measures
+the wrong thing while looking like it worked. Both are fixed for the next
+attempt — a rubric that can be failed, and two arms that load identical setting
+sources with the framework reaching its arm through `--plugin-dir` alone.
 
 One finding survives independently, because it does not require comparing the
 arms: on the four security requirements the brief deliberately never states —
@@ -128,9 +143,11 @@ timing-safe comparison, replay window, idempotency, raw-body signing — **plain
 Claude Code scored full marks in all three runs**. The implicit-requirement gap
 that process is often sold to close was already closed here.
 
-Two measurements are reliable regardless of the rubric: the framework cost more
-($46.28 against $29.19 median), and its cost was far less predictable — a 2.7×
-spread across its runs against 1.06× for the control.
+Two measurements are reliable regardless of the rubric, though the confound
+touches them too: the framework cost more ($46.28 against $29.19 median), and
+its cost was far less predictable — a 2.7× spread across its runs against 1.06×
+for the control. The arm that cost more is also the arm carrying more always-on
+instructions, and these runs cannot separate the two.
 
 Read [the results](docs/study/results.md), [the method](docs/study/method.md)
 committed before any run, [the incident log](docs/study/incidents.md) including

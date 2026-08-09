@@ -30,6 +30,19 @@ Most work lands here, including work that reaches here directly. A Level 0 typo 
 
 3. **Produce the test plan** in the same breath: what gets tested at which layer, and what is deliberately not tested.
 
+   **The not-tested list is the valuable half**, and it must say *why* and *what
+   covers it instead*: "constant-time comparison is not tested, because timing
+   assertions in CI measure the runner rather than the code — it is a mandatory
+   review check instead." A plan that claims everything is covered is either
+   wrong or describes a suite nobody can afford. Carry this list forward to the
+   review gate, so a human decides whether each gap is acceptable.
+
+   **Tests may not reach into production code to do their job.** If a test needs
+   to interleave execution or observe internal state, use the language's own
+   testing primitives. A hook, global, or flag added to shipped code so a test
+   can reach inside is reachable by everything else too, and the review gate now
+   rejects it.
+
 4. **Get both approved.** This gate is hard. Do not implement without an approved plan.
 
 5. **Write the failing test** (Level 2+). Run it. **Confirm it fails for the right reason** — a test that was green from the start has tested nothing, and this is the step that gets skipped.

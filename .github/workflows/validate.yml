@@ -86,3 +86,24 @@ jobs:
             exit 1
           fi
           echo "ok: no internal infrastructure referenced"
+
+      - name: No path names a developer's machine
+        run: |
+          # A hostname is not the only thing that leaks. This guard was once
+          # narrower - forge, a-private-network, .example - and three study scripts shipped a
+          # home-directory absolute past it, naming the maintainer's account and
+          # directory layout in a public repository. A review caught them; the
+          # CI that exists to catch them did not.
+          #
+          # Nothing is excluded but .git and this file. An earlier version
+          # carved out scores/ because one captured judge log held a real path;
+          # that path was scrubbed instead, leaving the score, the evidence and
+          # the verdict untouched. An exclusion is a place a leak can hide, and
+          # this guard had exactly one.
+          if grep -rnE '/home/[a-zA-Z0-9._-]+|/Users/[a-zA-Z0-9._-]+' \
+               --exclude-dir=.git \
+               --exclude=validate.yml . ; then
+            echo "::error::a home-directory path names a developer's machine"
+            exit 1
+          fi
+          echo "ok: no developer home paths"

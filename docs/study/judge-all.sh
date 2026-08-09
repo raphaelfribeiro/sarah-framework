@@ -1,7 +1,7 @@
 #!/bin/sh
 # Score all six packets, waiting out rate limits.
 set -u
-BASE=<HOME>/dev/sarah-runs/phase-e
+BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
 LOG="$BASE/logs/judging.log"
 note() { echo "$(date '+%H:%M:%S') $*" >> "$LOG"; echo "$*" > "$BASE/logs/judge-status.txt"; }
 

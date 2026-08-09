@@ -111,6 +111,18 @@ Name what is deliberately not done.
 
 These entries are what release notes are generated from. Writing them at merge time, while the work is fresh, is the only moment they are cheap.
 
+**One entry per delivery, not one per phase.** A delivery is what a user would
+notice; a phase is an internal step. Measured across three instrumented runs,
+entries written at phase boundaries restated the document the phase had just
+produced and were never opened again by anything — pure cost. Entries written
+because something *surprised* someone were the highest-value prose in those
+repositories.
+
+The test is simple: **if nothing surprising happened, there is nothing to
+record.** A phase that went exactly as planned earns a line in `sarah/state.md`
+and no entry at all. Write the entry when a defect was caught, a decision was
+reversed, an assumption broke, or something was deliberately left undone.
+
 ### Committed, the gitflow way
 
 Uncommitted work is not delivered work. It survives no crash, appears in no
