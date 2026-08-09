@@ -54,11 +54,18 @@ trap 'rm -rf "$DEST"' EXIT INT TERM
 
 # Copy everything, then remove what identifies the arm.
 #
-# Not cp -a. That is --preserve=ALL, which carries extended attributes across -
-# and an xattr naming the framework rode into a packet past every check, because
-# nothing reads xattrs and sed cannot rewrite them. Preserving mode and
-# timestamps is all a judge needs; -d keeps symlinks as symlinks so the check
-# below can still see them, instead of silently dereferencing them into copies.
+# Not cp -a. That is --preserve=ALL, which carries arbitrary extended attributes
+# across - and an xattr naming the framework rode into a packet past every
+# check, because nothing reads xattrs and sed cannot rewrite them. -d keeps
+# symlinks as symlinks so the check below can still see them, instead of
+# silently dereferencing them into copies.
+#
+# Two things this does NOT do, both verified rather than assumed. `mode` still
+# carries POSIX ACLs, so a named-user ACL would survive; nothing here sets one
+# and nothing in a coding agent's output does either, so it is accepted scope
+# rather than a closed hole. And timestamps survive only until the sed pass
+# below rewrites every non-empty text file, which resets mtime - harmless for
+# blinding, and arguably better, since every file ends up stamped alike.
 cp -dR --preserve=mode,timestamps "$SRC/." "$DEST/"
 
 # The strip is SYMMETRIC: the same paths are removed from both arms, whether or
@@ -71,9 +78,14 @@ cp -dR --preserve=mode,timestamps "$SRC/." "$DEST/"
 # docs/ goes entirely. It holds specs, ADRs, plans and design notes, which are
 # process artefacts rather than the software. README.md stays, and it is what
 # rubric item E3 is scored against.
+#
+# Directories only for the two that could plausibly name something else. A run
+# that produced a FILE called `sarah` had it deleted here without a word - the
+# strip is for the framework's state directory, not for anything that happens to
+# share its name.
+if [ -d "$DEST/sarah" ]; then rm -rf "$DEST/sarah"; fi
+if [ -d "$DEST/docs" ];  then rm -rf "$DEST/docs";  fi
 rm -rf "$DEST/.git" \
-       "$DEST/sarah" \
-       "$DEST/docs" \
        "$DEST/ARCHI.md" \
        "$DEST/CLAUDE.md" \
        "$DEST/.claude" \
@@ -139,10 +151,22 @@ rm -f "$HARDLINKS"
 # the script dies here - after the rewrite has already touched some files and
 # before the integrity check below ever runs. The safety net cannot be the thing
 # that fails first.
+# ONE expression, used on content here and on names below. It was two, briefly,
+# and they disagreed: the content version's trailing \.? ate the dot while the
+# name version kept it, so sarah.md shipped as a file called "the framework.md"
+# whose own prose pointed at "the frameworkmd". Nothing caught it - no "sarah"
+# remained for any gate to find - and that is the Phase E dangling reference
+# again, arriving through a rewrite instead of a deletion.
+#
+# The cost of dropping the trailing \.? is a leftover dot after the spelled-out
+# form: "S.A.R.A.H. is" becomes "the framework. is". Cosmetic, in one arm's
+# prose, and worth it - two expressions that must agree eventually will not.
+BLIND='s#[Ss]\.?A\.?R\.?A\.?H#the framework#gI'
+
 find "$DEST" -type f -exec grep -Iq . {} ';' -exec sed -i -E \
   -e 's#\[([^]]*)\]\((\.\./)*(docs/(specs|adr|plans|design)|ARCHI\.md|CLAUDE\.md)[^)]*\)#\1#g' \
   -e 's#(sarah/|docs/(specs|adr|plans|design)/|ARCHI\.md|CLAUDE\.md)#the project documentation#g' \
-  -e 's#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#gI' \
+  -e "$BLIND" \
   {} +
 
 # Symmetric integrity check: line counts must be unchanged from the source.
@@ -184,15 +208,11 @@ echo "  line counts intact"
 # self-inflicted "dangling reference" the Phase E sanitiser handed to judges as
 # if the artefact had produced it.
 RENAMED=$(mktemp)
-export RENAMED
+export RENAMED BLIND
 find "$DEST" -depth \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \) -exec sh -c '
   for p do
     d=$(dirname -- "$p"); b=$(basename -- "$p")
-    # No trailing \.? here, unlike the content expression. On a name it eats the
-    # extension separator: sarah.md became "the frameworkmd", shipped with exit
-    # 0 because no "sarah" remained to trip the gate, and the judge got a file
-    # nothing can open.
-    nb=$(printf %s "$b" | sed -E "s#[Ss]\.?A\.?R\.?A\.?H#the framework#gI")
+    nb=$(printf %s "$b" | sed -E "$BLIND")
     [ "$nb" = "$b" ] && continue
     if [ -e "$d/$nb" ]; then
       echo "  COLLISION: $b and $nb" >> "$RENAMED"
@@ -265,8 +285,11 @@ fi
 # deleting it on the way out.
 rm -rf "$FINAL"
 mv "$DEST" "$FINAL"
-DEST="$FINAL"
+# Disarmed before DEST is reassigned, not after. The trap resolves $DEST when it
+# fires, so a signal landing between the reassignment and the disarm would have
+# deleted the finished packet.
 trap - EXIT INT TERM
+DEST="$FINAL"
 
 # Record the mapping where judges will never see it.
 mkdir -p "$BASE/judging"

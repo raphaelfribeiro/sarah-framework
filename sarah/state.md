@@ -7,7 +7,7 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Framework v2 on `feature/framework-v2-lean`: four review rounds, each blocking, all findings fixed; fifth round pending. Phase F study paused at 2 partial runs |
+| **Current task** | Framework v2 on `feature/framework-v2-lean`: five review rounds, each blocking, all findings fixed; sixth round pending. Phase F study paused at 2 partial runs |
 | **Task level** | 3 |
 
 ## In flight
@@ -64,11 +64,26 @@
   that is not a regular file, refuse anything not readable as text, do not
   preserve attributes nobody inspects. The ones that kept failing enumerated
   what to fear. Packets now build under `.building-<label>` and move into place
-  in one rename, because a trap cannot catch SIGKILL. **Residual scope, accepted
-  rather than fixed:** unicode homoglyph and zero-width filenames evade the name
-  gate. The risk here is accidental deblinding by a coding agent, not an
-  adversary, and an agent does not spontaneously name a file in mathematical
-  alphanumerics.
+  in one rename, because a trap cannot catch SIGKILL.
+- **Round 5 blocked on a defect the new approach created.** Fixing round 4's
+  extension bug left two rewrite expressions where there had been one, and they
+  disagreed: `sarah.md` shipped as a file called `the framework.md` whose own
+  prose pointed at `the frameworkmd`. No gate caught it, because no "sarah"
+  remained to find. **That is the Phase E dangling reference again, through a
+  rewrite instead of a deletion** — and the lesson is narrower than the one
+  above: the fix was not another check, it was making divergence impossible by
+  defining the expression once. Round 5 otherwise came back clean, with the
+  security reviewer recommending merge and stating that the script is smaller
+  and more defensible than four commits earlier, because the growth is in
+  exclusion gates rather than enumerated cases.
+- **Residual scope on the packager, accepted and not fixed.** Unicode homoglyph
+  and zero-width sequences evade the name gate **and the content gate** — `ѕarah`
+  in Cyrillic, a zero-width joiner mid-word, `**s**arah` that renders as the name
+  in Markdown. POSIX ACLs survive `cp --preserve=mode`, so a named-user ACL would
+  carry a username across; nothing sets one and no agent output does. All of it
+  is adversarial evasion, and the risk this instrument actually runs is a coding
+  agent accidentally deblinding its own output. Recorded so a future round does
+  not rediscover it as new.
 - **The two study arms differed by more than the framework.** Found while
   repricing the rubric, not by any instrument. The harness gave the control
   `--setting-sources project` and the framework arm the default, which also loads
@@ -101,7 +116,7 @@ Nothing pending. Resolved on 2026-08-05:
 | Spec approved | approved | 2026-08-05 |
 | Plan approved | approved | 2026-08-05 |
 | Tests written first | n/a | Phase A ships no executable code beyond one hook, exercised across eight scenarios |
-| Review passed | **open** | 2026-08-09 — four rounds on `feature/framework-v2-lean`, each returning **changes required**: 7 findings, then 2, then 5, then 3. All fixed; the fixes from round 4 have not been reviewed. The gate does not close until a round comes back clean. Phase C remains signed off from 2026-08-06. |
+| Review passed | **open** | 2026-08-09 — five rounds on `feature/framework-v2-lean`, each returning **changes required**: 7 findings, then 2, then 5, then 3, then 1. All fixed; the fixes from round 5 have not been reviewed. Round 5 was clean on the security side, which recommended merge. The gate does not close until a round comes back clean. Phase C remains signed off from 2026-08-06. |
 | Documentation done | done | 2026-08-05 |
 
 ## Publication
