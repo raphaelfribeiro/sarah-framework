@@ -7,7 +7,7 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Framework v2 on `feature/framework-v2-lean`: gate 4 ran, seven blocking findings fixed, re-review pending; Phase F study paused at 2 partial runs |
+| **Current task** | Framework v2 on `feature/framework-v2-lean`: three review rounds, each blocking, all findings fixed; fourth round pending. Phase F study paused at 2 partial runs |
 | **Task level** | 3 |
 
 ## In flight
@@ -36,9 +36,24 @@
   open in three tracked files. Both fixed. The second round also found hardlinks
   leaking content past the symlink refusal and an unquoted `--plugin-dir`
   expansion that a demonstrated PoC used to inject a flag. **The CI guard was the
-  root cause of the path leak**: it hunted `a-git-forge|a-private-network|.example` and never
-  looked for a home directory, so it would not have caught the originals or a
-  regression. It does now. A third review round is the open item.
+  root cause of the path leak**: it hunted only for internal hosting names and
+  never looked for a home directory, so it would not have caught the originals
+  or a regression. It does now. A third review round is the open item.
+
+  Writing that sentence with the guard's own search terms in it broke CI, which
+  is the guard working exactly as intended and worth remembering before quoting
+  it again.
+- **Round 3 blocked on the same shape a third time.** Rounds 1 and 2 caught the
+  blinding check missing content; round 3 caught it missing *names* — a run that
+  produced `sarah-notes.md` shipped that filename to a judge untouched, because
+  every check read file bodies — and missing *binaries*, which `grep -I` skipped
+  in the rewrite and then skipped again in the gate. Names are now rewritten with
+  the same token as content, so in-file references still resolve; the final gate
+  reads binaries too. Also fixed: a `trap` so an unanticipated failure cannot
+  leave an unvalidated packet on disk, and the one real path leak in
+  `docs/study/scores/`, scrubbed from a captured pytest `rootdir` line with the
+  score, evidence and verdict untouched — which let the CI guard drop its only
+  exclusion.
 - **The two study arms differed by more than the framework.** Found while
   repricing the rubric, not by any instrument. The harness gave the control
   `--setting-sources project` and the framework arm the default, which also loads
@@ -71,7 +86,7 @@ Nothing pending. Resolved on 2026-08-05:
 | Spec approved | approved | 2026-08-05 |
 | Plan approved | approved | 2026-08-05 |
 | Tests written first | n/a | Phase A ships no executable code beyond one hook, exercised across eight scenarios |
-| Review passed | **open** | 2026-08-09 — gate 4 ran on `feature/framework-v2-lean` and returned **changes required**: seven blocking findings, all fixed, **re-review of the fixes not yet run**. The gate does not close until it does. Phase C remains signed off from 2026-08-06. |
+| Review passed | **open** | 2026-08-09 — three rounds on `feature/framework-v2-lean`, each returning **changes required**: 7 findings, then 2, then 5. All fixed; the fixes from round 3 have not been reviewed. The gate does not close until a round comes back clean. Phase C remains signed off from 2026-08-06. |
 | Documentation done | done | 2026-08-05 |
 
 ## Publication

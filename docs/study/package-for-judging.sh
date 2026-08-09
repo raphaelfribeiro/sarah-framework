@@ -39,6 +39,13 @@ DEST="$BASE/judging/packet-$LABEL"
 rm -rf "$DEST"
 mkdir -p "$DEST"
 
+# Every refusal below deletes the packet, but only the refusals anticipated when
+# this was written. A mktemp that cannot write, a full disk, an interrupt - any
+# of those kills the script under set -eu and leaves a half-sanitised packet on
+# disk, and nobody finding it later can tell it apart from a finished one.
+# Cleared only after the last check passes.
+trap 'rm -rf "$DEST"' EXIT INT TERM
+
 # Copy everything, then remove what identifies the arm.
 cp -a "$SRC/." "$DEST/"
 
@@ -149,6 +156,42 @@ fi
 rm -f "$MISMATCH"
 echo "  line counts intact"
 
+# Names give the arm away as surely as content does, and sed never sees them.
+# A run that produced sarah-notes.md or a sarah/ directory shipped both intact
+# through every check above, because they all read file bodies. The file tree is
+# the first thing a judge looks at.
+#
+# Renamed rather than refused: the substitution above already rewrote every
+# reference to these paths inside the files, so renaming keeps the packet
+# internally consistent. -depth renames children before their parents, or the
+# path under it moves mid-walk.
+#
+# The token is identical to the one used on content, spaces and all. A different
+# one - "the-framework" for names, "the framework" for text - leaves every
+# in-file reference pointing at a name that does not exist, which is the same
+# self-inflicted "dangling reference" the Phase E sanitiser handed to judges as
+# if the artefact had produced it.
+RENAMED=$(mktemp)
+export RENAMED
+find "$DEST" -depth \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \) -exec sh -c '
+  for p do
+    d=$(dirname -- "$p"); b=$(basename -- "$p")
+    nb=$(printf %s "$b" | sed -E "s#[Ss]\.?A\.?R\.?A\.?H\.?#the framework#gI")
+    [ "$nb" = "$b" ] && continue
+    if [ -e "$d/$nb" ]; then
+      echo "  COLLISION: $b and $nb" >> "$RENAMED"
+    else
+      mv -- "$p" "$d/$nb"
+    fi
+  done
+' sh {} +
+if [ -s "$RENAMED" ]; then
+  echo "REFUSING: renaming to blind the packet would overwrite an existing name:"
+  cat "$RENAMED"; rm -f "$RENAMED"
+  exit 1
+fi
+rm -f "$RENAMED"
+
 # This was a WARNING that exited 0, which meant a packet naming the framework in
 # plain text shipped to judges while the script reported success. Two rounds of
 # review found it, the second time as a live leak: the substitution above only
@@ -158,12 +201,26 @@ echo "  line counts intact"
 # The substitution is case-insensitive now, and this check refuses rather than
 # warns. Blinding is not optional, and a check that cannot stop the thing it
 # detects is decoration.
-if grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null | grep -q .; then
+#
+# No -I here, deliberately. The rewrite above skips binaries because running sed
+# on one is meaningless - but a binary carrying the name in plain ASCII was then
+# skipped by this check too, for the same reason, and shipped. The final gate
+# reads everything; if it finds the name in a file sed could not clean, that is
+# a packet a human has to look at, not one to wave through.
+if grep -rl -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null | grep -q .; then
   echo "REFUSING: files still name the framework - blinding is not optional:"
-  grep -rlI -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null
-  rm -rf "$DEST"
+  grep -rl -i -E 's\.a\.r\.a\.h|sarah' "$DEST" 2>/dev/null
   exit 1
 fi
+if find "$DEST" \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \) | grep -q .; then
+  echo "REFUSING: a path still names the framework:"
+  find "$DEST" \( -iname '*sarah*' -o -iname '*s.a.r.a.h*' \)
+  exit 1
+fi
+
+# The packet survived every check. From here it is a deliverable, not a
+# work-in-progress, so stop deleting it on the way out.
+trap - EXIT INT TERM
 
 # Record the mapping where judges will never see it.
 mkdir -p "$BASE/judging"
