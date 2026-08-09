@@ -88,10 +88,12 @@ Never report a self-review as a passed review. The author checking their own wor
    what the human has to decide, if anything. A review that buries its verdict
    in prose has done the work and thrown away the delivery.
 
-   **When the reviewers disagree on severity, report the disagreement**, do not
-   average it. Two specialists splitting on whether something blocks is a
-   finding about the change, and flattening it into one number destroys the only
-   information a second reviewer was there to produce.
+   **When one reviewer calls a finding blocking and the other calls it
+   optional, put both in the row and say who said which.** Do not pick one.
+   Two specialists splitting on whether a thing ships is a finding about the
+   change, and resolving it quietly destroys the only information a second
+   reviewer was there to produce. It is also the human's call, not the
+   consolidator's — the split is what they need to see.
 
 **Read narrowly.** Pull the diff and the files it touches, and pipe long command
 output through `tail` or `grep` rather than swallowing it whole. A reviewer that

@@ -7,7 +7,7 @@
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Framework v2 merged into `develop`, unpushed. Two decisions open: what v0.1 says about the evidence, and whether to run Phase F. |
+| **Current task** | Phase F armed to run unattended. Two decisions open: what v0.1 says about the evidence, and when to publish. |
 | **Task level** | 3 |
 
 ## In flight
@@ -131,13 +131,10 @@ links, and CI all reference GitHub and nothing else.
 1. **Decide what v0.1 says about the evidence.** The study is inconclusive for two independent reasons now — a saturated rubric and confounded arms — and both are stated plainly in `README.md`. The options are to ship v0.1 with that as the honest result, or to run Phase F first with the fixed instruments and let it speak. Nothing is pushed, and the first push is the publication.
 2. **Run the Phase F study.** One unattended command in `docs/study/phase-f-resume.md`; `run-phase-f.sh` chains all six runs in pair order, waits out rate limits, and resumes if interrupted. **The two 2026-08-07 partial runs cannot be resumed** — they were built before the setting-sources fix, and `sarah-1` came out in Portuguese, which is the confound itself. The orchestrator archives them. Roughly $280 from zero.
 3. **Decide what an inconclusive Phase E means for v0.1.** The comparison ran, cost $280.76, and could not discriminate: the rubric saturated at 43-44 out of 44 for every artefact in both arms. Options are to ship v0.1 with the study published as the honest inconclusive result it is, or to build a discriminating rubric and re-run before releasing. This is the maintainer's call and nothing should move until it is made.
-4. **Make the framework's output to the human short.** Every skill that reports
-   back — `ill-be-back`, `sarah-status`, the phase skills, the review gate —
-   should summarise rather than narrate: tables where a table fits, the decision
-   the human has to make stated as a decision, and what to do next. Long reports
-   are how a thirty-second instrument becomes one nobody runs. Raised by the
-   maintainer 2026-08-09 against this session's own output, which is the
-   evidence: the framework produced exactly the wall of prose it warns against.
+4. **Done 2026-08-09** — reports now have prescribed form, not just a length
+   rule. See `sarah/changelog/2026-08-09-reports-that-fit-on-a-screen.md`. The
+   finding worth keeping: the rule already existed and did not hold, because a
+   rule without a shape is exhortation.
 5. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried forward
