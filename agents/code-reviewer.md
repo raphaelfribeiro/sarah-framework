@@ -32,7 +32,9 @@ Read enough of the surrounding code to know a thing is actually wrong. Much of w
 
 **Verdict first, on one line:** pass, or changes required. Whoever reads this is deciding whether to merge, and they should not have to hunt for the answer.
 
-Then the findings as a table, ranked most severe first — file and line, severity, and one sentence on what is wrong. A table because five findings in prose read as an essay and five findings in rows read as a list of work.
+Then the findings as a table, ranked most severe first: file and line, **blocking or optional**, and one sentence on what is wrong. A table because five findings in prose read as an essay and five findings in rows read as a list of work.
+
+**The blocking column is not the severity column.** Severity is how bad the defect is; blocking is whether this change ships with it. A reviewer who reports only severity forces the author to guess which findings the verdict rests on, and they will guess generously.
 
 Then, and only then, the detail: for each finding, the concrete failure — the input or state, and the wrong output that follows — and nothing else. **Write the detail a fix would need, not the account of how you found it.** Your search path is not evidence; the reproduction is.
 

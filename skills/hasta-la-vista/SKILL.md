@@ -19,6 +19,8 @@ Distinguish **delivered** from **touched**. Code written but never run is not de
 
 What was started and not finished, what is blocked, what decisions are still waiting. Where the next session should pick up — written for someone with no memory of today, because on Monday that is exactly who reads it.
 
+A table once there is more than one open item, with what each one waits on. The person reading this is deciding where tomorrow starts, and a paragraph makes them extract the list themselves.
+
 ## 3. Update the state
 
 Rewrite `sarah/state.md`: phase, level, in flight, blocked, pending decisions, gates, and the `Next` section. Write `Next` last and write it carefully — it is what `/ill-be-back` reads tomorrow to propose the day.
