@@ -76,12 +76,16 @@ jobs:
 
       - name: Nothing references infrastructure that is not GitHub
         run: |
-          # Public artefacts point at GitHub and nothing else. This file is
-          # excluded because it necessarily contains the very terms it hunts
-          # for; keep that in mind if you ever edit the step itself.
+          # Public artefacts point at GitHub and nothing else. Two files are
+          # excluded because they necessarily contain the very terms they hunt
+          # for: this workflow, and .githooks/pre-push, which runs the same
+          # check before a push instead of after one. Keep that in mind if you
+          # ever edit either — inside those two, a real reference is invisible
+          # to this guard.
           if grep -rniE 'a-git-forge|a-private-network|\.example\b' \
                --exclude-dir=.git \
-               --exclude=validate.yml . ; then
+               --exclude=validate.yml \
+               --exclude=pre-push . ; then
             echo "::error::internal infrastructure referenced in a public artefact"
             exit 1
           fi

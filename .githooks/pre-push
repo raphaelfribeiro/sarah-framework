@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Blocks a push that would carry this repository's internal origin out of it.
+#
+# This project is mirrored, and the mirror syncs on every push, which means there is no
+# window between "it is here" and "it is on GitHub" in which to review anything. The
+# check has to happen before the push, and this is it.
+#
+# Inspects both the versioned content and the messages of the commits being pushed.
+# To let something through deliberately: ALLOW_ORIGIN=1 git push
+#
+# Install it — this file is not active until you point git at it:
+#
+#   git config core.hooksPath .githooks
+#
+# It lives in the repository rather than in .git/hooks so that it survives a clone.
+# A guard that exists on one machine protects one machine, and says nothing when it
+# is absent somewhere else.
+
+set -euo pipefail
+
+[ -n "${ALLOW_ORIGIN:-}" ] && exit 0
+
+pattern='a-git-forge|a-private-network|[A-Za-z0-9_-]+\.example([^A-Za-z0-9]|$)|ADR-[0-9]{4}'
+found=0
+
+# Two files necessarily contain the very terms this hunts for: the CI workflow that
+# runs the same check, and this hook. Excluding them is what keeps the guard from
+# firing on itself — a false positive teaches nothing except how to use ALLOW_ORIGIN.
+# The accepted risk is the one the CI workflow already accepts and documents: a real
+# reference added inside either file goes unnoticed.
+readonly EXCLUDE_CI=':(exclude).github/workflows/validate.yml'
+readonly EXCLUDE_SELF=':(exclude).githooks/pre-push'
+
+# A sha of all zeros is how git spells "does not exist": on the local side it means a
+# branch is being deleted, on the remote side it means the branch is new.
+all_zeros() { case "$1" in *[!0]*) return 1 ;; *) return 0 ;; esac; }
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+	all_zeros "$local_sha" && continue
+
+	if all_zeros "$remote_sha"; then
+		commits="$local_sha"
+	else
+		commits="${remote_sha}..${local_sha}"
+	fi
+
+	if content="$(git grep -I -n -E -i "$pattern" "$local_sha" \
+		-- "$EXCLUDE_CI" "$EXCLUDE_SELF" 2>/dev/null)"; then
+		printf '\nVersioned content revealing the origin:\n%s\n' "$content" >&2
+		found=1
+	fi
+
+	if messages="$(git log --format='%h %s' "$commits" 2>/dev/null |
+		grep -E -i "$pattern")"; then
+		printf '\nCommit messages revealing the origin:\n%s\n' "$messages" >&2
+		found=1
+	fi
+done
+
+[ "$found" = 0 ] && exit 0
+
+printf '\nPush blocked: this would be visible to anyone reading the repository on GitHub.\n' >&2
+printf 'Rewrite the text, or use ALLOW_ORIGIN=1 git push if it is deliberate.\n' >&2
+exit 1

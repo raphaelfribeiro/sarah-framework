@@ -20,6 +20,7 @@ most common bug of all.
 | Skills | `skills/<name>/SKILL.md` | YAML frontmatter with `name` and `description`; body under 500 lines |
 | Agents | `agents/<name>.md` | Frontmatter limited to fields Claude Code accepts for plugin agents |
 | Hooks | `hooks/hooks.json`, `hooks/scripts/` | POSIX `sh`, no bashisms, exit 0 on every path |
+| Git hooks | `.githooks/` | Enabled with `git config core.hooksPath .githooks`; these *do* block |
 | Templates | `templates/` | HTML-comment guidance that generation strips |
 | Manifests | `.claude-plugin/` | `claude plugin validate . --strict` passes |
 
@@ -31,6 +32,19 @@ Open it against `develop`. Never against `main`.
 claude plugin validate . --strict
 sh -n hooks/scripts/*.sh
 ```
+
+Enable the git hooks once per clone. They are not active until you do, and
+nothing reminds you:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+`.githooks/pre-push` blocks a push that would carry this repository's internal
+origin out to the public mirror. Note the distinction from `hooks/`: the hooks
+described in the table above are Claude Code sensors that never block, while
+this one exists precisely to block, because the mirror syncs on every push and
+leaves no window in which to review anything.
 
 Then confirm the documentation gate, which is not optional here:
 
