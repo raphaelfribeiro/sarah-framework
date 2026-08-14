@@ -1,13 +1,13 @@
 # S.A.R.A.H. state
 
-**Updated:** 2026-08-09
+**Updated:** 2026-08-14
 
 | | |
 | --- | --- |
 | **Phase** | 5-implement |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Current task** | Phase F armed to run unattended. Two decisions open: what v0.1 says about the evidence, and when to publish. |
+| **Current task** | Phase F running unattended since 2026-08-14. One decision open: when to publish. |
 | **Task level** | 3 |
 
 ## In flight
@@ -94,6 +94,19 @@
   the same sources and the framework reaches its arm through `--plugin-dir`
   alone, verified with the harness's own isolation probe. Recorded in
   `docs/study/incidents.md`.
+- **2026-08-10, the pre-push guard became versioned.** It lived in `.git/hooks`,
+  so it protected one machine and was silent about its own absence in any clone.
+  Now in `.githooks/`, enabled per clone with `git config core.hooksPath`, which
+  `CONTRIBUTING.md` states as a manual step because git offers no way around it.
+  Entry: `sarah/changelog/2026-08-10-versioned-pre-push-guard.md`.
+- **2026-08-14, Phase F started and is running unattended.** Six runs in pair
+  order against the fixed instruments; the two pre-fix runs from 2026-08-07 were
+  archived, not resumed. `sarah-1` passed the isolation probe with the framework
+  present. **The framework reaches its arm through a frozen worktree**
+  (`--plugin-dir` pointing at a detached checkout of `d95e7e5`), not this working
+  tree, so editing the repository during the study cannot contaminate a run.
+  Progress in the study base's `logs/orchestrator.log`; finished when
+  `logs/STUDY-COMPLETE` exists. Roughly $280 from zero.
 
 ## Blocked
 
@@ -128,9 +141,9 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. **Decide what v0.1 says about the evidence.** The study is inconclusive for two independent reasons now — a saturated rubric and confounded arms — and both are stated plainly in `README.md`. The options are to ship v0.1 with that as the honest result, or to run Phase F first with the fixed instruments and let it speak. Nothing is pushed, and the first push is the publication.
-2. **Run the Phase F study.** One unattended command in `docs/study/phase-f-resume.md`; `run-phase-f.sh` chains all six runs in pair order, waits out rate limits, and resumes if interrupted. **The two 2026-08-07 partial runs cannot be resumed** — they were built before the setting-sources fix, and `sarah-1` came out in Portuguese, which is the confound itself. The orchestrator archives them. Roughly $280 from zero.
-3. **Decide what an inconclusive Phase E means for v0.1.** The comparison ran, cost $280.76, and could not discriminate: the rubric saturated at 43-44 out of 44 for every artefact in both arms. Options are to ship v0.1 with the study published as the honest inconclusive result it is, or to build a discriminating rubric and re-run before releasing. This is the maintainer's call and nothing should move until it is made.
+1. **Decided 2026-08-14 — Phase F runs before v0.1 speaks about the evidence.** The maintainer chose to let the fixed instruments produce a result rather than ship v0.1 on a study that was inconclusive twice over, once from a saturated rubric and once from confounded arms. Both reasons remain stated in `README.md` and stay there whatever Phase F returns.
+2. **Wait out the Phase F study, then package and judge it.** Running since 2026-08-14; rerunning `run-phase-f.sh` resumes it if it stops. When `logs/STUDY-COMPLETE` exists: `package-for-judging.sh` per run, then `judge-all.sh` against `rubric-v2.md`, blind, with the label mapping outside every packet.
+3. **Then write what the study found, whichever way it lands.** A discriminating result and a second inconclusive one are both publishable; what is not publishable is a result the README does not match.
 4. **Done 2026-08-09** — reports now have prescribed form, not just a length
    rule. See `sarah/changelog/2026-08-09-reports-that-fit-on-a-screen.md`. The
    finding worth keeping: the rule already existed and did not hold, because a
