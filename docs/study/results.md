@@ -10,6 +10,11 @@ Eighteen scores. $280.76.
 **The comparison did not work, and the reason is worth more than the comparison
 would have been.**
 
+> **Superseded by Phase F.** This document records the first attempt and stays
+> for the reasoning that produced the second. The study that ran with fixed
+> instruments is [`results-phase-f.md`](results-phase-f.md), and its answer is
+> that the framework scores the same as plain Claude Code and costs 21% more.
+
 ## The instrument saturated
 
 | Packet | Arm | Three judges | Median |

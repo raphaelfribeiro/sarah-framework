@@ -96,6 +96,18 @@ The Level 0–1 row is deliberately almost empty. A documentation gate that dema
 
 **An out-of-date README is a defect**, not a chore. If a delivery changed how the project is run and the README still describes the old way, the delivery is not finished.
 
+### Releases carry one more requirement
+
+At Level 2 and above, a release does not close this gate until it can be
+**observed and reversed**: the signal that says it is working, and the documented
+way back if it is not. "It deployed successfully" is a statement about the
+deploy, not about the software.
+
+Scaled like everything else — a health check and structured logs at Level 2,
+alerts with an owner and golden-signal dashboards at Level 3, nothing new at
+Level 0-1. The rollback is written down before the deploy, because an incident
+is the worst moment to design one.
+
 ### The changelog entry
 
 Five to ten lines per delivery, in `sarah/changelog/`:

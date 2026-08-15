@@ -21,7 +21,20 @@ Half a page, maximum. **Use a table wherever there is more than one of anything*
 
 Mark anything waiting on the user as waiting on the user, in those words. The whole value of this command is that they see the stop signs without reading for them.
 
-1. **Phase and level.** Where the work is, and at what scale.
+1. **Phase and level, on the map.** Where the work is, at what scale, and what the eight steps are — so the answer is a position, not just a name. One line per step, current one marked, steps the level does not use marked as such:
+
+   ```
+     Brainstorm & architecture   done
+     Business analysis           done
+     System analysis             done
+     UI/UX design                skipped — no user-facing surface
+   > Build & QA                  HERE
+     Security                    pending — review gate
+     Documentation               pending — gate 5
+     Deploy, monitor & operate   pending
+   ```
+
+   At Level 0 and 1 this collapses to a single line: most of the map does not apply, and printing eight rows to say so is the padding this command exists to avoid.
 2. **In flight.** What is actually being worked on. "Nothing in flight" is a complete and healthy answer.
 3. **Blocked.** What cannot move, and what it waits on. Name the blocker, not just the blocked thing.
 4. **Pending decisions.** Choices waiting on the user, with how long they have waited. These are stop signs for the work behind them.

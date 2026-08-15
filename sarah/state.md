@@ -199,26 +199,37 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. **Fix the framework-use counter and recount from the logs.** It crashes on
-   events whose `message` is a string, and the empty result is read as zero —
-   which is the study's headline finding, fabricated by a dead instrument. The
-   `.jsonl` files hold everything needed to redo every count. Same fix shape as
-   the other two: it must be able to report that it did not measure, and its
-   stderr must not vanish. Then the incident entry, which is the third of the
-   day and the one that ties them together.
-2. **Decided 2026-08-14 — Phase F runs before v0.1 speaks about the evidence.** The maintainer chose to let the fixed instruments produce a result rather than ship v0.1 on a study that was inconclusive twice over, once from a saturated rubric and once from confounded arms. Both reasons remain stated in `README.md` and stay there whatever Phase F returns.
-3. **Rerun `sarah-2` from zero once the third pair finishes.** Decided
-   2026-08-14. Delete `runs/sarah-2` and `logs/sarah-2` first: its build ended
-   in error over a project already on disk, so resuming it would no longer be a
-   cold build. Roughly $12-15 and half an hour, and the study is back to three
-   matched pairs.
-4. **Wait out the Phase F study, then package and judge it.** Running since 2026-08-14; rerunning `run-phase-f.sh` resumes it if it stops. When `logs/STUDY-COMPLETE` exists: `package-for-judging.sh` per run, then `judge-all.sh` against `rubric-v2.md`, blind, with the label mapping outside every packet.
-5. **Then write what the study found, whichever way it lands.** A discriminating result and a second inconclusive one are both publishable; what is not publishable is a result the README does not match.
-6. **Done 2026-08-09** — reports now have prescribed form, not just a length
-   rule. See `sarah/changelog/2026-08-09-reports-that-fit-on-a-screen.md`. The
-   finding worth keeping: the rule already existed and did not hold, because a
-   rule without a shape is exhortation.
-7. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+**Working plan agreed 2026-08-15. Items 1-6 are one pass of documentation
+alignment; item 7 is a product decision and deliberately separate.**
+
+1. **Done 2026-08-15 — `docs/study/results-phase-f.md`.** Six runs, 18 blind scores,
+   20.7/48 against 19.7, +21% cost, the section-level pattern, and the blinding
+   check that named all three framework artefacts at 87-94%. Three attempts,
+   three times without a verdict, and this time by design rather than by
+   instrument.
+2. **Done 2026-08-15 — `docs/quality-gates.md` gained observability.** Gate 5 now includes the
+   release being observable and reversible, scaled by level.
+3. **Not applicable, checked 2026-08-15.** `ARCHI.md` describes the plugin's
+   structure, not the individual phases; adding a deliverable to an existing
+   phase moved nothing in it. Recorded rather than edited, because a documentation
+   gate satisfied by a cosmetic edit is worse than one honestly marked n/a.
+4. **Done 2026-08-15 — "How it compares" stopped saying the comparative evidence does
+   not exist.** It exists, it is ours, and it does not favour us.
+5. **Done 2026-08-15 — the Level 3 walkthrough says what a user sees today**
+   that the recorded run did not show, rather than being rewritten to claim a
+   run that never happened. The Level 1 walkthrough needs no change: it predates
+   nothing that moved.
+6. **Done 2026-08-15 — `sarah-status` prints the eight-step map with the
+   current position marked**, collapsing to one line at Levels 0-1.
+7. **Then, separately: the phase fusion.** Brainstorm, spec, architecture and
+   design-ux into one shaping phase. The change most likely to move the 21%
+   premium, and the one that must not land beside anything else - otherwise
+   nothing can be attributed.
+
+**The eight steps are documented in three places and must stay in agreement:**
+`README.md` (§The workflow), `skills/sarah-init/SKILL.md` (step 0 welcome), and
+`skills/sarah-bootstrap/SKILL.md` (the routing ladder). A change to one is a
+change to all three.
 
 ## Carried forward
 

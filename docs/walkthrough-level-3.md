@@ -23,7 +23,17 @@ surface, an error surface and a test pyramid.
 | 5 Design | `sarah-phase-design-ux` | `ux-ui-designer` |
 | 6 Implementation | `sarah-phase-implement` | `test-engineer`, `developer` |
 | 7 Review | `sarah-phase-review` | `code-reviewer`, `security-advisor` |
-| 8 Release | `sarah-phase-release` | `devops-engineer`, `release-manager` |
+| 8 Release & operate | `sarah-phase-release` | `devops-engineer`, `release-manager` |
+
+**What a user sees today that this run did not show them.** This walkthrough was
+recorded before the workflow became visible. A run started now opens with the
+eight-step map and its owners, and every routing decision announces the phase it
+is entering and the phases the level steps over. The sequence above is
+unchanged; what changed is that the user is no longer expected to infer it.
+
+Release now carries a fourth deliverable as well — the release must be
+observable and reversible at Level 2 and above — which this run predates and did
+not produce.
 
 **No prompt named a skill or an agent.** Each phase was opened with the kind of
 sentence a user actually types — *"Before we build anything, I want to think
