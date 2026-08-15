@@ -27,17 +27,33 @@ mkdir -p "$BASE/logs"
 LOG="$BASE/logs/orchestrator.log"
 say() { echo "[$(date '+%F %T')] $*" | tee -a "$LOG"; }
 
-# Anything already in runs/ predates the harness fix and cannot be resumed:
-# those builds ran with different setting sources per arm, which is the confound
-# this phase exists to avoid. Moved rather than deleted - it is evidence of the
-# confound, and the incident log refers to it.
-if [ -d "$BASE/runs" ] && [ -n "$(ls -A "$BASE/runs" 2>/dev/null)" ]; then
-  STAMP=$(date +%Y%m%d-%H%M%S)
-  mkdir -p "$BASE/archive"
-  mv "$BASE/runs" "$BASE/archive/runs-pre-fix-$STAMP"
-  [ -d "$BASE/logs" ] && cp -R "$BASE/logs" "$BASE/archive/logs-pre-fix-$STAMP" 2>/dev/null || true
-  find "$BASE/logs" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
-  say "archived pre-fix runs to archive/runs-pre-fix-$STAMP - they carry the setting-sources confound"
+# Starting the study never destroys it.
+#
+# This used to archive everything in runs/ unconditionally, because on
+# 2026-08-14 the only thing there was two pre-fix builds carrying the
+# setting-sources confound. That migration ran once and is done. The rule it
+# left behind was not "clear the confound", it was "clear whatever is here",
+# and the documented recovery step is to rerun this script - so the first
+# response to a dead orchestrator would have deleted every finished run and its
+# logs. Three runs and about $100 sat inside that window for a day.
+#
+# Resuming is now the default and the safe one: run-arm-phase-f.sh skips every
+# step that already finished, so an existing runs/ is progress, not garbage.
+# Discarding is an explicit act, spelled STUDY_ARCHIVE=1, and it still moves
+# rather than deletes.
+if [ "${STUDY_ARCHIVE:-0}" = "1" ]; then
+  if [ -d "$BASE/runs" ] && [ -n "$(ls -A "$BASE/runs" 2>/dev/null)" ]; then
+    STAMP=$(date +%Y%m%d-%H%M%S)
+    mkdir -p "$BASE/archive"
+    mv "$BASE/runs" "$BASE/archive/runs-archived-$STAMP" || {
+      say "could not archive runs/ - refusing to start over data I cannot move"; exit 2; }
+    [ -d "$BASE/logs" ] && cp -R "$BASE/logs" "$BASE/archive/logs-archived-$STAMP" 2>/dev/null || true
+    find "$BASE/logs" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} + 2>/dev/null || true
+    say "STUDY_ARCHIVE=1: moved previous runs to archive/runs-archived-$STAMP and cleared their logs"
+  fi
+elif [ -d "$BASE/runs" ] && [ -n "$(ls -A "$BASE/runs" 2>/dev/null)" ]; then
+  say "runs/ already holds work - resuming it; finished steps are skipped and nothing here is moved or deleted"
+  say "to start from nothing instead, rerun with STUDY_ARCHIVE=1"
 fi
 mkdir -p "$BASE/runs"
 

@@ -15,7 +15,21 @@ Progress goes to `$STUDY_BASE/logs/orchestrator.log`. Watch it with
 
 It is finished when `$STUDY_BASE/logs/STUDY-COMPLETE` exists. If it stops early
 for any reason, **run the same command again** — every finished step is skipped
-and it picks up where it stopped.
+and it picks up where it stopped. Nothing already in `runs/` is moved or
+deleted; resuming is the default.
+
+To start from nothing instead, say so: `STUDY_ARCHIVE=1` moves the previous
+`runs/` under `archive/` and clears the per-run logs. It is never the default,
+because the recovery step and the destroy step must not be the same command.
+
+To redo **one** run rather than all six — a run voided by a harness defect, say
+— call the arm script directly and archive that run's directory yourself first,
+so the build starts cold:
+
+    STUDY_BASE=... STUDY_BRIEF=... STUDY_PLUGIN_DIR=... \
+      sh docs/study/run-arm-phase-f.sh sarah 2
+
+Do not reach for `run-phase-f.sh` to do that.
 
 ## What it does
 
