@@ -73,17 +73,49 @@ cd "$DIR" || exit 1
 say() { echo "[$ARM-$N] $* ($(date +%H:%M:%S))"; echo "[$ARM-$N] $*" > "$STATUS"; }
 
 # --- arm isolation, verified before any work ------------------------------
+#
+# A probe that did not answer is not a verdict. On 2026-08-14 this check read
+# "You've hit your session limit" as "the framework arm cannot see the
+# framework" and killed a $12 run under the one exit code the orchestrator
+# refuses to retry. The failure was also asymmetric: an empty answer contained
+# no "sarah-bootstrap", so on the control arm the same dead probe passed as
+# proof of absence and verified nothing at all.
+#
+# So each verdict now requires its own affirmative evidence, and anything else
+# is inconclusive rather than negative:
+#
+#   framework present  -> the roster names sarah-bootstrap
+#   framework absent   -> the model said NONE
+#   anything else      -> the probe failed; exit 5 so the orchestrator retries
+#
+# Only a probe that answered and contradicts its arm is an isolation failure.
 say "checking arm isolation"
 probe=$(claude -p "List the exact names of any skills available to you whose name starts with 'sarah'. If none, reply NONE." \
-          $SETTINGS --output-format json 2>/dev/null \
+          $SETTINGS --output-format json 2>"$LOGDIR/isolation-probe.err" \
         | python3 -c "import json,sys; print(json.load(sys.stdin).get('result',''))" 2>/dev/null)
+echo "$probe" > "$LOGDIR/isolation-probe.txt"
+
+if echo "$probe" | grep -q "sarah-bootstrap"; then
+  probe_verdict=present
+elif echo "$probe" | grep -q -E '(^|[^A-Za-z])NONE([^A-Za-z]|$)'; then
+  probe_verdict=absent
+else
+  probe_verdict=inconclusive
+fi
+
+if [ "$probe_verdict" = "inconclusive" ]; then
+  say "isolation probe did not answer - not a verdict, retrying: ${probe:-<empty>}"
+  exit 5
+fi
+
 case "$ARM" in
-  sarah) echo "$probe" | grep -q "sarah-bootstrap" || { echo "ABORT: framework arm cannot see the framework: $probe"; exit 3; }
+  sarah) [ "$probe_verdict" = "present" ] || {
+           echo "ABORT: framework arm cannot see the framework: $probe"; exit 3; }
          say "isolation ok: framework present" ;;
-  plain) echo "$probe" | grep -q "sarah-bootstrap" && { echo "ABORT: control arm can see the framework: $probe"; exit 3; }
+  plain) [ "$probe_verdict" = "absent" ] || {
+           echo "ABORT: control arm can see the framework: $probe"; exit 3; }
          say "isolation ok: framework absent" ;;
 esac
-echo "$probe" > "$LOGDIR/isolation-probe.txt"
 
 # Capture the suite's state before a change, so regression is objective.
 snapshot_tests() {
