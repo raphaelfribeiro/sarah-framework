@@ -231,3 +231,52 @@ written for one situation applied to every situation. The probe could not say
 "I did not measure"; this could not say "there is nothing here to clear". Both
 were single-purpose steps that outlived their purpose while keeping their
 authority.
+
+---
+
+## 2026-08-14/15 — the counter crashed, and the crash became the finding
+
+`sarah-3` step 1 was logged as **"invoked the framework zero times - recorded as
+a finding"**. That is the single most consequential sentence this study can
+emit: it says the framework did not survive the handover to a cold session.
+
+It was not a measurement. The counter was an inline heredoc that did
+`(ev.get("message") or {}).get("content")`, and one event in four hundred — a
+`system/permission_denied` notice — carries `message` as a plain string. The
+`AttributeError` went to a stderr the harness never captured, the command
+substitution returned empty, and `[ "${used:-0}" -eq 0 ]` converted a dead
+instrument into the study's headline result.
+
+**The recount, from logs that were never at risk:**
+
+| Run | step 0 | step 1 | step 2 | step 3 |
+| --- | --- | --- | --- | --- |
+| `sarah-1` | 0 | 2 | 2 | 2 |
+| `sarah-2` | 0 | 2 | 2 | 2 |
+| `sarah-3` | 0 | **1** (was logged empty) | 1 | 1 |
+
+Step 0 counts zero by design — it carries an explicit `/sarah-init`, and a slash
+command is expanded before it becomes a tool call. Every other step in every
+framework-arm run invoked the framework at least once. **The finding was
+entirely an artefact.** Nothing else moved: every previously recorded number
+reproduced exactly.
+
+**The fix is the round-5 shape, not another check.** The expression now lives in
+`docs/study/count-framework-use.py`, used by the harness and by any later
+recount, because two copies of a rule disagree eventually — this repository has
+already paid that bill once, with a rename. The script prints a number and exits
+0, or prints nothing to stdout, explains itself on stderr and exits non-zero.
+The harness treats a failed count as `COUNT FAILED` in `framework-use.log` and
+says so out loud, and it no longer has a default that means zero.
+
+**Third of three in one day, and the pattern is now complete.** The probe could
+not say "I did not measure". The orchestrator could not say "there is nothing
+here to clear". This one could not say "I crashed". The first two cost money and
+would have cost data; this one cost a conclusion, and it is the only one that
+would have survived into a published result — the number was already in a log
+file, in the shape a reader trusts.
+
+**One thing seen in passing and not chased:** the permission_denied event that
+broke the counter shows a headless run being refused an edit outside its project
+directory. Worth understanding before the next study, and not a defect of this
+one.
