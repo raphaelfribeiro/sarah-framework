@@ -107,6 +107,17 @@
   tree, so editing the repository during the study cannot contaminate a run.
   Progress in the study base's `logs/orchestrator.log`; finished when
   `logs/STUDY-COMPLETE` exists. Roughly $280 from zero.
+- **The isolation probe killed `sarah-2`, and it was the instrument's fault.**
+  A session limit answered the probe, the check read "no `sarah-bootstrap` in
+  the answer" as "this arm cannot see the framework", and exit 3 is the one code
+  the orchestrator will not retry — $12 and 28 minutes of finished work, void.
+  The same defect passed silently on the control arm, where an empty answer
+  looks exactly like proof of absence. **Fourth instrument bug of this family,
+  and the sharpest statement of it yet: an instrument must be able to report
+  that it did not measure.** Fixed by exclusion — each verdict needs its own
+  affirmative evidence and anything else retries — installed mid-study by atomic
+  rename, so the third pair runs with it. Full account in
+  `docs/study/incidents.md`.
 
 ## Blocked
 
@@ -142,13 +153,18 @@ links, and CI all reference GitHub and nothing else.
 ## Next
 
 1. **Decided 2026-08-14 — Phase F runs before v0.1 speaks about the evidence.** The maintainer chose to let the fixed instruments produce a result rather than ship v0.1 on a study that was inconclusive twice over, once from a saturated rubric and once from confounded arms. Both reasons remain stated in `README.md` and stay there whatever Phase F returns.
-2. **Wait out the Phase F study, then package and judge it.** Running since 2026-08-14; rerunning `run-phase-f.sh` resumes it if it stops. When `logs/STUDY-COMPLETE` exists: `package-for-judging.sh` per run, then `judge-all.sh` against `rubric-v2.md`, blind, with the label mapping outside every packet.
-3. **Then write what the study found, whichever way it lands.** A discriminating result and a second inconclusive one are both publishable; what is not publishable is a result the README does not match.
-4. **Done 2026-08-09** — reports now have prescribed form, not just a length
+2. **Rerun `sarah-2` from zero once the third pair finishes.** Decided
+   2026-08-14. Delete `runs/sarah-2` and `logs/sarah-2` first: its build ended
+   in error over a project already on disk, so resuming it would no longer be a
+   cold build. Roughly $12-15 and half an hour, and the study is back to three
+   matched pairs.
+3. **Wait out the Phase F study, then package and judge it.** Running since 2026-08-14; rerunning `run-phase-f.sh` resumes it if it stops. When `logs/STUDY-COMPLETE` exists: `package-for-judging.sh` per run, then `judge-all.sh` against `rubric-v2.md`, blind, with the label mapping outside every packet.
+4. **Then write what the study found, whichever way it lands.** A discriminating result and a second inconclusive one are both publishable; what is not publishable is a result the README does not match.
+5. **Done 2026-08-09** — reports now have prescribed form, not just a length
    rule. See `sarah/changelog/2026-08-09-reports-that-fit-on-a-screen.md`. The
    finding worth keeping: the rule already existed and did not hold, because a
    rule without a shape is exhortation.
-5. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+6. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried forward
 

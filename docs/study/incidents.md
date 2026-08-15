@@ -153,3 +153,49 @@ rubric saturated. This is a second, independent reason it cannot support a claim
 in either direction, and it is the more serious of the two — a saturated
 instrument measures nothing, but a confounded one measures the wrong thing while
 looking like it worked.
+
+---
+
+## 2026-08-14 — a probe that could not answer counted as a verdict
+
+`sarah-2` died at 19:02 with `ARM ISOLATION FAILED (exit 3) - not retrying`,
+which is the one outcome the orchestrator deliberately refuses to retry, because
+arms that are not what they claim cannot be fixed by trying again. The run had
+already spent 28 minutes and $12 on a step 0 that finished.
+
+The abort line carries its own diagnosis:
+
+    ABORT: framework arm cannot see the framework: You've hit your session
+    limit · resets 8:50pm
+
+The probe asks the model to name the skills whose names start with `sarah` and
+searched the answer for `sarah-bootstrap`. A session limit is not an answer, and
+the check had no way to say so: stderr went to `/dev/null`, a failed decode
+became the empty string, and absence of the marker meant absence of the
+framework.
+
+**The same defect was asymmetric, and worse on the control arm.** An empty answer
+contains no `sarah-bootstrap`, so on `plain` the identical dead probe passed as
+proof that the framework was absent — a verification that verified nothing while
+logging that it had. The recorded probes show both controls answered `NONE` for
+real, so the door was open and never walked through. That is luck, not design.
+
+**The fix is by exclusion, which is the shape that has held here before.** Each
+verdict now needs its own affirmative evidence: `present` requires the roster to
+name `sarah-bootstrap`, `absent` requires the model to say `NONE`, and anything
+else is inconclusive and exits 5 so the orchestrator waits and retries. Only a
+probe that answered and contradicts its arm still aborts. Verified against six
+inputs including the exact text above and the three probes already on disk.
+
+**This is the fourth instrument bug of the same family**, after the sanitizer
+that deleted lines, the rate-limited step that counted as complete, and the
+framework-use check that counted tool calls. Every one of them read a failure of
+the instrument as a measurement. The lesson has a sharper form now: **an
+instrument must be able to report that it did not measure.** A check with only
+two outcomes will eventually assign one of them to its own failure.
+
+**What it costs Phase F:** `sarah-2` is void and will be rerun from zero once the
+third pair finishes, with the corrected probe. The fix was installed mid-study by
+atomic rename, so `sarah-3` and `plain-3` run with it. It changes how a failed
+probe is handled and touches nothing that is measured — no prompt, no arm
+setting, and nothing inside the plugin.
