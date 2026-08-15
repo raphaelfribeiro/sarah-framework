@@ -74,9 +74,31 @@ was skipped for the size of the work.
 | Documentation | Gate 5, every phase | all | State, architecture and changelog current, or it is not done |
 | Deploy, monitor & operate | `release` | devops-engineer, release-manager | CI/CD pipeline, version, release notes, observability and rollback |
 
-**Nothing is skipped silently.** A typo does not go through business analysis —
-that is the point of scale levels — but the framework says which steps it
-skipped and why, every time.
+**You choose the route.** At Level 2 and above, work opens with the itinerary:
+all eight steps, in or out, why each call was made *for this request*, and what
+each one costs you in time. Change any row and it changes.
+
+```
+Level 2 · itinerary for: webhook retry limit
+
+  step             | why here                        | cost
+  -----------------|---------------------------------|------
+  [ ] Brainstorm   | problem already stated          | ~10min
+  [x] Business an. | no acceptance criteria yet      | ~10min
+  [x] System an.   | crosses a data boundary         | ~15min
+  [ ] UI/UX        | no user-facing surface          | ~20min
+  [x] Build & QA   | always                          | —
+  [x] Security     | untrusted input from outside    | ~10min
+  [x] Docs         | gate 5                          | ~5min
+  [x] Deploy       | goes to production              | ~10min
+
+→ enter to proceed · "add ux" · "drop system analysis" · "why?" for the trade-offs
+```
+
+**Nothing is skipped silently, and nothing is forced.** Drop a step and it is
+recorded, not argued with — the one exception is documentation, because gate 5
+is what makes the next session possible. A typo fix gets no table at all; eight
+rows to justify a rename is the ceremony this framework exists to prevent.
 
 ## Quickstart
 

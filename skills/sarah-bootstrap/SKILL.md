@@ -49,7 +49,9 @@ Load the phase skill. It brings its own specialists. **Never load the full roste
 | 6. Review | `sarah-phase-review` | Code Reviewer, Security Advisor |
 | 7. Release & operate | `sarah-phase-release` | DevOps Engineer, Release Manager |
 
-**Say where you are entering and what you are stepping over.** One line before the work: the phase you are routing to, and any earlier phase the level skips, named. Skipping is correct at low levels; skipping silently leaves the user unable to object to it.
+**At Level 2 and above, propose the itinerary and let the user set it.** Read `references/itinerary.md` and present all eight steps as a table: in or out, the reason *from this request* rather than from the level, and the cost in the user's time. Then stop and let them answer. The level proposes; the user disposes, including dropping a step you marked in — record the choice in `sarah/state.md` and do not argue. Documentation is the one row that cannot be dropped.
+
+At Level 0 and 1, skip the table. Announce the route in one line, naming any step stepped over. Eight rows to justify a typo fix is the ceremony this framework exists to prevent.
 
 Two requests do not belong on this ladder at all:
 

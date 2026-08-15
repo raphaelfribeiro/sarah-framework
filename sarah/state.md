@@ -221,10 +221,24 @@ alignment; item 7 is a product decision and deliberately separate.**
    nothing that moved.
 6. **Done 2026-08-15 — `sarah-status` prints the eight-step map with the
    current position marked**, collapsing to one line at Levels 0-1.
-7. **Then, separately: the phase fusion.** Brainstorm, spec, architecture and
-   design-ux into one shaping phase. The change most likely to move the 21%
-   premium, and the one that must not land beside anything else - otherwise
-   nothing can be attributed.
+7. **Superseded 2026-08-15 — the phase fusion is off.** The maintainer chose the
+   better answer: instead of the framework merging four phases for everyone
+   forever, **the user picks the itinerary per request**. Same cost saving for
+   whoever wants it, no capability removed from anyone, and it follows the
+   principle the framework already sells. At Level 2+ work opens with all eight
+   steps as a table - in or out, the reason drawn from *this request*, the cost
+   in the user's time - and any row can be overruled. Dropping is recorded, not
+   argued with; documentation is the one row that cannot be dropped. Criteria in
+   `skills/sarah-bootstrap/references/itinerary.md`, loaded only when the table is
+   built, so the session budget carries the instruction and not the reasoning.
+   `sarah-bootstrap` now sits at ~1,822 tokens against 2,000.
+8. **Open, and newly named: S.A.R.A.H. has no answer for a sprint.** The state
+   model is single-track by construction - one `sarah/state.md`, one **Current
+   task**, one phase - and that file is versioned and rewritten continuously (31
+   commits so far). Two features in parallel means two divergent state files and
+   a merge conflict on every branch, which is a defect today and not only under
+   a sprint. Nothing in the framework describes more than one task in flight.
+   Decide before v1.
 
 **The eight steps are documented in three places and must stay in agreement:**
 `README.md` (§The workflow), `skills/sarah-init/SKILL.md` (step 0 welcome), and

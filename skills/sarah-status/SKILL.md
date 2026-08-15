@@ -35,6 +35,8 @@ Mark anything waiting on the user as waiting on the user, in those words. The wh
    ```
 
    At Level 0 and 1 this collapses to a single line: most of the map does not apply, and printing eight rows to say so is the padding this command exists to avoid.
+
+   **A step the user dropped is shown as dropped, with who dropped it** — `skipped by you` reads differently from `skipped — no user-facing surface`, and the difference is the whole point of having asked.
 2. **In flight.** What is actually being worked on. "Nothing in flight" is a complete and healthy answer.
 3. **Blocked.** What cannot move, and what it waits on. Name the blocker, not just the blocked thing.
 4. **Pending decisions.** Choices waiting on the user, with how long they have waited. These are stop signs for the work behind them.
