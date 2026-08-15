@@ -129,6 +129,21 @@
   rather than deletes. Verified in a sandbox, both paths. Nothing was lost -
   the orchestrator never died, so the fix landed by inspection rather than after
   a post-mortem.
+- **A third instance of the same defect, found at 23:00 and NOT yet fixed — and
+  this one fabricates the study's headline finding.** `sarah-3` step 1 was
+  logged as "invoked the framework zero times - recorded as a finding", which is
+  exactly the measurement Phase F exists to take. The counter did not measure
+  zero: it **crashed**. Its `framework-use.log` line is empty where `sarah-1`
+  reads `2`, and running the same Python over the same file raises
+  `AttributeError: 'str' object has no attribute 'get'` — some events carry
+  `message` as a string. The traceback goes to a stderr nobody captures, `used`
+  comes back empty, and `[ "${used:-0}" -eq 0 ]` turns a dead instrument into
+  the finding that the framework did not survive a cold session.
+  **Nothing is lost:** the raw `.jsonl` is on disk, so every count can be redone
+  once the counter is fixed. `sarah-1` measured 2, 2, 2 for steps 1-3, so the
+  failure is intermittent and content-dependent, not universal. First thing
+  tomorrow: fix the counter, recount every step from the logs, and write the
+  incident. Do not read any zero in `framework-use.log` as a finding until then.
 - **The `sarah-2` rerun is armed and unattended.** `phase-f/rerun-sarah-2.sh`
   waits for `plain-3`, waits for the orchestrator to exit so it does not compete
   for the session quota, archives the void run rather than deleting it, and
@@ -169,19 +184,26 @@ links, and CI all reference GitHub and nothing else.
 
 ## Next
 
-1. **Decided 2026-08-14 — Phase F runs before v0.1 speaks about the evidence.** The maintainer chose to let the fixed instruments produce a result rather than ship v0.1 on a study that was inconclusive twice over, once from a saturated rubric and once from confounded arms. Both reasons remain stated in `README.md` and stay there whatever Phase F returns.
-2. **Rerun `sarah-2` from zero once the third pair finishes.** Decided
+1. **Fix the framework-use counter and recount from the logs.** It crashes on
+   events whose `message` is a string, and the empty result is read as zero —
+   which is the study's headline finding, fabricated by a dead instrument. The
+   `.jsonl` files hold everything needed to redo every count. Same fix shape as
+   the other two: it must be able to report that it did not measure, and its
+   stderr must not vanish. Then the incident entry, which is the third of the
+   day and the one that ties them together.
+2. **Decided 2026-08-14 — Phase F runs before v0.1 speaks about the evidence.** The maintainer chose to let the fixed instruments produce a result rather than ship v0.1 on a study that was inconclusive twice over, once from a saturated rubric and once from confounded arms. Both reasons remain stated in `README.md` and stay there whatever Phase F returns.
+3. **Rerun `sarah-2` from zero once the third pair finishes.** Decided
    2026-08-14. Delete `runs/sarah-2` and `logs/sarah-2` first: its build ended
    in error over a project already on disk, so resuming it would no longer be a
    cold build. Roughly $12-15 and half an hour, and the study is back to three
    matched pairs.
-3. **Wait out the Phase F study, then package and judge it.** Running since 2026-08-14; rerunning `run-phase-f.sh` resumes it if it stops. When `logs/STUDY-COMPLETE` exists: `package-for-judging.sh` per run, then `judge-all.sh` against `rubric-v2.md`, blind, with the label mapping outside every packet.
-4. **Then write what the study found, whichever way it lands.** A discriminating result and a second inconclusive one are both publishable; what is not publishable is a result the README does not match.
-5. **Done 2026-08-09** — reports now have prescribed form, not just a length
+4. **Wait out the Phase F study, then package and judge it.** Running since 2026-08-14; rerunning `run-phase-f.sh` resumes it if it stops. When `logs/STUDY-COMPLETE` exists: `package-for-judging.sh` per run, then `judge-all.sh` against `rubric-v2.md`, blind, with the label mapping outside every packet.
+5. **Then write what the study found, whichever way it lands.** A discriminating result and a second inconclusive one are both publishable; what is not publishable is a result the README does not match.
+6. **Done 2026-08-09** — reports now have prescribed form, not just a length
    rule. See `sarah/changelog/2026-08-09-reports-that-fit-on-a-screen.md`. The
    finding worth keeping: the rule already existed and did not hold, because a
    rule without a shape is exhortation.
-6. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
+7. Then v0.1: decide whether to push. The repository is public and mirrors automatically, so the first push is the publication.
 
 ## Carried forward
 
