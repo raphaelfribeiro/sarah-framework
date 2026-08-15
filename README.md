@@ -216,7 +216,8 @@ its cost was far less predictable — a 2.7× spread across its runs against 1.0
 for the control. The arm that cost more is also the arm carrying more always-on
 instructions, and these runs cannot separate the two.
 
-Read [the results](docs/study/results.md), [the method](docs/study/method.md)
+Read [the Phase F results](docs/study/results-phase-f.md), [the first
+attempt](docs/study/results.md), [the method](docs/study/method.md)
 committed before any run, [the incident log](docs/study/incidents.md) including
 two errors of the author's own, and [the raw scores](docs/study/scores/).
 
@@ -229,8 +230,10 @@ demonstrated results.
 
 ## How it compares
 
-Honest positioning, with the caveat that the comparative evidence above does not
-exist yet for any of these — including S.A.R.A.H.
+Honest positioning. None of these projects has published a controlled comparison
+against working without them. S.A.R.A.H. now has one, and it does not favour
+S.A.R.A.H.: same scores as plain Claude Code, 21% more cost. Read that as the
+standard the others have not yet been held to, not as a point in our favour.
 
 | | Scope | Runs on | Process weight |
 | --- | --- | --- | --- |
@@ -238,7 +241,7 @@ exist yet for any of these — including S.A.R.A.H.
 | [**GitHub Spec Kit**](https://github.com/github/spec-kit) | Spec-driven: spec → plan → tasks → implement → review | 30+ agents | Spec-first on every change |
 | [**OpenSpec**](https://github.com/Fission-AI/OpenSpec) | Lightweight SDD: propose → apply → archive, with a living spec | 30+ agents | Light, spec-centred |
 | [**Superpowers**](https://github.com/obra/superpowers) | Composable skills: TDD, systematic debugging, subagent review | Many harnesses, including Claude Code | Disciplined: red-green-refactor enforced |
-| **S.A.R.A.H.** | Phase pipeline with per-phase specialists and five gates | Claude Code only | Adaptive: levels 0–3 decide how much process applies |
+| **S.A.R.A.H.** | Eight-step lifecycle with per-step specialists, five gates, and observability at the end | Claude Code only | Adaptive: levels 0–3 decide how much process applies |
 
 <sub>Checked against each project's own documentation on 2026-08-06. These
 projects move; if something here is out of date or unfair,
