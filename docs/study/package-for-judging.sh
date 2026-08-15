@@ -93,6 +93,27 @@ rm -rf "$DEST/.git" \
        "$DEST/.pytest_cache" \
        "$DEST/.coverage" 2>/dev/null || true
 
+# Judges read text, so a packet holds text.
+#
+# The list above enumerates build caches by name, and the names it does not know
+# walk straight through: __pycache__ at any depth, .mypy_cache, a venv without
+# the dot. That is not a hypothetical - every one of the six Phase F packets was
+# REFUSED by the final gate over .pyc files, and the gate was right. A .pyc
+# embeds the absolute path it was compiled from, and that path contains the run
+# directory, which names the arm. The blinding leak was real and the enumeration
+# was what let it in.
+#
+# So: anything not readable as text is removed, whatever it is called. Empty
+# files are kept, because an empty __init__.py is load-bearing and carries
+# nothing. What was removed is written outside the packet and reported, because
+# a silent strip reads as "there was nothing there".
+NONTEXT_LIST="$BASE/judging/removed-nontext-$LABEL.txt"
+: > "$NONTEXT_LIST"
+find "$DEST" -type f -size +0 ! -exec grep -Iq . {} ';' -print -delete \
+  | sed "s#^$DEST/##" >> "$NONTEXT_LIST" 2>/dev/null || true
+find "$DEST" -type d -empty -delete 2>/dev/null || true
+NONTEXT_COUNT=$(wc -l < "$NONTEXT_LIST" | tr -d ' ')
+
 # Neutralise references to stripped paths WITHOUT deleting lines.
 #
 # The previous version deleted any line naming a stripped path. Only the
@@ -297,3 +318,4 @@ echo "$LABEL=$ARM-$N" >> "$BASE/judging/KEY-DO-NOT-SHOW-JUDGES.txt"
 
 echo "packet $LABEL built from $ARM-$N"
 find "$DEST" -type f | wc -l | sed 's/^/  files: /'
+echo "  non-text files removed: ${NONTEXT_COUNT:-0} (listed in judging/removed-nontext-$LABEL.txt)"

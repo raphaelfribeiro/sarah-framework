@@ -129,21 +129,36 @@
   rather than deletes. Verified in a sandbox, both paths. Nothing was lost -
   the orchestrator never died, so the fix landed by inspection rather than after
   a post-mortem.
-- **A third instance of the same defect, found at 23:00 and NOT yet fixed — and
-  this one fabricates the study's headline finding.** `sarah-3` step 1 was
-  logged as "invoked the framework zero times - recorded as a finding", which is
-  exactly the measurement Phase F exists to take. The counter did not measure
-  zero: it **crashed**. Its `framework-use.log` line is empty where `sarah-1`
-  reads `2`, and running the same Python over the same file raises
-  `AttributeError: 'str' object has no attribute 'get'` — some events carry
-  `message` as a string. The traceback goes to a stderr nobody captures, `used`
-  comes back empty, and `[ "${used:-0}" -eq 0 ]` turns a dead instrument into
-  the finding that the framework did not survive a cold session.
-  **Nothing is lost:** the raw `.jsonl` is on disk, so every count can be redone
-  once the counter is fixed. `sarah-1` measured 2, 2, 2 for steps 1-3, so the
-  failure is intermittent and content-dependent, not universal. First thing
-  tomorrow: fix the counter, recount every step from the logs, and write the
-  incident. Do not read any zero in `framework-use.log` as a finding until then.
+- **2026-08-15, the three-instrument day closed.** The framework-use counter
+  crashed on the one event whose `message` is a string, and `${used:-0}` turned
+  the crash into "sarah-3 step 1 invoked the framework zero times - recorded as
+  a finding". **Recounted from logs that were never at risk: it is 1, not zero.**
+  Every framework-arm step outside step 0 invoked the framework (2/2/2, 2/2/2,
+  1/1/1), step 0 counts zero by design because a slash command is expanded
+  before it can become a tool call, and every previously recorded number
+  reproduced exactly. The finding is withdrawn. The expression now lives once in
+  `docs/study/count-framework-use.py`, shared by the harness and any recount; a
+  failed count is `COUNT FAILED`, never a number. Original logs kept beside the
+  recount as evidence.
+- **2026-08-15, the study finished and the framework answered for it.** Six runs
+  judged blind, 18 scores: framework 20.7/48 against 19.7 for plain Claude Code,
+  at 21% more cost. The rubric discriminated (35-50%, against 43-44 out of 44 in
+  Phase E), and the blinding did not hold - a separate reader named all three
+  framework artefacts at 87-94% confidence from the scars left by stripping
+  their process documents. **Three attempts, three times without a verdict, and
+  this time for a design reason rather than an instrument one.** Total US$ 308.63.
+- **The README now says all of that**, including that S.A.R.A.H. does not make
+  Claude write better code on a well-specified brief. Added: who it is for, who
+  it is not for, and the eight-step map with owners.
+- **The audit the maintainer asked for found four real gaps, all closed.**
+  `test-engineer` was invoked by no skill; observability and rollback existed
+  nowhere; no welcome or map was ever shown; gates were numbered in the README
+  and unnamed in the phases that enforce them. A fifth suspected gap was a false
+  positive - the decision protocol lives in `sarah-bootstrap` and reaches every
+  phase from there.
+- **Phase F finished: six of six runs, US$ 187.31.** `sarah-2` was rerun from
+  zero after the probe defect and matches `sarah-1` step for step. Packaging and
+  judging are the remaining work.
 - **The `sarah-2` rerun is armed and unattended.** `phase-f/rerun-sarah-2.sh`
   waits for `plain-3`, waits for the orchestrator to exit so it does not compete
   for the session quota, archives the void run rather than deleting it, and

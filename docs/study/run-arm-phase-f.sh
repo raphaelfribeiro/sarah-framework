@@ -180,21 +180,17 @@ run_step() {
   # through nothing is a control run wearing the wrong label, and it would be
   # scored as treatment with nothing in the output looking wrong.
   if [ "$ARM" = "sarah" ]; then
-    used=$(python3 - "$out" <<'PYEOF'
-import json,sys
-n=0
-for line in open(sys.argv[1],errors="replace"):
-    try: ev=json.loads(line)
-    except: continue
-    c=(ev.get("message") or {}).get("content")
-    if isinstance(c,list):
-        for b in c:
-            if isinstance(b,dict) and b.get("type")=="tool_use" and b.get("name") in ("Skill","Agent","Task"):
-                n+=1
-print(n)
-PYEOF
-)
-    echo "step $n framework invocations: $used" >> "$LOGDIR/framework-use.log"
+    # One expression, in one file, shared with any later recount. The heredoc
+    # this replaces crashed on the single event whose `message` is a string and
+    # handed back an empty result that ${used:-0} read as a measured zero.
+    if used=$(python3 "$HERE/count-framework-use.py" "$out" 2>>"$LOGDIR/count-errors.log") \
+       && [ -n "$used" ]; then
+      echo "step $n framework invocations: $used" >> "$LOGDIR/framework-use.log"
+    else
+      used=""
+      echo "step $n framework invocations: COUNT FAILED - see count-errors.log" >> "$LOGDIR/framework-use.log"
+      say "step $n: the framework-use count FAILED - this is not a zero and must not be read as one"
+    fi
     # Step 0 is judged by ARTEFACTS ON DISK, not by tool calls. It carries an
     # explicit /sarah-init, and the harness expands a slash command before it
     # ever becomes a Skill tool_use - so counting tool calls reports zero for a
@@ -211,8 +207,13 @@ PYEOF
         say "step 0 produced no sarah/state.md - the framework never initialised, run is void"
         exit 4
       fi
-      say "step 0 ok: framework initialised on disk ($used tool invocations)"
-    elif [ "${used:-0}" -eq 0 ]; then
+      say "step 0 ok: framework initialised on disk (${used:-uncounted} tool invocations)"
+    elif [ -z "$used" ]; then
+      # Deliberately silent about findings here: the count did not happen, and
+      # the previous version's habit of defaulting to zero is exactly what
+      # turned a dead instrument into the study's headline result.
+      :
+    elif [ "$used" -eq 0 ]; then
       say "step $n invoked the framework zero times - recorded as a finding"
     fi
   fi

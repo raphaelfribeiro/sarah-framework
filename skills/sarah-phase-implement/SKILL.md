@@ -43,15 +43,19 @@ Most work lands here, including work that reaches here directly. A Level 0 typo 
    can reach inside is reachable by everything else too, and the review gate now
    rejects it.
 
-4. **Get both approved.** This gate is hard. Do not implement without an approved plan.
+4. **Gate 2 — get both approved.** This gate is hard. Do not implement without an approved plan.
 
-5. **Write the failing test** (Level 2+). Run it. **Confirm it fails for the right reason** — a test that was green from the start has tested nothing, and this is the step that gets skipped.
+5. **Spawn the `test-engineer`** to write the failing test (Level 2+), then run it. **Confirm it fails for the right reason** — a test that was green from the start has tested nothing, and this is the step that gets skipped.
+
+   QA is a specialist's job and it has one: the `test-engineer` plans coverage across the pyramid and writes the tests. Leaving the test to whoever happens to be holding the keyboard is how the suite ends up shaped like the code instead of like the requirement.
 
 6. **Spawn the `developer`** to implement against the failing test.
 
 7. **Run everything.** Report actual output, including failures.
 
-## The test-first gate
+8. **Say where the work now stands.** One line before handing back: the phase just finished, the phase that comes next, and any step the scale level skipped, named. A user who is not told what was skipped cannot object to it.
+
+## Gate 3 — the test-first gate
 
 At Level 2 and above: **no production code without a failing test first.** Wrote the code before the test? Delete it and start over.
 

@@ -1,15 +1,35 @@
 ---
 name: sarah-phase-release
-description: Cut a release - propose a CI/CD pipeline if the project has none, determine the semantic version, write release notes from the changelog, and tag. Use when the user says "release it", "ship it", "cut a version", "tag it", "deploy", "set up CI", "how do we deploy this", or when reviewed work is ready to go out. Delivers the pipeline, the notes, and the version without being asked for each.
+description: Cut a release and put it under watch - propose a CI/CD pipeline if the project has none, determine the semantic version, write release notes from the changelog, tag, and define how the release is observed and rolled back. Use when the user says "release it", "ship it", "cut a version", "tag it", "deploy", "set up CI", "how do we deploy this", "how do we monitor this", "is it healthy", "add logging or metrics", "set up alerts", or when reviewed work is ready to go out. Delivers the pipeline, the notes, the version, and the observability without being asked for each.
 ---
 
-# Phase 7 — Release
+# Phase 7 — Release and operate
 
-This phase delivers three things by default. The user should never have to remember to ask for any of them.
+This phase delivers four things by default. The user should never have to remember to ask for any of them.
 
 1. **A CI/CD pipeline**, proposed as options, when the project does not already have one.
 2. **Release notes**, generated from `sarah/changelog/`.
 3. **A version and a tag**, following semantic versioning.
+4. **A way to know whether it is working**, and a way back if it is not.
+
+## Observability — the fourth deliverable
+
+Shipping is not the end of the lifecycle. A release nobody can observe is a release nobody can operate, and "it deployed successfully" is not the same claim as "it works".
+
+Spawn the `devops-engineer` for this, proportional to the level. It is a proposal with options and a recommendation, like every other real decision here.
+
+| Level | What ships with the release |
+| --- | --- |
+| **0-1** | Nothing new. The existing logs are the answer. |
+| **2** | Health check, structured logs for the paths that can fail, and the one number that says the system is doing its job. |
+| **3** | The above, plus alerts with an owner and a threshold, and a dashboard for the golden signals: traffic, errors, latency, saturation. |
+
+Two rules that hold at every level:
+
+- **An alert nobody acts on is noise, and noise trains people to ignore alerts.** Every alert names what a human should do when it fires. If there is no action, it is a metric, not an alert.
+- **Define the rollback before the deploy, not during the incident.** State the command, who can run it, and what data does not come back.
+
+`sarah-hotfix` handles the emergency. This is what makes the emergency visible in the first place.
 
 ## When this phase applies
 
@@ -45,6 +65,7 @@ Spawn the `release-manager` with the entries in `sarah/changelog/`.
 Nothing is tagged with an open item:
 
 - Every delivery in this release has an entry in `sarah/changelog/`.
+- The release can be observed and rolled back, at the level the project is at.
 - The version follows from the changes.
 - `README.md` reflects anything user-visible.
 - `ARCHI.md` reflects any architectural change.
@@ -57,8 +78,9 @@ Nothing is tagged with an open item:
 - Deploy from a developer's machine as the normal path.
 - Skip tests to get a release out. If that is the call, it is the human's, made explicitly.
 - Push or publish anything without being asked. Publication is a decision, not a step.
+- Call a deploy done because it succeeded. Done is when somebody can tell it is working.
 
-## Exit gate
+## Gate 5 — documented, committed, released
 
 Released, tagged, and `sarah/state.md` updated to reflect the new version and an empty runway — all of it committed, and the release branch merged the way the project's branching model prescribes.
 

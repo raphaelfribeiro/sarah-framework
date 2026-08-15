@@ -2,6 +2,7 @@
 # Score all six packets, waiting out rate limits.
 set -u
 BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
+HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 LOG="$BASE/logs/judging.log"
 note() { echo "$(date '+%H:%M:%S') $*" >> "$LOG"; echo "$*" > "$BASE/logs/judge-status.txt"; }
 
@@ -21,9 +22,16 @@ for label in A B C D E F; do
   while [ "$attempt" -lt 8 ]; do
     attempt=$((attempt+1))
     note "packet $label (attempt $attempt)"
-    if sh "$BASE/judge.sh" "$label" >> "$LOG" 2>&1; then note "packet $label done"; break; fi
+    if sh "$HERE/judge.sh" "$label" >> "$LOG" 2>&1; then note "packet $label done"; break; fi
     wait_for_quota || { note "quota gone"; exit 1; }
   done
 done
-note "JUDGING COMPLETE"
-echo done > "$BASE/logs/JUDGING-COMPLETE"
+# Completion is counted, not assumed. Six packets, three judges each.
+HAVE=$(find "$BASE/judging/scores" -name 'packet-*-judge-*.json' ! -name '*.raw' -size +0 2>/dev/null | wc -l)
+if [ "$HAVE" -eq 18 ]; then
+  note "JUDGING COMPLETE: 18 of 18 scores"
+  echo done > "$BASE/logs/JUDGING-COMPLETE"
+else
+  note "JUDGING INCOMPLETE: $HAVE of 18 scores - rerun to resume, finished scores are skipped"
+  exit 1
+fi

@@ -47,7 +47,9 @@ Load the phase skill. It brings its own specialists. **Never load the full roste
 | 4. Design / UX | `sarah-phase-design-ux` | UX/UI Designer |
 | 5. Implementation | `sarah-phase-implement` | Developer, Test Engineer |
 | 6. Review | `sarah-phase-review` | Code Reviewer, Security Advisor |
-| 7. Release | `sarah-phase-release` | DevOps Engineer, Release Manager |
+| 7. Release & operate | `sarah-phase-release` | DevOps Engineer, Release Manager |
+
+**Say where you are entering and what you are stepping over.** One line before the work: the phase you are routing to, and any earlier phase the level skips, named. Skipping is correct at low levels; skipping silently leaves the user unable to object to it.
 
 Two requests do not belong on this ladder at all:
 
