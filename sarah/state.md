@@ -118,6 +118,23 @@
   affirmative evidence and anything else retries — installed mid-study by atomic
   rename, so the third pair runs with it. Full account in
   `docs/study/incidents.md`.
+- **The documented recovery step would have deleted the study.**
+  `run-phase-f.sh` archived everything in `runs/` and deleted the per-run logs
+  on every start — right for the one-off migration it was written for, and
+  `phase-f-resume.md` told the operator to rerun exactly that command whenever
+  the orchestrator stopped early. Three finished runs and ~$100 sat behind it
+  for a day. **Same shape as the probe, twice in one day: a single-purpose step
+  that outlived its purpose while keeping its authority.** Resuming is now the
+  default and moves nothing; discarding is `STUDY_ARCHIVE=1` and still moves
+  rather than deletes. Verified in a sandbox, both paths. Nothing was lost -
+  the orchestrator never died, so the fix landed by inspection rather than after
+  a post-mortem.
+- **The `sarah-2` rerun is armed and unattended.** `phase-f/rerun-sarah-2.sh`
+  waits for `plain-3`, waits for the orchestrator to exit so it does not compete
+  for the session quota, archives the void run rather than deleting it, and
+  reruns `sarah-2` from zero with the same rate-limit handling. It calls the arm
+  script directly and never the orchestrator, for the reason above. Log in
+  `logs/rerun-sarah-2.log`.
 
 ## Blocked
 

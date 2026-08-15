@@ -199,3 +199,35 @@ third pair finishes, with the corrected probe. The fix was installed mid-study b
 atomic rename, so `sarah-3` and `plain-3` run with it. It changes how a failed
 probe is handled and touches nothing that is measured — no prompt, no arm
 setting, and nothing inside the plugin.
+
+---
+
+## 2026-08-14 — the recovery step and the destroy step were the same command
+
+`run-phase-f.sh` opened by archiving everything in `runs/` and deleting the
+per-run log directories. That was written for one situation: on 2026-08-14 the
+only thing in `runs/` was two builds carrying the setting-sources confound,
+which genuinely could not be resumed. The migration ran once and was correct.
+
+The rule it left behind was not "clear the confound" but "clear whatever is
+here" — and `phase-f-resume.md` told the operator that the response to an
+orchestrator that stopped early is to **run the same command again**. By the
+evening of 2026-08-14 that meant three finished runs and about $100 of work sat
+behind an instruction that would have deleted them, and the logs with them.
+
+Nothing was lost. The orchestrator never died, so the documented recovery was
+never needed, and the one rerun that was needed went through the arm script
+directly. The window was open for a day and closed by inspection rather than by
+consequence.
+
+**Fixed:** resuming is the default and moves nothing; discarding is
+`STUDY_ARCHIVE=1`, still by move and never by delete. Verified in a sandbox with
+a stubbed arm script: a normal rerun leaves a seeded run untouched and skips it,
+and the explicit flag relocates it under `archive/` intact. The resume document
+now also shows how to redo a single run without going near the orchestrator.
+
+**The shape, for the fourth time in this study and the second today:** a step
+written for one situation applied to every situation. The probe could not say
+"I did not measure"; this could not say "there is nothing here to clear". Both
+were single-purpose steps that outlived their purpose while keeping their
+authority.
