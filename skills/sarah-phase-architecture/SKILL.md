@@ -49,7 +49,7 @@ Every layer of indirection is paid on every future change. When the architect pr
 
 - ADRs written for the decisions that matter.
 - `ARCHI.md` updated: structure, boundaries, invariants, decisions table.
-- `sarah/state.md` updated.
+- The task's file in `sarah/state/` updated.
 - **All three committed on the feature branch.** A decision nobody can find in the history will be relitigated by whoever comes next.
 
 A commit, not a changelog entry. The changelog records deliveries and surprises,

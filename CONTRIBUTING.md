@@ -48,7 +48,7 @@ leaves no window in which to review anything.
 
 Then confirm the documentation gate, which is not optional here:
 
-- `sarah/state.md` is current.
+- `sarah/state.md` and the task's file in `sarah/state/` are current.
 - `ARCHI.md` is updated if the architecture moved.
 - `README.md` is updated if anything user-visible changed.
 - There is an entry in `sarah/changelog/` for the delivery.
@@ -124,7 +124,7 @@ differently than intended. "The agent did the wrong thing" is hard to act on;
 ## What gets a pull request rejected
 
 - Adding a sixth command without removing one.
-- A change that leaves `sarah/state.md` or `ARCHI.md` describing a system that
+- A change that leaves `sarah/state.md`, a task file, or `ARCHI.md` describing a system that
   no longer exists.
 - A hook that can break a session.
 - Growing `sarah-bootstrap` past its budget.

@@ -25,7 +25,7 @@ Two gates hold, and two relax:
 | Plan approved | Holds. The mini-plan is approved before code is written |
 | Test first | Relaxed. Tests afterwards are acceptable **if the user chooses that** |
 | Review before merge | Holds. The author never reviews |
-| Documented and committed | `sarah/state.md` updated, work committed. Nothing else |
+| Documented and committed | Task state updated, work committed. Nothing else |
 
 The documentation row is deliberately almost empty. A documentation gate that
 demands paperwork for a typo is a gate everyone learns to skip.

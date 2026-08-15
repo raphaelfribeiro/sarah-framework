@@ -75,7 +75,7 @@ Code written, tests passing, and the actual test output shown to the user — no
 
 Then **the documentation gate**, proportional to the level:
 
-- **Level 0–1:** `sarah/state.md` updated. That is all.
+- **Level 0–1:** the task's file in `sarah/state/` updated. That is all.
 - **Level 2+:** also `ARCHI.md` if anything architectural moved, `README.md` if anything user-visible changed, and a short entry in `sarah/changelog/`:
 
 ```markdown
