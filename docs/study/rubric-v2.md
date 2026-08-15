@@ -34,7 +34,16 @@ Three rules that v1 lacked, and whose absence is why it saturated:
 3. **Do not grade on effort.** More code, more commands and more configuration
    are costs. Section P scores them as costs.
 
-**Total: 56 points across 28 items.**
+**Total: 48 points across 24 items** — H 3, R 3, S 4, X 3, P 4, M 4, O 3, every
+item worth 2.
+
+This line read "56 points across 28 items" until 2026-08-15, and no such
+instrument was ever written: the sections below have always summed to 48. The
+paragraph under it describes a revision that added four scored security
+properties, and S1-S4 are those items, so the arithmetic was carried from a
+draft rather than counted from the document. Scoring against a total the
+instrument does not have would have skewed every percentage in the report.
+Counted, not remembered.
 
 Revised 2026-08-07 after calibration against a deliberately mediocre artefact,
 which scored 8/48 on the original draft — inside the 8-12 target band, so the
@@ -44,7 +53,10 @@ all; four core security properties were gated rather than scored and therefore
 worth zero points; four items awarded full marks for *absence of surface* rather
 than quality, which a do-nothing artefact could max; and one false README claim
 could fire in three sections at once. On the revised instrument the same
-artefact lands at **2-4/56**.
+artefact lands at **2-4** out of the instrument's 48. The figures in this
+paragraph are the calibration as it was recorded, against a document that
+misstated its own total; the floor it established stands, the denominator it
+was written with did not exist.
 
 ## What changed from v1, and why
 

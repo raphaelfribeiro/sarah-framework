@@ -20,14 +20,20 @@ set -eu
 LABEL="${1:?usage: judge.sh <packet-label>}"
 
 BASE="${STUDY_BASE:?set STUDY_BASE to the study run directory}"
+HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 PACKET="$BASE/judging/packet-$LABEL"
-RUBRIC="$BASE/rubric.md"
+RUBRIC="${STUDY_RUBRIC:-$HERE/rubric-v2.md}"
 OUT="$BASE/judging/scores"
 
 [ -d "$PACKET" ] || { echo "no packet: $PACKET"; exit 1; }
 mkdir -p "$OUT"
 
-RUBRIC_TEXT=$(cat "$RUBRIC")
+# The rubric file is the instrument AND its derivation, and the derivation names
+# runs, names the framework, and announces that six artefacts are compared. The
+# judge gets the extract that can identify none of that, and the generator
+# refuses rather than emit a leaky one.
+RUBRIC_TEXT=$(python3 "$HERE/make-judge-rubric.py" "$RUBRIC" 2>/dev/null) || {
+  echo "could not build the judge-facing rubric from $RUBRIC - refusing to judge"; exit 2; }
 
 n=1
 while [ "$n" -le 3 ]; do
@@ -57,8 +63,9 @@ Rules you must follow:
 - Every score above 0 needs evidence: a file and line, or a command you ran and
   what it printed. If you did not verify it, it scores 0. An item you believe is
   probably fine but did not check is a 0, not a 1.
-- Actually run the test suite. Report what it printed. If you cannot get it to
-  run, that is a finding and D1 scores 0.
+- Actually run the test suite and report what it printed. Several items are
+  scored on what the suite demonstrates, and an unrun suite demonstrates
+  nothing.
 - Do not credit intent. A comment saying something is handled is not the thing
   being handled.
 - If you find a real defect the rubric does not cover, record it in
@@ -66,15 +73,19 @@ Rules you must follow:
 
 Reply with ONLY a JSON object, no prose around it, in exactly this shape:
 
-{\"scores\": {\"A1\": 0, \"A2\": 0, \"A3\": 0, \"A4\": 0, \"A5\": 0, \"A6\": 0,
- \"B1\": 0, \"B2\": 0, \"B3\": 0, \"B4\": 0, \"B5\": 0,
- \"C1\": 0, \"C2\": 0, \"C3\": 0, \"C4\": 0,
- \"D1\": 0, \"D2\": 0, \"D3\": 0, \"D4\": 0,
- \"E1\": 0, \"E2\": 0, \"E3\": 0},
- \"evidence\": {\"A1\": \"file:line or command output\"},
+{\"scores\": {\"H1\": 0, \"H2\": 0, \"H3\": 0,
+ \"R1\": 0, \"R2\": 0, \"R3\": 0,
+ \"S1\": 0, \"S2\": 0, \"S3\": 0, \"S4\": 0,
+ \"X1\": 0, \"X2\": 0, \"X3\": 0,
+ \"P1\": 0, \"P2\": 0, \"P3\": 0, \"P4\": 0,
+ \"M1\": 0, \"M2\": 0, \"M3\": 0, \"M4\": 0,
+ \"O1\": 0, \"O2\": 0, \"O3\": 0},
+ \"evidence\": {\"H1\": \"file:line or command output\"},
  \"test_output\": \"what the suite actually printed\",
  \"unanticipated_findings\": [\"...\"],
- \"total\": 0}" \
+ \"total\": 0}
+
+Every item is 0, 1 or 2, and the maximum total is 48." \
     --setting-sources project \
     --allowedTools "Read,Glob,Grep,Bash" \
     --output-format json \
