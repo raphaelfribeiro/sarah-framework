@@ -23,7 +23,11 @@ A table once there is more than one open item, with what each one waits on. The 
 
 ## 3. Update the state
 
-Rewrite `sarah/state.md`: phase, level, in flight, blocked, pending decisions, gates, and the `Next` section. Write `Next` last and write it carefully — it is what `/ill-be-back` reads tomorrow to propose the day.
+Rewrite the **task file** for each task touched today — `sarah/state/<slug>.md`: phase, in flight, blocked, pending decisions, gates, and the `Next` section. Write `Next` last and write it carefully — it is what `/ill-be-back` reads tomorrow to propose the day.
+
+Then update `sarah/state.md`, the index: one row per task, and the `Waiting on` column current. The index is what a reader sees first, and a stale `Waiting on` sends them to the wrong task.
+
+**A task that shipped loses its file.** Delete `sarah/state/<slug>.md` and drop its row from the index — the changelog entry is the permanent record. A directory of finished task files is a graveyard that makes the index harder to read every week.
 
 If something delivered today, add an entry to `sarah/changelog/`:
 

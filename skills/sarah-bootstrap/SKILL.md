@@ -13,8 +13,11 @@ This skill runs before the work, not instead of it. It costs a few hundred token
 
 Read, in this order, and read **only** these:
 
-1. `sarah/state.md` — current phase, scale level, open gates, pending decisions.
-2. `ARCHI.md` — the architecture map, sections relevant to the request.
+1. `sarah/state.md` — the index: what is in flight, and what each piece waits on.
+2. `sarah/state/<slug>.md` for the task this request belongs to, if one exists. **Only that one.** Reading every task file is how a five-task project starts costing five times as much to orient.
+3. `ARCHI.md` — the architecture map, sections relevant to the request.
+
+New work gets a new task file, named after its branch, from `references/task-template.md`. One task, one file, one branch — which is why two people working in parallel no longer collide in a single state file.
 
 Never read a full spec, PRD, or architecture document as a routine step. If a routine step needs more than roughly 30k tokens of input, it is the wrong step — narrow it.
 

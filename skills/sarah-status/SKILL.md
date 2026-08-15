@@ -11,7 +11,9 @@ This command answers one question — *where does the work stand?* — and it an
 
 ## What to read
 
-`sarah/state.md`, and nothing else. Do not read `ARCHI.md`, do not scan the codebase, do not run the test suite. Those cost tokens and time to answer a question the state file already answers.
+`sarah/state.md` — the index — and, only when the user asks about one task in particular, that task's file in `sarah/state/`. Nothing else: not `ARCHI.md`, not the codebase, not the test suite. Those cost tokens and time to answer a question the index already answers.
+
+**With several tasks in flight, the index is the answer.** One row each, and the `Waiting on` column read out loud. Opening every task file to produce a fuller report is how a thirty-second command becomes a five-minute one nobody runs.
 
 If `sarah/state.md` does not exist, say the project is not initialized and offer `/sarah-init`. One line.
 

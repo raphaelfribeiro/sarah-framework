@@ -116,7 +116,7 @@ routes itself.
 
 ## How it works
 
-Every request passes through `sarah-bootstrap`, which reads `sarah/state.md` and
+Every request passes through `sarah-bootstrap`, which reads the state index, the file of the task it belongs to, and
 the relevant parts of `ARCHI.md`, sizes the work, and loads exactly one phase
 skill — which loads only its own specialists.
 

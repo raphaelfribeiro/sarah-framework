@@ -11,7 +11,8 @@ Four blocks, under a page, ending in a decision that is theirs to make.
 
 ## What to read
 
-- `sarah/state.md` — the current picture.
+- `sarah/state.md` — the index: every task in flight and what each waits on.
+- The task files in `sarah/state/` for the tasks that are actually moving — not all of them. A task nobody has touched in a week needs one line in the report, not a full read.
 - The most recent one or two files in `sarah/changelog/` — what actually shipped.
 - `git log --oneline -10` and `git status --short` — what really happened, which sometimes differs from what the state file says.
 
@@ -21,7 +22,7 @@ Nothing else. This is a briefing, not an audit. Reading the codebase to prepare 
 
 **1. Last session.** What was delivered, in two or three lines, from the changelog and the state file. Concrete: what changed, not "progress was made".
 
-**2. Where things stand.** Phase, level, and what is in flight. One line.
+**2. Where things stand.** One line per task in flight: phase, level, and what it waits on. **A task waiting on the user for days is the report's headline**, not a row buried under the others — and with more than about five in flight, say that too, because too much in flight is itself the finding.
 
 **3. Open and blocked.** Pending decisions with how long they have waited, blockers with what they wait on, and gates still open. If a decision has been pending for days, say how many — an aging decision is usually the real bottleneck, and nobody notices without the number.
 

@@ -74,8 +74,18 @@ every plugin update, so nothing durable may be written there.
 | File | Lives in | Holds | Lifetime |
 | --- | --- | --- | --- |
 | `ARCHI.md` | User project root | Curated architecture memory | Permanent, hand-maintained |
-| `sarah/state.md` | User project | Phase, level, gates, pending decisions | Rewritten continuously |
+| `sarah/state.md` | User project | The index: what is in flight, what each task waits on | Rewritten continuously |
+| `sarah/state/<slug>.md` | User project | One task: itinerary, phase, gates, decisions, next | Created when work starts, deleted when it ships |
 | `sarah/changelog/` | User project | One short record per delivery | Append-only; feeds release notes |
+
+**State is per task, not per repository.** It used to be one file holding one
+`Current task`, versioned and rewritten continuously, which meant two branches
+produced two divergent copies and a conflict at every merge. Each task now owns
+a file named after its branch, so branches never touch each other's state. The
+index carries only what is in flight and what each piece waits on, and a task
+file is deleted when the work ships — the changelog is the permanent record, and
+a directory of finished task files is a graveyard that makes the index worse
+every week.
 
 `ARCHI.md` carries a size contract: a hard ceiling of 10% of the context window,
 with `/sarah-compact` measuring and compacting it. The ceiling exists because an

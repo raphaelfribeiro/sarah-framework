@@ -89,8 +89,8 @@ Documentation here is not a favour to a future reader. `ARCHI.md` is what the ne
 
 | Level | Required before the merge gate closes |
 | --- | --- |
-| **0–1** | `sarah/state.md` updated. Nothing else. |
-| **2–3** | `sarah/state.md`, plus: `ARCHI.md` if anything architectural moved; `README.md` if anything user-visible changed — how to run it, the stack, the features; and a short entry in `sarah/changelog/`. |
+| **0–1** | The task's file in `sarah/state/` updated. Nothing else. |
+| **2–3** | The task's file in `sarah/state/` and the index row in `sarah/state.md`, plus: `ARCHI.md` if anything architectural moved; `README.md` if anything user-visible changed — how to run it, the stack, the features; and a short entry in `sarah/changelog/`. |
 
 The Level 0–1 row is deliberately almost empty. A documentation gate that demands paperwork for a typo teaches everyone to route around the gate, and then it is not there when it matters.
 
@@ -131,7 +131,7 @@ because something *surprised* someone were the highest-value prose in those
 repositories.
 
 The test is simple: **if nothing surprising happened, there is nothing to
-record.** A phase that went exactly as planned earns a line in `sarah/state.md`
+record.** A phase that went exactly as planned earns a line in its task file
 and no entry at all. Write the entry when a defect was caught, a decision was
 reversed, an assumption broke, or something was deliberately left undone.
 

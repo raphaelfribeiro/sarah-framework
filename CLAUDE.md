@@ -93,7 +93,7 @@ claude plugin validate . --strict
 sh -n hooks/scripts/*.sh
 ```
 
-Then confirm the documentation gate: `sarah/state.md` current, `ARCHI.md`
+Then confirm the documentation gate: `sarah/state.md` and the task file current, `ARCHI.md`
 updated if the architecture moved, `README.md` updated if anything user-visible
 changed, and an entry in `sarah/changelog/` for the delivery.
 

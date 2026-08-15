@@ -82,6 +82,6 @@ Nothing is tagged with an open item:
 
 ## Gate 5 — documented, committed, released
 
-Released, tagged, and `sarah/state.md` updated to reflect the new version and an empty runway — all of it committed, and the release branch merged the way the project's branching model prescribes.
+Released, tagged, and the task's file in `sarah/state/` updated to reflect the new version and an empty runway — all of it committed, and the release branch merged the way the project's branching model prescribes.
 
 If a tracker MCP is connected, offer to move the related cards or close the issues — as an option. If none is connected, the subject never comes up.
