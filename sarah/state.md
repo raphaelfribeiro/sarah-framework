@@ -140,6 +140,22 @@
   `docs/study/count-framework-use.py`, shared by the harness and any recount; a
   failed count is `COUNT FAILED`, never a number. Original logs kept beside the
   recount as evidence.
+- **2026-08-15, the study finished and the framework answered for it.** Six runs
+  judged blind, 18 scores: framework 20.7/48 against 19.7 for plain Claude Code,
+  at 21% more cost. The rubric discriminated (35-50%, against 43-44 out of 44 in
+  Phase E), and the blinding did not hold - a separate reader named all three
+  framework artefacts at 87-94% confidence from the scars left by stripping
+  their process documents. **Three attempts, three times without a verdict, and
+  this time for a design reason rather than an instrument one.** Total US$ 308.63.
+- **The README now says all of that**, including that S.A.R.A.H. does not make
+  Claude write better code on a well-specified brief. Added: who it is for, who
+  it is not for, and the eight-step map with owners.
+- **The audit the maintainer asked for found four real gaps, all closed.**
+  `test-engineer` was invoked by no skill; observability and rollback existed
+  nowhere; no welcome or map was ever shown; gates were numbered in the README
+  and unnamed in the phases that enforce them. A fifth suspected gap was a false
+  positive - the decision protocol lives in `sarah-bootstrap` and reaches every
+  phase from there.
 - **Phase F finished: six of six runs, US$ 187.31.** `sarah-2` was rerun from
   zero after the probe defect and matches `sarah-1` step for step. Packaging and
   judging are the remaining work.

@@ -92,7 +92,13 @@ Every item is 0, 1 or 2, and the maximum total is 48." \
     > "$dest.raw" 2>&1 || echo "  judge $n exited non-zero, keeping partial output"
 
   # The result field holds the model's reply; pull the JSON object out of it.
-  python3 - "$dest.raw" "$dest" <<'PY' || echo "  could not parse judge $n output"
+  # A judge that produced no score has not scored. The previous version printed
+  # "could not parse" and carried on with exit 0, so judge-all.sh recorded
+  # JUDGING COMPLETE over five missing scores - one whole packet unjudged and a
+  # second short by two - and never once waited for the quota it was being
+  # refused by. Exit 5 instead: that is the code the caller already knows how to
+  # wait out and retry, and every finished score is skipped on the way back in.
+  python3 - "$dest.raw" "$dest" <<'PY' || { echo "  judge $n produced no score - not counting it as one"; rm -f "$dest"; exit 5; }
 import json, re, sys
 raw = open(sys.argv[1], errors="replace").read()
 try:

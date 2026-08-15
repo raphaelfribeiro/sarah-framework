@@ -17,32 +17,66 @@ letting the workflow become a project of its own.
 ---
 
 > [!WARNING]
-> **v0.1 is not released.** The pipeline is built and has been exercised end to
-> end, but the comparative study that would justify the claims below is not
-> done. See [Evidence](#evidence) for exactly what has and has not been
-> measured.
+> **v0.1 is not released.** The comparative study has now run three times. It
+> does not show that S.A.R.A.H. produces better software than plain Claude Code.
+> [Evidence](#evidence) has the numbers, including the ones that argue against
+> us.
 
-## Why S.A.R.A.H.?
+## What it does
 
-Unsupervised AI ships fast and breaks everything. S.A.R.A.H. exists so the
-machines never run the mission — you do.
+Claude Code writes the code. S.A.R.A.H. decides what gets checked before it
+reaches your repository, and hands you the decisions worth making.
 
-Five commitments, held together:
+- **Catches what the brief never said.** Security, limits, and scope are checked
+  because the process checks them, not because someone remembered.
+- **Remembers between sessions.** Tomorrow's session opens knowing what today's
+  decided, without you re-explaining it.
+- **Stops before merge.** A reviewer that never saw the code written looks for
+  what the author could not see.
+- **Shrinks to fit.** A typo gets none of this. A new product gets all of it.
+- **Leaves the calls to you.** Real choices arrive as options with trade-offs
+  and a recommendation. You decide; the machines never run the mission.
 
-1. **Specialist expertise, on demand.** The full team exists — architecture,
-   UX, security, DevOps, QA — but only the current phase's specialists enter
-   context. Having the roster is not the same as activating it.
-2. **Scale that actually adapts.** A typo reaches code in minutes. A new product
-   goes through the whole pipeline. The process depth *and* the number of active
-   agents follow the size of the work.
-3. **Decisions taught, not made for you.** Every real choice arrives as two or
-   three options with honest trade-offs and a justified recommendation. You
-   decide. You come away understanding why.
-4. **A workflow that disappears.** Skills fire on intent. There are five
-   commands, and that ceiling is hard.
-5. **Brownfield without ceremony.** Existing projects work in delta-specs
-   anchored to a curated architecture memory, never a monolithic upfront rewrite
-   of documentation nobody asked for.
+## Who it's for
+
+| Use it when | Skip it when |
+| --- | --- |
+| The work spans several sessions | One session, one file, one answer |
+| Nobody will read every line the model writes | You review everything yourself anyway |
+| The brief is silent on security, limits and scope | Requirements are complete and explicit |
+| Somebody else inherits the code | Throwaway scripts and spikes |
+| Getting it wrong is expensive | Getting it wrong costs a retry |
+
+## What it is not
+
+**It does not make Claude write better code.** We tested that and published the
+numbers below: on a well-specified brief, plain Claude Code scores the same and
+costs about 20% less. If your requirements are complete and you read every diff,
+you do not need this.
+
+What it buys is coverage of what nobody specified, and continuity across
+sessions. Pay for it when you need it.
+
+## The workflow
+
+Every step of the software lifecycle has an owner here. You see the map on day
+one, and at every handover you are told where you are, what comes next, and what
+was skipped for the size of the work.
+
+| Step | Phase | Specialist | Delivers |
+| --- | --- | --- | --- |
+| Brainstorm & architecture | `brainstorm` → `architecture` | product-analyst, software-architect | Scope options, stack, boundaries, decision records |
+| Business analysis | `spec` | product-manager | Requirements with acceptance criteria and a cut line |
+| System analysis | `architecture` | software-architect | Data ownership, failure behaviour, contracts |
+| UI/UX design | `design-ux` | ux-ui-designer | Flows and every screen state, including empty and error |
+| Build & QA | `implement` | developer, test-engineer | Failing test first, then the code |
+| Security | `architecture` + `review` | security-advisor | Auth, secrets, input trust, data exposure |
+| Documentation | Gate 5, every phase | all | State, architecture and changelog current, or it is not done |
+| Deploy, monitor & operate | `release` | devops-engineer, release-manager | CI/CD pipeline, version, release notes, observability and rollback |
+
+**Nothing is skipped silently.** A typo does not go through business analysis —
+that is the point of scale levels — but the framework says which steps it
+skipped and why, every time.
 
 ## Quickstart
 
@@ -115,7 +149,40 @@ wrote outside the notes directory, and the reviewers noted that the 147 passing
 tests covered none of the four scenarios. Details in
 [the Level 3 walkthrough](docs/walkthrough-level-3.md).
 
-**Attempted and inconclusive.** A controlled study was run on 2026-08-07: the
+**The comparison, third attempt, 2026-08-15.** Same brief, six builds — three
+with S.A.R.A.H., three with plain Claude Code — then three changes each in cold
+sessions, scored blind by three judges per artefact against a 24-item rubric
+built to be failable. US$ 308.63.
+
+| | S.A.R.A.H. | Plain Claude Code |
+| --- | --- | --- |
+| Score (median of 3 judges, out of 48) | **20.7** | 19.7 |
+| Range across runs | 17 – 24 | 17 – 22 |
+| Cost per build | **$34.13** | $28.30 |
+| Security items | **2.6** | 1.0 |
+| Restraint — no unrequested surface | **3.2** | 2.0 |
+| Resource behaviour | 2.6 | **3.6** |
+| Documentation that executes | 3.9 | **4.9** |
+| Maintainability | 3.6 | **4.4** |
+
+**Read it honestly.** One point out of 48 is not a difference — the arms overlap
+almost entirely, and the worst run in the study is a tie between them. The
+framework costs 21% more. The section-level pattern is the only interesting
+thing here: it wins where the brief is silent and loses where the work is
+direct, which is what a checklist should do and no proof that it did.
+
+**And the blinding leaked.** A separate reader, asked after scoring, identified
+all three framework artefacts with 87–94% confidence, citing the scars left by
+stripping the process documents out of them. Two of three controls were correctly
+called. So even the one-point difference is not a blind measurement. This is a
+design problem, not a bug: a framework that produces process documents which the
+code then references cannot be hidden by rewriting text.
+
+Three attempts, three times without a verdict. The instrument now discriminates
+— scores spread 35% to 50%, against 43–44 out of 44 in the attempt below — and
+that is the part we would defend.
+
+**Earlier attempt, inconclusive, 2026-08-07.** A controlled study was run: the
 same brief built three times with S.A.R.A.H. and three times with plain Claude
 Code, scored blind by three judges per artefact against a rubric fixed in
 advance. It failed twice over, and both failures are the author's.

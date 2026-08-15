@@ -9,7 +9,33 @@ Be prepared. Judgment Day is a deploy on Friday.
 
 This runs once per project. It ends with three files on disk and a user who knows what they are for. It is an interview, not a form: ask, offer options, let the user decide, then draft.
 
-## Step 0 — Refuse to clobber
+## Step 0 — Show them the mission before asking them to sign up for it
+
+Before any question, before reading anything, print the welcome and the map. A user who does not know the shape of the workflow cannot tell when it skipped a step, and a process nobody can audit is a process nobody should trust.
+
+Keep it to this — a greeting, the map, the two rules that govern it:
+
+> **S.A.R.A.H.** — Skills, Agents, Reviews & Adaptive Hierarchy.
+> Claude Code writes the code. You command the mission.
+>
+> Every step below has an owner. You will be told at each handover where you are, what comes next, and what was skipped.
+>
+> | Step | Owner | Delivers |
+> | --- | --- | --- |
+> | Brainstorm & architecture | product-analyst, software-architect | Scope options, stack, boundaries |
+> | Business analysis | product-manager | Requirements, acceptance criteria, cut line |
+> | System analysis | software-architect | Data ownership, failure behaviour, contracts |
+> | UI/UX design | ux-ui-designer | Flows and every screen state |
+> | Build & QA | developer, test-engineer | Failing test first, then the code |
+> | Security | security-advisor | Auth, secrets, input trust, data exposure |
+> | Documentation | every phase, gate 5 | Current state, architecture, changelog |
+> | Deploy, monitor & operate | devops-engineer, release-manager | Pipeline, version, observability, rollback |
+>
+> **Two rules.** The process shrinks to the size of the work — a typo does not get business analysis, and you will be told when a step is skipped and why. And every real decision is yours: options with trade-offs, a recommendation, your call.
+
+Then say which parts of it this project will actually use, once you know its scale level in step 2. Do not present all eight steps as mandatory for a Level 0 repository.
+
+## Step 0.5 — Refuse to clobber
 
 If `sarah/state.md` already exists, this project is initialized. Do not overwrite it. Report the current phase and level, and offer three choices: leave it alone, refresh `ARCHI.md` against the current codebase, or start over from scratch with the old files backed up. Wait for the answer.
 

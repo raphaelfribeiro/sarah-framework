@@ -113,7 +113,7 @@ finding defects.
   exists only so a test can reach inside is a defect in the delivery: it is
   reachable at runtime by anything, not just the test. Say so and send it back.
 
-## Exit gate
+## Gate 4 — review passed
 
 **Pass**, or **changes required** with specific blocking items.
 

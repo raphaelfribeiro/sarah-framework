@@ -45,7 +45,7 @@ Never demand a specification of the whole existing system. That is the mistake t
 - Let the spec drift into design. What, not how. The architect decides how.
 - Pass a spec forward with open questions buried inside it as assumptions.
 
-## Exit gate
+## Gate 1 — spec approved
 
 **The user approves the spec.** This gate is hard: nothing is architected until it closes.
 
