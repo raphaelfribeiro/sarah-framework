@@ -113,6 +113,13 @@ they do not cost another:
   `refs/pull/*` refs still holding pre-rewrite objects stayed on the origin and
   did not travel, confirmed by inspecting what actually arrived. That closes a
   question that was going to cost a repository rebuild to answer by guesswork.
+- **How the mirror is wired**, because the next person to touch it will need it
+  and it lives in a settings page nobody reads: it syncs **on push**, with an
+  eight-hour interval as the fallback, and a manual sync can be triggered
+  through the origin's API. It was rebuilt on 2026-08-16 to turn the on-push
+  sync back on — the replacement had it off, which would have put an eight-hour
+  window between a push and its publication and quietly falsified both
+  `docs/operating.md` and the premise the pre-push hook is built on.
 - **A brand-new mirror target does not fire its own release.** The first sync
   pushed every ref at once and the public side registered a workflow run for the
   default branch only — no run for `develop`, none for the tag. Deleting the tag
