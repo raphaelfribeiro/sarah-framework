@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# Blocks a push that would carry this repository's private origin out of it.
+#
+# This project is mirrored, and the mirror syncs on its own, which means there is no
+# window between "it is here" and "it is published" in which to review anything. The
+# check has to happen before the push, and this is it.
+#
+# Inspects both the versioned content and the messages of the commits being pushed.
+# To let something through deliberately: ALLOW_ORIGIN=1 git push
+#
+# Install it — this file is not active until you point git at it:
+#
+#   git config core.hooksPath .githooks
+#
+# It lives in the repository rather than in .git/hooks so that it survives a clone.
+# A guard that exists on one machine protects one machine, and says nothing when it
+# is absent somewhere else.
+#
+# It has no exclusions. The earlier version enumerated the names it feared, so it
+# necessarily contained them — and had to skip itself and the CI workflow to avoid
+# firing on its own source, leaving exactly two files where a real reference was
+# invisible to it. An allowlist cannot leak what it does not contain, so it can
+# search everything, including this line.
+
+set -euo pipefail
+
+[ -n "${ALLOW_ORIGIN:-}" ] && exit 0
+
+repo_root="$(git rev-parse --show-toplevel)"
+readonly LIST='scripts/allowed-hosts.txt'
+
+# A host allowlist catches any machine name. It cannot catch a bare word — the name
+# of a product or a private network, written as prose, with no domain attached. Those
+# terms cannot be versioned here without defeating the point, so they live in a local
+# file that is never committed, one extended-regex alternation per line:
+#
+#   printf 'some-term\nanother-term\n' > .private-terms
+#
+# When the file is absent the hook says so and runs without it, rather than passing in
+# silence. A guard that cannot report what it did not check is worse than no guard.
+readonly TERMS="$repo_root/.private-terms"
+
+# ADR-NNNN is an internal document convention. It names no machine, so it stays a
+# pattern rather than moving into the allowlist.
+readonly MESSAGE_PATTERN='ADR-[0-9]{4}'
+# A machine can be named with no scheme in front of it. The trailing class is what
+# keeps a filename like settings.local.json out: there the suffix is followed by
+# another dot rather than by nothing.
+readonly BARE_HOST='[a-z0-9-]+\.(lan|local|internal|intranet)($|[^.a-zA-Z0-9])'
+
+found=0
+
+private_pattern=''
+if [ -r "$TERMS" ]; then
+	private_pattern="$(grep -vE '^\s*(#|$)' "$TERMS" | paste -sd'|' -)"
+fi
+if [ -z "$private_pattern" ]; then
+	printf 'pre-push: no %s here, so only the host allowlist ran.\n' "$(basename "$TERMS")" >&2
+fi
+
+# A sha of all zeros is how git spells "does not exist": on the local side it means a
+# branch is being deleted, on the remote side it means the branch is new.
+all_zeros() { case "$1" in *[!0]*) return 1 ;; *) return 0 ;; esac; }
+
+allowed_for() {
+	# The list as it exists in the commit being pushed, so a push cannot be judged
+	# against a list the pusher edited afterwards. Falls back to the working tree
+	# for a commit older than the list itself.
+	git show "$1:$LIST" 2>/dev/null || cat "$repo_root/$LIST"
+}
+
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+	all_zeros "$local_sha" && continue
+
+	if all_zeros "$remote_sha"; then
+		commits="$local_sha"
+	else
+		commits="${remote_sha}..${local_sha}"
+	fi
+
+	allowed="$(allowed_for "$local_sha" | grep -vE '^\s*(#|$)' | tr -d ' ')"
+
+	unlisted=''
+	while read -r host; do
+		[ -z "$host" ] && continue
+		printf '%s\n' "$allowed" | grep -qxF "$host" && continue
+		unlisted="${unlisted}  ${host}"$'\n'
+	done <<-EOF
+		$(git grep -I -h -o -E 'https?://[a-zA-Z0-9._~-]+' "$local_sha" -- . 2>/dev/null |
+			sed -E 's#^.*https?://##' | sort -u)
+	EOF
+
+	if [ -n "$unlisted" ]; then
+		printf '\nHosts this repository is not allowed to name:\n%s' "$unlisted" >&2
+		found=1
+	fi
+
+	if bare="$(git grep -I -n -E "$BARE_HOST" "$local_sha" -- . 2>/dev/null)"; then
+		printf '\nBare hostnames naming a private machine:\n%s\n' "$bare" >&2
+		found=1
+	fi
+
+	if [ -n "$private_pattern" ]; then
+		if terms="$(git grep -I -n -i -E "$private_pattern" "$local_sha" -- . 2>/dev/null)"; then
+			printf '\nPrivate terms in versioned content:\n%s\n' "$terms" >&2
+			found=1
+		fi
+	fi
+
+	# Messages get the same treatment as content. A hostname written into a commit
+	# message is published exactly as widely as one written into a file, and this
+	# repository has one commit message that proves it is an easy thing to do.
+	msgs="$(git log --format='%h %s%n%b' "$commits" 2>/dev/null || true)"
+
+	msg_unlisted=''
+	while read -r host; do
+		[ -z "$host" ] && continue
+		printf '%s\n' "$allowed" | grep -qxF "$host" && continue
+		msg_unlisted="${msg_unlisted}  ${host}"$'\n'
+	done <<-EOF
+		$(printf '%s' "$msgs" | grep -oE 'https?://[a-zA-Z0-9._~-]+' |
+			sed -E 's#^https?://##' | sort -u)
+	EOF
+
+	if [ -n "$msg_unlisted" ]; then
+		printf '\nCommit messages name hosts this repository is not allowed to name:\n%s' "$msg_unlisted" >&2
+		found=1
+	fi
+
+	msg_pattern="$MESSAGE_PATTERN|$BARE_HOST"
+	[ -n "$private_pattern" ] && msg_pattern="$msg_pattern|$private_pattern"
+	if messages="$(printf '%s' "$msgs" | grep -E -i "$msg_pattern")"; then
+		printf '\nCommit messages revealing the origin:\n%s\n' "$messages" >&2
+		found=1
+	fi
+done
+
+[ "$found" = 0 ] && exit 0
+
+printf '\nPush blocked: this would be visible to anyone reading the repository once it is published.\n' >&2
+printf 'Rewrite the text, add the host to %s if it is genuinely public, or use ALLOW_ORIGIN=1 git push.\n' "$LIST" >&2
+exit 1

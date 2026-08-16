@@ -53,7 +53,7 @@ Before this is over, write to `sarah/changelog/`:
 **Owed:** <regression test, proper fix, ARCHI.md update, post-mortem>
 ```
 
-Then update `sarah/state.md` with the outstanding items as blocked work.
+Then update the task's file in `sarah/state/` with the outstanding items as blocked work.
 
 **A hotfix that leaves no debt entry is how a codebase fills with changes nobody can explain.** Six months later the narrow fix is load-bearing and nobody knows why it exists.
 

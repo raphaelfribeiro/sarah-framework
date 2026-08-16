@@ -19,9 +19,15 @@ Distinguish **delivered** from **touched**. Code written but never run is not de
 
 What was started and not finished, what is blocked, what decisions are still waiting. Where the next session should pick up — written for someone with no memory of today, because on Monday that is exactly who reads it.
 
+A table once there is more than one open item, with what each one waits on. The person reading this is deciding where tomorrow starts, and a paragraph makes them extract the list themselves.
+
 ## 3. Update the state
 
-Rewrite `sarah/state.md`: phase, level, in flight, blocked, pending decisions, gates, and the `Next` section. Write `Next` last and write it carefully — it is what `/ill-be-back` reads tomorrow to propose the day.
+Rewrite the **task file** for each task touched today — `sarah/state/<slug>.md`: phase, in flight, blocked, pending decisions, gates, and the `Next` section. Write `Next` last and write it carefully — it is what `/ill-be-back` reads tomorrow to propose the day.
+
+Then update `sarah/state.md`, the index: one row per task, and the `Waiting on` column current. The index is what a reader sees first, and a stale `Waiting on` sends them to the wrong task.
+
+**A task that shipped loses its file.** Delete `sarah/state/<slug>.md` and drop its row from the index — the changelog entry is the permanent record. A directory of finished task files is a graveyard that makes the index harder to read every week.
 
 If something delivered today, add an entry to `sarah/changelog/`:
 

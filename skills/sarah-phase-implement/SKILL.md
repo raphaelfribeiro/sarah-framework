@@ -30,15 +30,32 @@ Most work lands here, including work that reaches here directly. A Level 0 typo 
 
 3. **Produce the test plan** in the same breath: what gets tested at which layer, and what is deliberately not tested.
 
-4. **Get both approved.** This gate is hard. Do not implement without an approved plan.
+   **The not-tested list is the valuable half**, and it must say *why* and *what
+   covers it instead*: "constant-time comparison is not tested, because timing
+   assertions in CI measure the runner rather than the code — it is a mandatory
+   review check instead." A plan that claims everything is covered is either
+   wrong or describes a suite nobody can afford. Carry this list forward to the
+   review gate, so a human decides whether each gap is acceptable.
 
-5. **Write the failing test** (Level 2+). Run it. **Confirm it fails for the right reason** — a test that was green from the start has tested nothing, and this is the step that gets skipped.
+   **Tests may not reach into production code to do their job.** If a test needs
+   to interleave execution or observe internal state, use the language's own
+   testing primitives. A hook, global, or flag added to shipped code so a test
+   can reach inside is reachable by everything else too, and the review gate now
+   rejects it.
+
+4. **Gate 2 — get both approved.** This gate is hard. Do not implement without an approved plan.
+
+5. **Spawn the `test-engineer`** to write the failing test (Level 2+), then run it. **Confirm it fails for the right reason** — a test that was green from the start has tested nothing, and this is the step that gets skipped.
+
+   QA is a specialist's job and it has one: the `test-engineer` plans coverage across the pyramid and writes the tests. Leaving the test to whoever happens to be holding the keyboard is how the suite ends up shaped like the code instead of like the requirement.
 
 6. **Spawn the `developer`** to implement against the failing test.
 
 7. **Run everything.** Report actual output, including failures.
 
-## The test-first gate
+8. **Say where the work now stands.** One line before handing back: the phase just finished, the phase that comes next, and any step the scale level skipped, named. A user who is not told what was skipped cannot object to it.
+
+## Gate 3 — the test-first gate
 
 At Level 2 and above: **no production code without a failing test first.** Wrote the code before the test? Delete it and start over.
 
@@ -58,7 +75,7 @@ Code written, tests passing, and the actual test output shown to the user — no
 
 Then **the documentation gate**, proportional to the level:
 
-- **Level 0–1:** `sarah/state.md` updated. That is all.
+- **Level 0–1:** the task's file in `sarah/state/` updated. That is all.
 - **Level 2+:** also `ARCHI.md` if anything architectural moved, `README.md` if anything user-visible changed, and a short entry in `sarah/changelog/`:
 
 ```markdown
@@ -71,5 +88,10 @@ Name what is deliberately not done.
 ```
 
 If it isn't documented, it isn't done.
+
+Then **commit** — on the feature branch, small and frequent while the work
+happens, and never a single commit for the whole phase. Code that passes its
+tests but sits uncommitted is not delivered: it survives no crash and can be
+bisected by nobody. If it isn't committed, it didn't happen.
 
 Then move to `sarah-phase-review`. You do not review your own work.

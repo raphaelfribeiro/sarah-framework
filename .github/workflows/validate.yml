@@ -1,0 +1,137 @@
+name: validate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  # Called by release.yml so a tag runs these exact guards rather than a copy of
+  # them. This repository has already shipped a defect from two expressions that
+  # were meant to agree and did not; a second copy of the guards is that defect
+  # waiting for a release to happen.
+  workflow_call:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Plugin manifests are valid JSON
+        run: |
+          for f in .claude-plugin/*.json; do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+            echo "ok: $f"
+          done
+
+      - name: Hooks are POSIX sh and exit 0 on every path
+        run: |
+          sh -n hooks/scripts/*.sh
+          echo "ok: hook syntax"
+          # A hook is a sensor. One that exits non-zero breaks a user's session.
+          # Note: a grep that matches nothing returns 1, and these steps run
+          # under `bash -e`, so the test must be wrapped rather than chained.
+          fail=0
+          for f in hooks/scripts/*.sh; do
+            if grep -nE '^[[:space:]]*exit[[:space:]]+[1-9]' "$f"; then
+              echo "::error file=$f::hook exits non-zero; hooks must never block"
+              fail=1
+            else
+              echo "ok: $f never exits non-zero"
+            fi
+          done
+          exit $fail
+
+      - name: Every skill has the frontmatter that makes it loadable
+        run: |
+          fail=0
+          for f in skills/*/SKILL.md; do
+            head -1 "$f" | grep -q '^---$' || { echo "::error file=$f::missing frontmatter"; fail=1; continue; }
+            awk 'NR>1 && /^---$/{exit} NR>1' "$f" | grep -q '^name:' || { echo "::error file=$f::frontmatter has no name"; fail=1; }
+            awk 'NR>1 && /^---$/{exit} NR>1' "$f" | grep -q '^description:' || { echo "::error file=$f::frontmatter has no description"; fail=1; }
+          done
+          exit $fail
+
+      - name: Skill bodies stay under the 500-line ceiling
+        run: |
+          fail=0
+          for f in skills/*/SKILL.md; do
+            n=$(wc -l < "$f")
+            if [ "$n" -gt 500 ]; then
+              echo "::error file=$f::$n lines, ceiling is 500"
+              fail=1
+            fi
+          done
+          exit $fail
+
+      - name: sarah-bootstrap stays inside its context budget
+        run: |
+          # Injected into every session, so its size is charged to every task
+          # the user ever runs. The ceiling is roughly 2,000 tokens.
+          python3 - <<'PY'
+          import sys
+          text = open("skills/sarah-bootstrap/SKILL.md").read()
+          approx = len(text) / 4
+          print(f"sarah-bootstrap ~{approx:.0f} tokens (chars/4)")
+          if approx > 2000:
+              print("::error file=skills/sarah-bootstrap/SKILL.md::"
+                    f"~{approx:.0f} tokens, ceiling is 2000")
+              sys.exit(1)
+          PY
+
+      - name: Every host this repository names is one it is allowed to name
+        run: |
+          # This guard used to enumerate the names it feared, which meant it
+          # spelled out the private infrastructure it existed to keep out of a
+          # public repository — and then had to exclude itself and the pre-push
+          # hook from its own search, leaving two files where a real reference
+          # was invisible. Written as an allowlist it has no exclusions at all,
+          # cannot leak what it does not contain, and catches hosts nobody has
+          # thought of yet. The list lives in scripts/allowed-hosts.txt so the
+          # hook and this file cannot drift apart.
+          allowed=$(grep -vE '^\s*(#|$)' scripts/allowed-hosts.txt | tr -d ' ')
+          fail=0
+
+          for h in $(grep -rhoE 'https?://[a-zA-Z0-9._~-]+' --exclude-dir=.git . \
+                     | sed -E 's#https?://##' | sort -u); do
+            if printf '%s\n' "$allowed" | grep -qxF "$h"; then
+              continue
+            fi
+            echo "::error::unlisted host: $h"
+            fail=1
+          done
+
+          # A machine can be named without a scheme in front of it. The trailing
+          # class is what keeps a filename like settings.local.json out: there,
+          # the suffix is followed by another dot rather than by nothing.
+          if grep -rnE '[a-z0-9-]+\.(lan|local|internal|intranet)($|[^.a-zA-Z0-9])' \
+               --exclude-dir=.git . ; then
+            echo "::error::a bare hostname that names a private machine"
+            fail=1
+          fi
+
+          [ "$fail" -eq 0 ] && echo "ok: every host named here is on the list"
+          exit $fail
+
+      - name: No path names a developer's machine
+        run: |
+          # A hostname is not the only thing that leaks. This guard was once
+          # narrower, and three study scripts shipped a home-directory absolute
+          # past it, naming the maintainer's account and directory layout in a
+          # public repository. A review caught them; the CI that exists to catch
+          # them did not.
+          #
+          # Nothing is excluded, not even this file. An earlier version carved
+          # out scores/ because one captured judge log held a real path; that
+          # path was scrubbed instead, leaving the score, the evidence and the
+          # verdict untouched. Then it carved out itself, because the pattern
+          # matched its own source. The bracket below is what removes that last
+          # exclusion: /h[o]me/ matches the paths and does not match the line
+          # you are reading. An exclusion is a place a leak can hide, and this
+          # guard no longer has one.
+          if grep -rnE '/h[o]me/[a-zA-Z0-9._-]+|/U[s]ers/[a-zA-Z0-9._-]+' \
+               --exclude-dir=.git . ; then
+            echo "::error::a home-directory path names a developer's machine"
+            exit 1
+          fi
+          echo "ok: no developer home paths"

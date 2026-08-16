@@ -57,10 +57,48 @@ Never report a self-review as a passed review. The author checking their own wor
 ## How it runs
 
 1. **Assemble what changed.** The diff, the approved plan, and the acceptance criteria. The reviewer needs the plan to detect drift from it.
+
+   **Bring the not-tested list with it.** The implement phase produces one, with
+   a reason and a compensating control for each gap. It arrives here because a
+   gap only counts as accepted once a human has seen it — an untested edge that
+   was never surfaced is not a decision, it is an omission with a paper trail.
+   If the change has no such list, that absence is the first finding.
 2. **Spawn the `code-reviewer`** in a clean context with the diff and the plan.
 3. **Spawn the `security-advisor`** in parallel when the change touches auth, secrets, input handling, personal data, or an external boundary.
-4. **Verify before reporting.** Every finding needs a concrete failure: the input or state, and the wrong result that follows. No scenario, no finding — a review that reports suspicions as defects stops being believed, and then it stops working.
-5. **Report ranked**, most severe first, marking which findings block and which are optional. Forcing the author to guess which is which wastes the review.
+4. **Probe, do not only read.** Reviewers write throwaway scripts that call the
+   code with hostile input and observe what it does. Reading finds design
+   mistakes; only execution finds the ones that live in a missing `except`.
+   Feed every parser the values that break parsers — empty, enormous, negative,
+   `inf`, `nan`, deeply nested, wrong type, duplicate keys — and every path
+   handler the ones that break paths. **A crash on unauthenticated input is a
+   security finding, not a robustness nit.**
+5. **Rehearse the cold start.** Clone into a fresh directory, build a clean
+   environment, and follow the README exactly as a stranger would, running every
+   command it prints. Instructions that do not work are a defect of the same
+   rank as a broken test, and they are invisible to anyone reading the repository
+   they already have. Nothing else in this framework catches them.
+6. **Verify before reporting.** Every finding needs a concrete failure: the input or state, and the wrong result that follows. No scenario, no finding — a review that reports suspicions as defects stops being believed, and then it stops working.
+7. **Report ranked**, most severe first, marking which findings block and which are optional. Forcing the author to guess which is which wastes the review.
+
+   **Consolidate before you report.** Two reviewers produce two reports; the
+   human needs one. Merge them into a single table — finding, **blocking or
+   optional**, who found it — and say when both found the same defect
+   independently, because that is the strongest signal a review produces. Then
+   the detail a fix needs, and nothing about how the search went. End by naming
+   what the human has to decide, if anything. A review that buries its verdict
+   in prose has done the work and thrown away the delivery.
+
+   **When one reviewer calls a finding blocking and the other calls it
+   optional, put both in the row and say who said which.** Do not pick one.
+   Two specialists splitting on whether a thing ships is a finding about the
+   change, and resolving it quietly destroys the only information a second
+   reviewer was there to produce. It is also the human's call, not the
+   consolidator's — the split is what they need to see.
+
+**Read narrowly.** Pull the diff and the files it touches, and pipe long command
+output through `tail` or `grep` rather than swallowing it whole. A reviewer that
+re-reads the entire repository spends its budget on rediscovery instead of on
+finding defects.
 
 ## What you never do
 
@@ -69,17 +107,35 @@ Never report a self-review as a passed review. The author checking their own wor
 - Pad the review. Ten trivia items bury the one real bug.
 - Approve to be agreeable.
 - Merge. You report; the human decides.
+- **Pass a change whose README you did not run.** Documentation that has never
+  been executed is a claim, and this gate exists to stop claims reaching a user.
+- **Accept a test seam that ships in production.** A hook, global, or flag that
+  exists only so a test can reach inside is a defect in the delivery: it is
+  reachable at runtime by anything, not just the test. Say so and send it back.
 
-## Exit gate
+## Gate 4 — review passed
 
 **Pass**, or **changes required** with specific blocking items.
 
 Changes required means back to `sarah-phase-implement` for those items, then review again — the fixes get reviewed too.
 
+**Present the not-tested list to the human before the gate closes**, each entry
+with its reason and what covers it instead. They accept it, or they send an
+entry back for a test. Reporting it as reviewed without that answer defeats the
+purpose of carrying it here.
+
 On a pass, the documentation gate must also be closed before merge:
 
 - **Level 0–1:** `sarah/state.md` current.
 - **Level 2+:** also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and an entry in `sarah/changelog/`.
+
+Review fixes are commits of their own, on the same feature branch — never
+amended into the commits under review, which would erase what the reviewer
+caught.
+
+Once the gate closes, the delivery goes to the permanent branch **the way the
+project's branching model says**: under gitflow, a pull request into `develop`.
+The pull request is the delivery boundary, and a human merges it.
 
 If a tracker MCP is connected, offer to sync the card or issue — as an option, never automatically. If none is connected, never mention it.
 

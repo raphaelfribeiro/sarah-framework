@@ -29,7 +29,8 @@ loads into context, when, and at what cost.
 | Manifests | JSON | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` |
 | Hooks | POSIX `sh` | No bashisms; runs on macOS, Linux, and Git Bash |
 | Scripts | Python 3, standard library only | Token measurement for `/sarah-compact` |
-| CI | GitHub Actions | Manifest validation, frontmatter and size linting |
+| CI | GitHub Actions | `validate.yml`: manifest validation, frontmatter and size linting, the bootstrap token budget, and two leak guards. `release.yml`: fires on `v*` and calls `validate.yml` rather than repeating it |
+| Distribution | Git tag on `main` | No deploy step and no server. A tag push builds the GitHub Release; see `docs/operating.md` |
 
 ## 3. System shape
 
@@ -74,8 +75,18 @@ every plugin update, so nothing durable may be written there.
 | File | Lives in | Holds | Lifetime |
 | --- | --- | --- | --- |
 | `ARCHI.md` | User project root | Curated architecture memory | Permanent, hand-maintained |
-| `sarah/state.md` | User project | Phase, level, gates, pending decisions | Rewritten continuously |
+| `sarah/state.md` | User project | The index: what is in flight, what each task waits on | Rewritten continuously |
+| `sarah/state/<slug>.md` | User project | One task: itinerary, phase, gates, decisions, next | Created when work starts, deleted when it ships |
 | `sarah/changelog/` | User project | One short record per delivery | Append-only; feeds release notes |
+
+**State is per task, not per repository.** It used to be one file holding one
+`Current task`, versioned and rewritten continuously, which meant two branches
+produced two divergent copies and a conflict at every merge. Each task now owns
+a file named after its branch, so branches never touch each other's state. The
+index carries only what is in flight and what each piece waits on, and a task
+file is deleted when the work ships — the changelog is the permanent record, and
+a directory of finished task files is a graveyard that makes the index worse
+every week.
 
 `ARCHI.md` carries a size contract: a hard ceiling of 10% of the context window,
 with `/sarah-compact` measuring and compacting it. The ceiling exists because an
@@ -124,6 +135,10 @@ authority.
   every session; its size is charged to every task the user ever runs.
 - **The user decides.** No specialist commits to a consequential choice without
   presenting options and receiving an answer.
+- **Every phase that produces an artefact ends with a commit.** Work that exists
+  only in a working tree is not delivered, cannot be bisected, and survives no
+  crash. The pull request sits at the delivery boundary, not at every phase —
+  the approval gates already put a human at each step.
 
 ## 8. Sharp edges
 
@@ -151,9 +166,19 @@ authority.
   and tested on every review, while the detection branch is written but never
   executed here. Treat it as untested code until a contributor with a second CLI
   reports otherwise.
-- **`claude plugin validate` checks manifests, not content.** Nothing yet
-  verifies that a skill body stays under 500 lines, that agent frontmatter uses
-  only accepted fields, or that internal links resolve. Phase D adds this to CI.
+- **`claude plugin validate` checks manifests, not content.** CI now covers the
+  500-line body ceiling, skill frontmatter, and the bootstrap token budget. Two
+  things it still does not cover: **agent frontmatter fields** and **whether an
+  internal link resolves**. A dead link in a skill is invisible until a model
+  follows it and finds nothing.
+- **Nothing verifies that the plugin installs.** CI validates structure — a
+  manifest parses, a body fits, a hook exits 0. Whether a skill *fires*, whether
+  a gate *holds*, and whether the plugin loads at all from a published tag are
+  behavioural, and the only instrument that has ever measured them is a recorded
+  run against a fresh project. That costs real money and is not automated. An
+  installation smoke test would need CLI authentication on a runner; recorded in
+  `docs/operating.md` as a gap rather than closed. **Structural green is
+  necessary and never sufficient.**
 
 ## 9. Map
 
@@ -164,6 +189,8 @@ authority.
 | `agents/` | Specialist personas, loaded per phase |
 | `hooks/` | Hook registration and POSIX shell scripts |
 | `templates/` | Artifacts copied into the user's project |
-| `docs/` | Framework documentation for humans |
-| `examples/` | End-to-end walkthroughs |
+| `docs/` | Framework documentation for humans, including the walkthroughs and the comparative studies under `docs/study/` |
+| `scripts/` | Python helpers; token measurement for `/sarah-compact` |
+| `.github/` | CI workflows and the issue and pull request templates |
+| `.githooks/` | Versioned pre-push guard; opt-in per clone with `core.hooksPath` |
 | `sarah/` | This repository's own S.A.R.A.H. state |

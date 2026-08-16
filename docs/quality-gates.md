@@ -79,22 +79,38 @@ This is the gate the framework leans on hardest. A reviewer who watched the impl
 
 ---
 
-## Gate 5 — Documentation is part of done
+## Gate 5 — Documented and committed is part of done
 
 **Applies at:** every level, proportionally.
 
-**If it isn't documented, it isn't done.**
+**If it isn't documented, it isn't done. If it isn't committed, it didn't happen.**
 
 Documentation here is not a favour to a future reader. `ARCHI.md` is what the next task reads *instead of* the codebase, so letting it go stale does not merely lose information — it actively misleads the next piece of work.
 
 | Level | Required before the merge gate closes |
 | --- | --- |
-| **0–1** | `sarah/state.md` updated. Nothing else. |
-| **2–3** | `sarah/state.md`, plus: `ARCHI.md` if anything architectural moved; `README.md` if anything user-visible changed — how to run it, the stack, the features; and a short entry in `sarah/changelog/`. |
+| **0–1** | The task's file in `sarah/state/` exists and is updated. Nothing else. |
+| **2–3** | The task's file in `sarah/state/` and the index row in `sarah/state.md`, plus: `ARCHI.md` if anything architectural moved; `README.md` if anything user-visible changed — how to run it, the stack, the features; and a short entry in `sarah/changelog/`. |
 
 The Level 0–1 row is deliberately almost empty. A documentation gate that demands paperwork for a typo teaches everyone to route around the gate, and then it is not there when it matters.
 
+**A task with no file in `sarah/state/` has not closed this gate**, whatever else is
+true. It is invisible to the index, to `/sarah-status`, and to the next session —
+which is the whole reason the state was split per task.
+
 **An out-of-date README is a defect**, not a chore. If a delivery changed how the project is run and the README still describes the old way, the delivery is not finished.
+
+### Releases carry one more requirement
+
+At Level 2 and above, a release does not close this gate until it can be
+**observed and reversed**: the signal that says it is working, and the documented
+way back if it is not. "It deployed successfully" is a statement about the
+deploy, not about the software.
+
+Scaled like everything else — a health check and structured logs at Level 2,
+alerts with an owner and golden-signal dashboards at Level 3, nothing new at
+Level 0-1. The rollback is written down before the deploy, because an incident
+is the worst moment to design one.
 
 ### The changelog entry
 
@@ -110,6 +126,43 @@ Name what is deliberately not done.
 ```
 
 These entries are what release notes are generated from. Writing them at merge time, while the work is fresh, is the only moment they are cheap.
+
+**One entry per delivery, not one per phase.** A delivery is what a user would
+notice; a phase is an internal step. Measured across three instrumented runs,
+entries written at phase boundaries restated the document the phase had just
+produced and were never opened again by anything — pure cost. Entries written
+because something *surprised* someone were the highest-value prose in those
+repositories.
+
+The test is simple: **if nothing surprising happened, there is nothing to
+record.** A phase that went exactly as planned earns a line in its task file
+and no entry at all. Write the entry when a defect was caught, a decision was
+reversed, an assumption broke, or something was deliberately left undone.
+
+### Committed, the gitflow way
+
+Uncommitted work is not delivered work. It survives no crash, appears in no
+history, and can be bisected by nobody.
+
+**Every phase that produces an artefact ends with a commit.** The spec, the
+architecture decisions, the design, the code, the review fixes, the release
+notes — each lands in the history at the moment it is finished, not swept into
+one commit at the end. A single commit for a day of work throws away the ability
+to find, later, which decision caused which consequence.
+
+| Level | Required |
+| --- | --- |
+| **0–1** | Work happens on a `feature/*` branch and is committed. A pull request when the project's branching model asks for one. |
+| **2–3** | A `feature/*` branch off `develop`; one commit per completed phase; a pull request into `develop` once the review gate closes. |
+
+The pull request sits at the **delivery** boundary, not at every phase. Gates 1,
+2 and 4 already put a human in the loop at each step — a pull request per phase
+would be a second approval mechanism bolted onto the same control point, which
+buys ceremony rather than rigour.
+
+Projects that have adopted a different branching model follow theirs. What does
+not vary: the work is on a branch, each finished phase is a commit, and nothing
+reaches the permanent branches without a human merging it.
 
 ---
 

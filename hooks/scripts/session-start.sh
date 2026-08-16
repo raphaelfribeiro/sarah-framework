@@ -51,25 +51,37 @@ field() {
         sed 's/^[[:space:]]*//; s/[[:space:]]*$//' 2>/dev/null || true
 }
 
-phase=$(field 'Phase')
 level=$(field 'Default level')
+
+# Phase and task moved out of this file: it is an index now, and each task keeps
+# its own state in sarah/state/<slug>.md. Both are still read, because a project
+# initialized before the split still carries them here and reporting nothing
+# would be worse than reporting the old shape.
+phase=$(field 'Phase')
 task=$(field 'Current task')
 
-# Is there real work in flight? A section holding only the template placeholder,
-# the word "none", or nothing at all does not count.
-in_flight=$(
-    awk '
+# How many tasks are in flight? The index lists one table row per task. Header,
+# separator and unfilled template rows do not count.
+in_flight_count=$(
+    awk -F'|' '
         /^## In flight/ { inside = 1; next }
         /^## / { inside = 0 }
-        inside && /^- / {
+        inside && /^\|/ {
             line = tolower($0)
-            if (line !~ /\{\{/ && line !~ /^- *none/ && line !~ /nothing in flight/) {
-                found = 1
-            }
+            if (line ~ /\{\{/) next
+            if (line ~ /^\| *-+ *\|/) next
+            if (line ~ /\| *task *\|/) next
+            if (line ~ /nothing in flight/) next
+            n++
         }
-        END { if (found) print "yes" }
-    ' "$state" 2>/dev/null || true
+        END { print n + 0 }
+    ' "$state" 2>/dev/null || echo 0
 )
+
+# A pre-split project reports its single task the old way.
+if [ "${in_flight_count:-0}" -eq 0 ] && [ -n "$task" ] && [ "$task" != "none" ]; then
+    in_flight_count=1
+fi
 
 # ---------------------------------------------------------------------------
 # Emit the pointer. Stdout on SessionStart is added to context verbatim, so this
@@ -79,17 +91,26 @@ in_flight=$(
 
 echo "S.A.R.A.H. is active in this project."
 
-if [ -n "$phase" ] || [ -n "$level" ]; then
-    echo "State: phase ${phase:-unknown}, default level ${level:-unknown}."
+# "phase unknown" is noise, not information: after the state split there is no
+# single project phase to report, and printing a placeholder for it trains the
+# reader to skip the line that also carries the level.
+if [ -n "$phase" ] && [ -n "$level" ]; then
+    echo "State: phase ${phase}, default level ${level}."
+elif [ -n "$phase" ]; then
+    echo "State: phase ${phase}."
+elif [ -n "$level" ]; then
+    echo "State: default level ${level}."
 fi
 
 if [ -n "$task" ] && [ "$task" != "none" ]; then
     echo "Current task: $task"
+elif [ "${in_flight_count:-0}" -gt 0 ]; then
+    echo "In flight: ${in_flight_count} task(s). Their state is in sarah/state/, one file per task - read only the one the request belongs to."
 fi
 
 echo "Before any development work, use the sarah-bootstrap skill: it reads sarah/state.md and ARCHI.md, sizes the request into a scale level, and routes to the right phase with only that phase's specialists in context. Do not start planning or editing without it."
 
-if [ "$in_flight" = "yes" ]; then
+if [ "${in_flight_count:-0}" -gt 0 ]; then
     echo "Work is already in flight. Suggest /ill-be-back to the user for a situation report and the day's priorities before starting anything new."
 fi
 

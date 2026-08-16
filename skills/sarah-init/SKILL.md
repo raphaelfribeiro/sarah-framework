@@ -9,7 +9,33 @@ Be prepared. Judgment Day is a deploy on Friday.
 
 This runs once per project. It ends with three files on disk and a user who knows what they are for. It is an interview, not a form: ask, offer options, let the user decide, then draft.
 
-## Step 0 — Refuse to clobber
+## Step 0 — Show them the mission before asking them to sign up for it
+
+Before any question, before reading anything, print the welcome and the map. A user who does not know the shape of the workflow cannot tell when it skipped a step, and a process nobody can audit is a process nobody should trust.
+
+Keep it to this — a greeting, the map, the two rules that govern it:
+
+> **S.A.R.A.H.** — Skills, Agents, Reviews & Adaptive Hierarchy.
+> Claude Code writes the code. You command the mission.
+>
+> Every step below has an owner. You will be told at each handover where you are, what comes next, and what was skipped.
+>
+> | Step | Owner | Delivers |
+> | --- | --- | --- |
+> | Brainstorm & architecture | product-analyst, software-architect | Scope options, stack, boundaries |
+> | Business analysis | product-manager | Requirements, acceptance criteria, cut line |
+> | System analysis | software-architect | Data ownership, failure behaviour, contracts |
+> | UI/UX design | ux-ui-designer | Flows and every screen state |
+> | Build & QA | developer, test-engineer | Failing test first, then the code |
+> | Security | security-advisor | Auth, secrets, input trust, data exposure |
+> | Documentation | every phase, gate 5 | Current state, architecture, changelog |
+> | Deploy, monitor & operate | devops-engineer, release-manager | Pipeline, version, observability, rollback |
+>
+> **Two rules.** The process shrinks to the size of the work — a typo does not get business analysis, and you will be told when a step is skipped and why. And every real decision is yours: options with trade-offs, a recommendation, your call.
+
+Then say which parts of it this project will actually use, once you know its scale level in step 2. Do not present all eight steps as mandatory for a Level 0 repository.
+
+## Step 0.5 — Refuse to clobber
 
 If `sarah/state.md` already exists, this project is initialized. Do not overwrite it. Report the current phase and level, and offer three choices: leave it alone, refresh `ARCHI.md` against the current codebase, or start over from scratch with the old files backed up. Wait for the answer.
 
@@ -80,6 +106,7 @@ Templates ship alongside this skill. Read them with paths relative to this file,
 - [references/ARCHI-template.md](references/ARCHI-template.md)
 - [references/README-template.md](references/README-template.md)
 - [references/state-template.md](references/state-template.md)
+- [references/task-template.md](references/task-template.md)
 
 **Read each template with the Read tool before writing the file it produces.** Do not generate from memory or from the descriptions in this skill. A template is a structure to be filled, not a description to be paraphrased — and paraphrasing it is the single most likely way this step goes wrong.
 
@@ -106,7 +133,9 @@ When one already exists, read it before deciding anything. Someone wrote those w
 
 Whichever you propose, say which case you judged it to be and why, and show the diff before writing.
 
-**`sarah/state.md`** from `references/state-template.md`. Set phase, default level, mode, and the date. Leave the gate and decision sections empty — they fill in as work happens.
+**`sarah/state.md`** from `references/state-template.md`. It is an index: default level, mode, the date, and an empty **In flight** table. Do not invent a task to put in it — "Nothing in flight" is the correct state of a project that has not started.
+
+Task state lives in `sarah/state/<branch-slug>.md`, one file per task, created from `references/task-template.md` when work actually begins. Do not create the directory now; the first task creates it.
 
 **`sarah/changelog/`** — create the directory with a `.gitkeep`.
 

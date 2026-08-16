@@ -77,14 +77,23 @@ surrounding text has earned it. Everything else is sober and technical.
 Cultural references stay at the level of short textual allusion. No franchise
 imagery, artwork, logos, or extended quotation anywhere in the repository.
 
+## Branching
+
+This repository follows **gitflow**, documented in full in
+[`docs/branching.md`](docs/branching.md). `main` holds released versions,
+`develop` holds the next one, and work happens on `feature/*` branched from
+`develop`. Never commit directly to either permanent branch.
+
 ## Before opening a pull request
+
+Open it against `develop`, never against `main`.
 
 ```bash
 claude plugin validate . --strict
 sh -n hooks/scripts/*.sh
 ```
 
-Then confirm the documentation gate: `sarah/state.md` current, `ARCHI.md`
+Then confirm the documentation gate: `sarah/state.md` and the task file current, `ARCHI.md`
 updated if the architecture moved, `README.md` updated if anything user-visible
 changed, and an entry in `sarah/changelog/` for the delivery.
 

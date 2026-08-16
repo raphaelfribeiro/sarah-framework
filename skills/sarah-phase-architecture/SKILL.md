@@ -49,6 +49,16 @@ Every layer of indirection is paid on every future change. When the architect pr
 
 - ADRs written for the decisions that matter.
 - `ARCHI.md` updated: structure, boundaries, invariants, decisions table.
-- `sarah/state.md` updated.
+- The task's file in `sarah/state/` updated.
+- **All three committed on the feature branch.** A decision nobody can find in the history will be relitigated by whoever comes next.
+
+A commit, not a changelog entry. The changelog records deliveries and surprises,
+not phase boundaries — see [`quality-gates.md`](../../docs/quality-gates.md).
+
+**Record superseded decisions rather than deleting them.** When a later decision
+replaces an earlier one, keep the earlier row and mark it superseded, with the
+reason. Instrumented runs found this to be among the highest-value prose any
+phase produces: it hands the next person the bug that forced the change, and the
+reason the obvious test would never have caught it.
 
 Next is `sarah-phase-design-ux` when there is a user-facing surface, otherwise `sarah-phase-implement`.

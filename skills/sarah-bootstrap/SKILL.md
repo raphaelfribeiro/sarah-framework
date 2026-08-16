@@ -13,8 +13,11 @@ This skill runs before the work, not instead of it. It costs a few hundred token
 
 Read, in this order, and read **only** these:
 
-1. `sarah/state.md` — current phase, scale level, open gates, pending decisions.
-2. `ARCHI.md` — the architecture map, sections relevant to the request.
+1. `sarah/state.md` — the index: what is in flight, and what each piece waits on.
+2. `sarah/state/<slug>.md` for the task this request belongs to, if one exists. **Only that one.** Reading every task file is how a five-task project starts costing five times as much to orient.
+3. `ARCHI.md` — the architecture map, sections relevant to the request.
+
+**Work that is starting gets its file before it starts.** Create `sarah/state/<branch-slug>.md` from `references/task-template.md`, and add its row to the index — at Level 2 and above, with the itinerary the user just approved. One task, one file, one branch, which is why parallel work no longer collides. A task with no file is invisible to the index, to `/sarah-status` and to tomorrow's session, and this step is the one that gets skipped.
 
 Never read a full spec, PRD, or architecture document as a routine step. If a routine step needs more than roughly 30k tokens of input, it is the wrong step — narrow it.
 
@@ -47,7 +50,11 @@ Load the phase skill. It brings its own specialists. **Never load the full roste
 | 4. Design / UX | `sarah-phase-design-ux` | UX/UI Designer |
 | 5. Implementation | `sarah-phase-implement` | Developer, Test Engineer |
 | 6. Review | `sarah-phase-review` | Code Reviewer, Security Advisor |
-| 7. Release | `sarah-phase-release` | DevOps Engineer, Release Manager |
+| 7. Release & operate | `sarah-phase-release` | DevOps Engineer, Release Manager |
+
+**At Level 2 and above, propose the itinerary and let the user set it.** Read `references/itinerary.md` and present all eight steps as a table: in or out, the reason *from this request* rather than from the level, and the cost in the user's time. Then stop and let them answer. The level proposes; the user disposes, including dropping a step you marked in — record the choice in `sarah/state.md` and do not argue. Documentation is the one row that cannot be dropped.
+
+At Level 0 and 1, skip the table. Announce the route in one line, naming any step stepped over. Eight rows to justify a typo fix is the ceremony this framework exists to prevent.
 
 Two requests do not belong on this ladder at all:
 
@@ -64,7 +71,7 @@ These hold at every level unless the row says otherwise. Full text: `docs/qualit
 2. **Plan approved** before implementing. Do not implement without an approved plan.
 3. **Test first** at Level 2+. No production code without a failing test. Wrote the code first? Delete it and start over. At Level 0–1, tests afterward are acceptable if the user chooses that.
 4. **The author never reviews.** Review happens in a separate context before merge.
-5. **Documentation is part of done.** Level 0–1: `sarah/state.md` updated. Level 2+: also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and a short entry in `sarah/changelog/`. If it isn't documented, it isn't done.
+5. **Documented and committed is part of done.** The task's file always; at Level 2+ also `ARCHI.md`, `README.md` and `sarah/changelog/` when each applies. Every phase ends with a commit on a `feature/*` branch. If it isn't documented, it isn't done — if it isn't committed, it didn't happen.
 
 Every gate has a guardian. Every merge has a human behind it.
 
@@ -77,6 +84,8 @@ Any specialist facing a real choice follows one protocol, without exception:
 Never decide silently on the user's behalf, and never present options without saying which one you would pick and why. The point is not neutrality — it is that the user ends up understanding the decision they made.
 
 The machines propose. The human decides. No exceptions.
+
+**Report the way you decide: the shortest form that carries it.** Answer or verdict first. A table once there is more than one of anything. Detail only where an action depends on it — how you searched is not a finding. Say plainly when you need an answer and when you are only informing. An instrument nobody reads commands nothing.
 
 ## 6. Commands
 
