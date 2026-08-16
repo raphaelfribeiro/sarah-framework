@@ -55,8 +55,10 @@ did not do as well as what it did.
   [docs/operating.md](docs/operating.md) states what that means for this plugin.
 - **CI.** Manifest validation, hook syntax and never-blocks checks, skill
   frontmatter and body-size ceilings, the `sarah-bootstrap` token budget, and two
-  guards against a public artefact naming private infrastructure or a
-  developer's home directory.
+  leak guards written as allowlists rather than denylists — `scripts/allowed-hosts.txt`
+  names the hosts this repository may reference, and a path guard that includes
+  itself in its own search. Neither has an exclusion, because an exclusion is a
+  place a leak can hide.
 - **Documentation.** [Quality gates](docs/quality-gates.md),
   [branching](docs/branching.md), [extending](docs/extending.md),
   [contributing](CONTRIBUTING.md), a [Level 1](docs/walkthrough-level-1.md)
