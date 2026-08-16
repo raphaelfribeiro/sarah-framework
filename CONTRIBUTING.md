@@ -40,11 +40,25 @@ nothing reminds you:
 git config core.hooksPath .githooks
 ```
 
-`.githooks/pre-push` blocks a push that would carry this repository's internal
+`.githooks/pre-push` blocks a push that would carry this repository's private
 origin out to the public mirror. Note the distinction from `hooks/`: the hooks
 described in the table above are Claude Code sensors that never block, while
-this one exists precisely to block, because the mirror syncs on every push and
+this one exists precisely to block, because the mirror syncs on its own and
 leaves no window in which to review anything.
+
+It works from `scripts/allowed-hosts.txt` — a list of hosts this repository is
+allowed to name, rather than a list of the ones it must hide. That is deliberate:
+a guard written the other way has to spell out the private infrastructure it
+exists to keep out of a public repository, in a file that gets published like
+every other. An allowlist cannot leak what it does not contain.
+
+A host allowlist cannot catch a bare word, though — a product or network name
+written as prose with no domain attached. Those go in a `.private-terms` file at
+the repository root, one extended-regex alternation per line. It is gitignored
+and never committed, which is the whole point. **When it is absent the hook says
+so on every push and runs without it**, rather than passing in silence; a guard
+that cannot report what it did not check is worse than no guard. Most
+contributors need no such file and can ignore the line.
 
 Then confirm the documentation gate, which is not optional here:
 
