@@ -10,11 +10,10 @@
 
 ## In flight
 
-Nothing in this repository. **One thing is owed on the origin**, and it is not a
-code change: the push-mirror still points at the pre-rename repository name and
-has been failing every eight hours since 2026-08-05. Until it is repointed,
-`v0.1.0` exists on the origin and nowhere else, and the README's Quickstart
-resolves to nothing.
+Nothing. **v0.1.0 is published**: the mirror was repointed on 2026-08-16, both
+branches and the tag reached the public repository, CI passed there, and the
+release pipeline built the GitHub Release from the changelog. The Quickstart in
+`README.md` resolves to something for the first time.
 
 `v1-readiness` shipped as `v0.1.0` and its task file was deleted, which is what
 the per-task state model prescribes. What it delivered is in
@@ -108,7 +107,14 @@ they do not cost another:
 - **`main` refuses every direct push**, admins included. Releases land through a
   pull request merged **fast-forward only**, which keeps the tag pointing at a
   commit `main` actually contains. Sequence in `docs/branching.md`.
-- **The mirror does not run.** It was never repointed after the 2026-08-05
-  rename, so it has been failing on the old repository name every eight hours
-  since. Nothing external has received a single commit. Fixing it is a settings
-  change on the origin, not a change here.
+- **The mirror runs, and what it sends is now measured rather than assumed.** It
+  had been failing on the pre-rename repository name every eight hours since
+  2026-08-05; repointed 2026-08-16. It pushes **heads and tags only** — the two
+  `refs/pull/*` refs still holding pre-rewrite objects stayed on the origin and
+  did not travel, confirmed by inspecting what actually arrived. That closes a
+  question that was going to cost a repository rebuild to answer by guesswork.
+- **A brand-new mirror target does not fire its own release.** The first sync
+  pushed every ref at once and the public side registered a workflow run for the
+  default branch only — no run for `develop`, none for the tag. Deleting the tag
+  and pushing it again as its own event ran the pipeline correctly. A one-time
+  artefact of an empty repository, and a trap for the next first release.
