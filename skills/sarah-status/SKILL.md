@@ -51,6 +51,8 @@ Mark anything waiting on the user as waiting on the user, in those words. The wh
 - **No advice unless asked.** One line pointing at the most useful next thing is welcome. A plan is not.
 - **No padding.** If the answer is "phase idle, nothing in flight, nothing blocked", that is the whole output. Stretching it to look substantial wastes the one thing this command sells, which is speed.
 
+**Work with no task file is a finding, not a blank.** If the index says nothing is in flight and the git log or the working tree says otherwise, say so — that is a gate that did not close, and reporting "nothing in flight" with a straight face hides it.
+
 ## When the state file is stale
 
 If `sarah/state.md` was last updated days ago and the git log shows work since, say so. A state file that has drifted from reality is worth one sentence — it is exactly the kind of rot `/hasta-la-vista` exists to prevent, and pointing at it is more useful than reporting stale numbers with a straight face.

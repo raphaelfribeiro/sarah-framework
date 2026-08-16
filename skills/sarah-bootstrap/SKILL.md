@@ -17,7 +17,7 @@ Read, in this order, and read **only** these:
 2. `sarah/state/<slug>.md` for the task this request belongs to, if one exists. **Only that one.** Reading every task file is how a five-task project starts costing five times as much to orient.
 3. `ARCHI.md` — the architecture map, sections relevant to the request.
 
-New work gets a new task file, named after its branch, from `references/task-template.md`. One task, one file, one branch — which is why two people working in parallel no longer collide in a single state file.
+**Work that is starting gets its file before it starts.** Create `sarah/state/<branch-slug>.md` from `references/task-template.md`, and add its row to the index — at Level 2 and above, with the itinerary the user just approved. One task, one file, one branch, which is why parallel work no longer collides. A task with no file is invisible to the index, to `/sarah-status` and to tomorrow's session, and this step is the one that gets skipped.
 
 Never read a full spec, PRD, or architecture document as a routine step. If a routine step needs more than roughly 30k tokens of input, it is the wrong step — narrow it.
 
@@ -71,7 +71,7 @@ These hold at every level unless the row says otherwise. Full text: `docs/qualit
 2. **Plan approved** before implementing. Do not implement without an approved plan.
 3. **Test first** at Level 2+. No production code without a failing test. Wrote the code first? Delete it and start over. At Level 0–1, tests afterward are acceptable if the user chooses that.
 4. **The author never reviews.** Review happens in a separate context before merge.
-5. **Documented and committed is part of done.** Level 0–1: `sarah/state.md` updated. Level 2+: also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and a short entry in `sarah/changelog/`. Every phase that produces an artefact ends with a commit on a `feature/*` branch; the pull request comes at delivery. If it isn't documented, it isn't done — if it isn't committed, it didn't happen.
+5. **Documented and committed is part of done.** The task's file always; at Level 2+ also `ARCHI.md`, `README.md` and `sarah/changelog/` when each applies. Every phase ends with a commit on a `feature/*` branch. If it isn't documented, it isn't done — if it isn't committed, it didn't happen.
 
 Every gate has a guardian. Every merge has a human behind it.
 

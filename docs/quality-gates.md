@@ -89,10 +89,14 @@ Documentation here is not a favour to a future reader. `ARCHI.md` is what the ne
 
 | Level | Required before the merge gate closes |
 | --- | --- |
-| **0–1** | The task's file in `sarah/state/` updated. Nothing else. |
+| **0–1** | The task's file in `sarah/state/` exists and is updated. Nothing else. |
 | **2–3** | The task's file in `sarah/state/` and the index row in `sarah/state.md`, plus: `ARCHI.md` if anything architectural moved; `README.md` if anything user-visible changed — how to run it, the stack, the features; and a short entry in `sarah/changelog/`. |
 
 The Level 0–1 row is deliberately almost empty. A documentation gate that demands paperwork for a typo teaches everyone to route around the gate, and then it is not there when it matters.
+
+**A task with no file in `sarah/state/` has not closed this gate**, whatever else is
+true. It is invisible to the index, to `/sarah-status`, and to the next session —
+which is the whole reason the state was split per task.
 
 **An out-of-date README is a defect**, not a chore. If a delivery changed how the project is run and the README still describes the old way, the delivery is not finished.
 
