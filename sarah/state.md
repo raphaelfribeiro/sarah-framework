@@ -11,7 +11,7 @@
 
 | Task | File | Phase | Level | Waiting on | Since |
 | --- | --- | --- | --- | --- | --- |
-| v1 readiness — evidence, visibility, and the state model | `sarah/state/v1-readiness.md` | 5-implement | 3 | nobody | 2026-08-14 |
+| v1 readiness — evidence, visibility, and the state model | `sarah/state/v1-readiness.md` | 5-implement, complete | 3 | **you — publish v1, or not** | 2026-08-15 |
 
 ## Carried forward
 

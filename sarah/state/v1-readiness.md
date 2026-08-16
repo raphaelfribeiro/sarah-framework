@@ -1,6 +1,6 @@
 # v1 readiness — evidence, visibility, and the state model
 
-**Branch:** `develop` · **Level:** 3 · **Phase:** 5-implement · **Updated:** 2026-08-15
+**Branch:** `develop` · **Level:** 3 · **Phase:** 5-implement, complete · **Updated:** 2026-08-15
 
 ## Itinerary
 
