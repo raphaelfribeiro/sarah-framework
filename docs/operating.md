@@ -33,8 +33,11 @@ running into them:
   sequence is in [branching.md](branching.md).
 - **The mirror is not a guarantee.** A push-mirror can be configured, run on
   schedule, fail every time, and report that only inside its own settings page.
-  Ours did exactly that for eleven days after the repository was renamed. Treat
-  "it mirrors automatically" as a claim to verify at release time, not a fact.
+  Ours did exactly that for eleven days after the repository was renamed, and
+  the state file repeated "it mirrors automatically" as a fact the whole time.
+  Treat it as a claim to verify at release time: **read what actually arrived**,
+  not what was supposed to. It carries heads and tags and nothing else — checked
+  by listing the refs on the far side rather than by reasoning about it.
 
 Users receive it by installing from the marketplace, which resolves to `main`:
 
@@ -58,10 +61,18 @@ That leaves four signals, in the order they arrive:
 | The plugin loads | Manifests parse, skills register, hooks do not break a session | `/plugin` in any Claude Code session |
 | Issues | A human hit something the guards do not model | GitHub issues |
 
-**As of v0.1.0 the first signal has never fired.** No runner has executed the
-`release` workflow — its steps were exercised locally, including against a
-deliberately wrong tag, and that is not the same thing. Until a run appears, the
-release pipeline is a claim like any other.
+**The first signal fired for the first time on v0.1.0**, and it passed: both the
+called validation and the publish job, producing the release from the changelog
+section. Before that it was a claim — its steps had been exercised locally,
+including against a deliberately wrong tag, which is not the same thing.
+
+One trap it revealed, worth knowing before the next repository is set up. **A
+first push into an empty remote does not fire a release.** Every ref arrives at
+once, and the remote registered a workflow run for the default branch only —
+nothing for the other branch, nothing for the tag, even though the workflow file
+was present in the tag's own tree. Deleting the tag and pushing it again as an
+isolated event ran the pipeline correctly. It is an artefact of an empty
+repository and does not recur, which is exactly why nobody remembers it.
 
 The fourth is the only one that finds a defect the first three cannot, which is
 why [the README asks for a specific kind of report](../README.md#contributing): a
