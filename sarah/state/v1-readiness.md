@@ -245,7 +245,7 @@ alignment; item 7 is a product decision and deliberately separate.**
    `skills/sarah-bootstrap/references/itinerary.md`, loaded only when the table is
    built, so the session budget carries the instruction and not the reasoning.
    `sarah-bootstrap` now sits at ~1,822 tokens against 2,000.
-8. **Open, and newly named: S.A.R.A.H. has no answer for a sprint.** The state
+8. **Done 2026-08-15 — state is per task now.** Was: S.A.R.A.H. had no answer for a sprint. The state
    model is single-track by construction - one `sarah/state.md`, one **Current
    task**, one phase - and that file is versioned and rewritten continuously (31
    commits so far). Two features in parallel means two divergent state files and
