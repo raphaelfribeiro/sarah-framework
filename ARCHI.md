@@ -29,7 +29,8 @@ loads into context, when, and at what cost.
 | Manifests | JSON | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` |
 | Hooks | POSIX `sh` | No bashisms; runs on macOS, Linux, and Git Bash |
 | Scripts | Python 3, standard library only | Token measurement for `/sarah-compact` |
-| CI | GitHub Actions | Manifest validation, frontmatter and size linting |
+| CI | GitHub Actions | `validate.yml`: manifest validation, frontmatter and size linting, the bootstrap token budget, and two leak guards. `release.yml`: fires on `v*` and calls `validate.yml` rather than repeating it |
+| Distribution | Git tag on `main` | No deploy step and no server. A tag push builds the GitHub Release; see `docs/operating.md` |
 
 ## 3. System shape
 
@@ -165,9 +166,19 @@ authority.
   and tested on every review, while the detection branch is written but never
   executed here. Treat it as untested code until a contributor with a second CLI
   reports otherwise.
-- **`claude plugin validate` checks manifests, not content.** Nothing yet
-  verifies that a skill body stays under 500 lines, that agent frontmatter uses
-  only accepted fields, or that internal links resolve. Phase D adds this to CI.
+- **`claude plugin validate` checks manifests, not content.** CI now covers the
+  500-line body ceiling, skill frontmatter, and the bootstrap token budget. Two
+  things it still does not cover: **agent frontmatter fields** and **whether an
+  internal link resolves**. A dead link in a skill is invisible until a model
+  follows it and finds nothing.
+- **Nothing verifies that the plugin installs.** CI validates structure — a
+  manifest parses, a body fits, a hook exits 0. Whether a skill *fires*, whether
+  a gate *holds*, and whether the plugin loads at all from a published tag are
+  behavioural, and the only instrument that has ever measured them is a recorded
+  run against a fresh project. That costs real money and is not automated. An
+  installation smoke test would need CLI authentication on a runner; recorded in
+  `docs/operating.md` as a gap rather than closed. **Structural green is
+  necessary and never sufficient.**
 
 ## 9. Map
 
@@ -178,6 +189,8 @@ authority.
 | `agents/` | Specialist personas, loaded per phase |
 | `hooks/` | Hook registration and POSIX shell scripts |
 | `templates/` | Artifacts copied into the user's project |
-| `docs/` | Framework documentation for humans |
-| `examples/` | End-to-end walkthroughs |
+| `docs/` | Framework documentation for humans, including the walkthroughs and the comparative studies under `docs/study/` |
+| `scripts/` | Python helpers; token measurement for `/sarah-compact` |
+| `.github/` | CI workflows and the issue and pull request templates |
+| `.githooks/` | Versioned pre-push guard; opt-in per clone with `core.hooksPath` |
 | `sarah/` | This repository's own S.A.R.A.H. state |

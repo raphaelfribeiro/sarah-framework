@@ -292,6 +292,9 @@ the work is small and to bring the right specialist when it is not.
 
 - [Quality gates](docs/quality-gates.md) — the five gates in full
 - [Branching](docs/branching.md) — the gitflow model this project uses
+- [Operating a release](docs/operating.md) — how a release is cut, how you know
+  it is working, and the way back
+- [Changelog](CHANGELOG.md) — what shipped in each version
 - [Extending](docs/extending.md) — the tracker and second-model contracts
 - [Contributing](CONTRIBUTING.md) — how to work on the framework itself
 - [Architecture](ARCHI.md) — how S.A.R.A.H. is built

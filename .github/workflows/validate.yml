@@ -5,6 +5,11 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
+  # Called by release.yml so a tag runs these exact guards rather than a copy of
+  # them. This repository has already shipped a defect from two expressions that
+  # were meant to agree and did not; a second copy of the guards is that defect
+  # waiting for a release to happen.
+  workflow_call:
 
 jobs:
   validate:

@@ -1,0 +1,69 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  # The tag runs the same guards as every branch, from the same file. A tag that
+  # cannot pass them is not a release, whatever it is called.
+  validate:
+    uses: ./.github/workflows/validate.yml
+
+  publish:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The tag and the manifests agree
+        run: |
+          # A tag that disagrees with the version users see in /plugin is worse
+          # than no tag: it makes every later bug report ambiguous about which
+          # version it describes.
+          tag="${GITHUB_REF_NAME#v}"
+          fail=0
+          for f in .claude-plugin/plugin.json .claude-plugin/marketplace.json; do
+            found=$(python3 - "$f" <<'PY'
+          import json, sys
+          d = json.load(open(sys.argv[1]))
+          v = d.get("version") or d["plugins"][0]["version"]
+          print(v)
+          PY
+          )
+            if [ "$found" != "$tag" ]; then
+              echo "::error file=$f::manifest says $found, tag says $tag"
+              fail=1
+            else
+              echo "ok: $f is $found"
+            fi
+          done
+          exit $fail
+
+      - name: The changelog has a section for this version
+        run: |
+          # Release notes are extracted, never generated. If the section is
+          # missing the release stops here rather than publishing an empty one.
+          tag="${GITHUB_REF_NAME#v}"
+          awk -v v="$tag" '
+            $0 ~ "^## \\[" v "\\]" { inside = 1; next }
+            inside && /^## \[/     { exit }
+            inside                 { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "::error file=CHANGELOG.md::no section for [$tag]"
+            exit 1
+          fi
+          echo "ok: $(wc -l < release-notes.md) lines of notes"
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            --verify-tag

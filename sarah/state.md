@@ -1,23 +1,82 @@
 # S.A.R.A.H. state
 
-**Updated:** 2026-08-15
+**Updated:** 2026-08-16
 
 | | |
 | --- | --- |
 | **Default level** | 3 |
 | **Mode** | greenfield |
+| **Released** | `v0.1.0`, 2026-08-16 |
 
 ## In flight
 
-| Task | File | Phase | Level | Waiting on | Since |
-| --- | --- | --- | --- | --- | --- |
-| v1 readiness — evidence, visibility, and the state model | `sarah/state/v1-readiness.md` | 5-implement, complete | 3 | **you — publish v1, or not** | 2026-08-15 |
+Nothing. The runway is empty.
+
+`v1-readiness` shipped as `v0.1.0` and its task file was deleted, which is what
+the per-task state model prescribes. What it delivered is in
+`sarah/changelog/`; what outlived it is below.
 
 ## Carried forward
 
-- **The Level 3 pipeline runs end to end, and the two open questions are closed.** Exercised twice: 2026-08-05 uninstrumented from step 1, and 2026-08-06 instrumented throughout. Gate 3 holds and gate 4 stops deliveries; every phase spawns its own specialists without being asked. What each run could and could not prove is recorded in `sarah/changelog/2026-08-05-level-3-pipeline-verified.md` and `sarah/changelog/2026-08-06-level-3-instrumented.md`. **What no run has proven:** the human gates, because headless prompts must say "do not ask me anything"; and whether the framework's contribution is separable from the model's, which is what Phase E exists to measure. Evidence in the run logs, outside the repository.
-- **Framework v2 exists but is unproven.** `feature/framework-v2-lean` rewrites the review gate to probe with hostile input and rehearse a cold start, refuses README-not-run and production test seams, cuts phase-boundary ceremony, and keeps three artefacts an independent analysis found genuinely valuable: invariants stated with the consequence no test would catch, superseded decisions with their reason, and the deliberately-not-tested list. Whether any of it helps is exactly what Phase F was started to measure, and Phase F is paused.
-- **Three instrument bugs of my own, all the same shape.** The blinding sanitizer deleted whole lines and truncated prose in one arm only (~15% of the evidence base). The harness treated a rate-limited step as complete, so one artefact was judged having never had a review. And a framework-use check counted tool calls, but slash commands are expanded before becoming tool calls - it voided a valid run. The pattern: **my own spot checks are less trustworthy than the instrumented procedure, and when they disagree the procedure wins unless I can show otherwise.**
-- **The evidence study ran and could not discriminate — for two independent reasons.** Six builds of one brief, three per arm, eighteen blind scores, $280.76. Every artefact scored 43-44 out of 44, so the rubric had no room to record a difference. And the arms were confounded: the control ran without the maintainer's user settings and the framework arm ran with them, so the comparison was framework-plus-personal-context against a bare CLI. The second reason is the more serious — a saturated instrument measures nothing, but a confounded one measures the wrong thing while looking like it worked. Inconclusive about the framework in both directions. One finding stands on its own: on the four security requirements the brief never states, plain Claude Code scored full marks in all three runs. Cost and its variance are the reliable measurements - the framework arm spread 2.7x against the control's 1.06x. Full writeup in `docs/study/`.
-- **`sarah-bootstrap` sits at ~1,574 tokens against its own 2,000 ceiling**, measured 2026-08-06. Anything added there still costs every session, so additions stay in words rather than lines.
-- **Gate 5 now requires a commit, and nothing enforces it at runtime.** Three instrumented runs ended implementation with a passing suite and no commits — the third collapsed eight phases into three commits at release time, one of them 2,849 lines with the review fixes fused into the code under review. The gate was rewritten and all seven phase skills now close their own loop. The framework is prose a model reads: whether phase-closing commits actually happen is measurable only by instrumenting another run, and that measurement is now part of what Phase E has to report.
+- **v0.1.0 is tagged and the pipeline enforces it.** `release.yml` fires on `v*`,
+  calls `validate.yml` through `workflow_call` rather than copying its guards,
+  and refuses a tag whose manifests disagree with it or whose version has no
+  `CHANGELOG.md` section. Both refusals were exercised against a wrong tag before
+  the branch was cut. **Bumping a version means editing both manifests and adding
+  a changelog section, or the release stops** — by design.
+- **`docs/operating.md` is where observe-and-reverse lives.** No telemetry, on
+  purpose. Four signals: CI on the tag, CI on `main`, the plugin loading, and
+  issues. **None of them can tell whether a skill fires** — that is behavioural
+  and only a recorded run against a fresh project has ever measured it. Structural
+  green is necessary and never sufficient, and the missing installation smoke test
+  is recorded as a gap rather than closed.
+- **The framework does not make Claude write better code on a well-specified
+  brief, and the README says so.** Six blind-judged runs, 20.7/48 against 19.7 at
+  21% more cost; an earlier study could not discriminate at all because every
+  artefact scored 43-44 of 44 and the arms were confounded by `--setting-sources`.
+  Three attempts, three times without a verdict in our favour. US$ 308.63 and
+  US$ 187.31. Full writeups in `docs/study/`. **The next study needs a different
+  question, not a better rubric** — the tested claim was code quality on a brief
+  that leaves nothing unstated, which is the case the framework is least likely
+  to help.
+- **The human gates have never been measured.** Every instrumented run carried
+  "do not ask me anything", which proves the automatic gates and forecloses the
+  human ones. Anything claiming otherwise is claiming more than the evidence.
+- **Five instrument bugs, one shape.** A sanitizer that deleted lines in one arm
+  only; a harness that read a rate-limited step as complete; a framework-use
+  count that crashed into `0` and became a finding; an isolation probe that read
+  silence as absence; a recovery step that would have deleted three finished runs.
+  **An instrument must be able to report that it did not measure.** The fixes that
+  held were written by exclusion — refuse anything that is not a regular file,
+  make each verdict carry its own affirmative evidence — and the ones that kept
+  failing enumerated what to fear.
+- **Divergence, not omission, is the defect that survives gates.** Round 5 of the
+  packager review shipped a file called `the framework.md` whose prose pointed at
+  `the frameworkmd`, from two rewrite expressions that were meant to agree. No
+  gate could see it because each passed alone. The fix was defining the
+  expression once. `release.yml` calling `validate.yml` is the same lesson applied
+  before the fact.
+- **`sarah-bootstrap` sits at ~1,950 tokens against its 2,000 ceiling**, measured
+  2026-08-16 by CI. It is injected into every session, so there is room for
+  roughly one paragraph and no more. Additions go in words, or something leaves.
+- **Framework v2's subtractive thesis is unproven and still the live question.**
+  The review gate probes with hostile input and rehearses a cold start, and three
+  artefacts survived an independent cut: invariants stated with the consequence no
+  test would catch, superseded decisions with their reason, and the
+  deliberately-not-tested list. Whether any of it helps was what Phase F set out
+  to measure, and Phase F answered a different question.
+- **Gate 5 requires a commit, and nothing enforces it at runtime.** All seven
+  phase skills close their own loop in prose. Whether phase-closing commits
+  actually happen is measurable only by instrumenting another run.
+- **The eight steps are documented in three places and must stay in agreement:**
+  `README.md` (§The workflow), `skills/sarah-init/SKILL.md` (step 0 welcome), and
+  `skills/sarah-bootstrap/SKILL.md` (the routing ladder). A change to one is a
+  change to all three.
+
+## Publication
+
+The repository is **public**. It mirrors automatically, so a push is a publish —
+and now a tag push also builds a GitHub Release. Commit freely; push only on an
+explicit decision. Nothing versioned here may reveal the maintainer's internal
+infrastructure: clone URLs, badges, issue links, and CI reference GitHub and
+nothing else, and two CI guards enforce it.
