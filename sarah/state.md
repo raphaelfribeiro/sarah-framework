@@ -10,7 +10,11 @@
 
 ## In flight
 
-Nothing. The runway is empty.
+Nothing in this repository. **One thing is owed on the origin**, and it is not a
+code change: the push-mirror still points at the pre-rename repository name and
+has been failing every eight hours since 2026-08-05. Until it is repointed,
+`v0.1.0` exists on the origin and nowhere else, and the README's Quickstart
+resolves to nothing.
 
 `v1-readiness` shipped as `v0.1.0` and its task file was deleted, which is what
 the per-task state model prescribes. What it delivered is in
@@ -18,6 +22,15 @@ the per-task state model prescribes. What it delivered is in
 
 ## Carried forward
 
+- **A rename left a downstream reference behind, and it failed in silence for
+  eleven days.** The mirror kept the old repository name, retried every eight
+  hours, and recorded `Repository not found` where only its own settings page
+  could see it. The 2026-08-05 decision that renamed the repository closed with
+  "no versioned file changed: every URL already used that name" — true, and it
+  was the one unversioned URL that mattered. **Sixth of the family, and the first
+  outside an instrument:** a component that cannot report its own failure to
+  anyone who would act on it. The state file then repeated the belief as fact,
+  which is how a tag got pushed ahead of a branch that could not accept it.
 - **v0.1.0 is tagged and the pipeline enforces it.** `release.yml` fires on `v*`,
   calls `validate.yml` through `workflow_call` rather than copying its guards,
   and refuses a tag whose manifests disagree with it or whose version has no
@@ -75,8 +88,18 @@ the per-task state model prescribes. What it delivered is in
 
 ## Publication
 
-The repository is **public**. It mirrors automatically, so a push is a publish —
-and now a tag push also builds a GitHub Release. Commit freely; push only on an
-explicit decision. Nothing versioned here may reveal the maintainer's internal
-infrastructure: clone URLs, badges, issue links, and CI reference GitHub and
-nothing else, and two CI guards enforce it.
+The repository is **public** and pushing is publishing. Commit freely; push only
+on an explicit decision. Nothing versioned here may reveal the maintainer's
+internal infrastructure: clone URLs, badges, issue links, and CI reference GitHub
+and nothing else, and two CI guards enforce it.
+
+Two mechanics that cost a release-day hour on 2026-08-16 and are written down so
+they do not cost another:
+
+- **`main` refuses every direct push**, admins included. Releases land through a
+  pull request merged **fast-forward only**, which keeps the tag pointing at a
+  commit `main` actually contains. Sequence in `docs/branching.md`.
+- **The mirror does not run.** It was never repointed after the 2026-08-05
+  rename, so it has been failing on the old repository name every eight hours
+  since. Nothing external has received a single commit. Fixing it is a settings
+  change on the origin, not a change here.
