@@ -79,22 +79,39 @@ jobs:
               sys.exit(1)
           PY
 
-      - name: Nothing references infrastructure that is not GitHub
+      - name: Every host this repository names is one it is allowed to name
         run: |
-          # Public artefacts point at GitHub and nothing else. Two files are
-          # excluded because they necessarily contain the very terms they hunt
-          # for: this workflow, and .githooks/pre-push, which runs the same
-          # check before a push instead of after one. Keep that in mind if you
-          # ever edit either — inside those two, a real reference is invisible
-          # to this guard.
-          if grep -rniE 'a-git-forge|a-private-network|\.example\b' \
-               --exclude-dir=.git \
-               --exclude=validate.yml \
-               --exclude=pre-push . ; then
-            echo "::error::internal infrastructure referenced in a public artefact"
-            exit 1
+          # This guard used to enumerate the names it feared, which meant it
+          # spelled out the private infrastructure it existed to keep out of a
+          # public repository — and then had to exclude itself and the pre-push
+          # hook from its own search, leaving two files where a real reference
+          # was invisible. Written as an allowlist it has no exclusions at all,
+          # cannot leak what it does not contain, and catches hosts nobody has
+          # thought of yet. The list lives in scripts/allowed-hosts.txt so the
+          # hook and this file cannot drift apart.
+          allowed=$(grep -vE '^\s*(#|$)' scripts/allowed-hosts.txt | tr -d ' ')
+          fail=0
+
+          for h in $(grep -rhoE 'https?://[a-zA-Z0-9._~-]+' --exclude-dir=.git . \
+                     | sed -E 's#https?://##' | sort -u); do
+            if printf '%s\n' "$allowed" | grep -qxF "$h"; then
+              continue
+            fi
+            echo "::error::unlisted host: $h"
+            fail=1
+          done
+
+          # A machine can be named without a scheme in front of it. The trailing
+          # class is what keeps a filename like settings.local.json out: there,
+          # the suffix is followed by another dot rather than by nothing.
+          if grep -rnE '[a-z0-9-]+\.(lan|local|internal|intranet)($|[^.a-zA-Z0-9])' \
+               --exclude-dir=.git . ; then
+            echo "::error::a bare hostname that names a private machine"
+            fail=1
           fi
-          echo "ok: no internal infrastructure referenced"
+
+          [ "$fail" -eq 0 ] && echo "ok: every host named here is on the list"
+          exit $fail
 
       - name: No path names a developer's machine
         run: |

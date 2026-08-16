@@ -22,6 +22,15 @@ the per-task state model prescribes. What it delivered is in
 
 ## Carried forward
 
+- **The guard against leaking private infrastructure was itself the leak.** It
+  was a denylist, so it spelled the names, in two versioned files that would have
+  been published — and it had to exclude itself from its own search to avoid
+  firing on its own source. Replaced by `scripts/allowed-hosts.txt`, a list of
+  what may be named, which has no exclusions and catches hosts nobody predicted.
+  **An allowlist cannot catch a bare word**, so product and network names go in a
+  gitignored `.private-terms` that the pre-push hook reads, and **the hook
+  announces on every push when that file is absent** rather than passing in
+  silence. CI cannot check that class at all, because CI runs after publication.
 - **A rename left a downstream reference behind, and it failed in silence for
   eleven days.** The mirror kept the old repository name, retried every eight
   hours, and recorded `Repository not found` where only its own settings page

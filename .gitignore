@@ -7,3 +7,6 @@ __pycache__/
 
 # OS noise
 .DS_Store
+
+# Local, never committed: the bare terms the pre-push guard must not spell in public.
+.private-terms

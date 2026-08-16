@@ -1,0 +1,27 @@
+# Every host this repository is allowed to name.
+#
+# Read by the CI guard and by .githooks/pre-push. It exists as a file, and not
+# as a literal in each of them, because two copies of one list are two lists:
+# this repository has already shipped a defect from two expressions that were
+# meant to agree and did not.
+#
+# The list is what is ALLOWED, never what is forbidden. A guard written the
+# other way has to spell out the private infrastructure it exists to keep out
+# of a public repository — in a file that is published like any other. This one
+# cannot leak what it does not contain, and it stops hosts nobody has thought
+# of yet.
+#
+# Adding a line is a decision: it makes that host publishable forever. Removing
+# one is free.
+
+github.com
+raw.githubusercontent.com
+img.shields.io
+json.schemastore.org
+anthropic.com
+semver.org
+keepachangelog.com
+
+# Loopback, for examples and generated project templates.
+localhost
+127.0.0.1
