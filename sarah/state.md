@@ -10,7 +10,11 @@
 
 ## In flight
 
-Nothing. **v0.1.0 is published**: the mirror was repointed on 2026-08-16, both
+| Task | File | Phase | Level | Waiting on | Since |
+| --- | --- | --- | --- | --- | --- |
+| Measurement pilot — Jukebox Disc | `sarah/state/measurement-pilot.md` | running, outside this repo | 2 | **the first session in `dev/jukebox-disc`** | 2026-08-16 |
+
+Nothing else. **v0.1.0 is published**: the mirror was repointed on 2026-08-16, both
 branches and the tag reached the public repository, CI passed there, and the
 release pipeline built the GitHub Release from the changelog. The Quickstart in
 `README.md` resolves to something for the first time.
