@@ -23,9 +23,18 @@ git checkout develop
 git merge --no-ff release/X.Y.Z     # back-merge, never skip
 ```
 
-Pushing the tag is what publishes it. The repository is public and mirrors
-automatically, so **a push is a publish** — it is a decision, not a step, and the
-full flow is in [branching.md](branching.md).
+Pushing is what publishes it, and it is a decision rather than a step. Two
+things about this origin that the commands above do not show, both learned by
+running into them:
+
+- **`main` refuses every direct push**, administrators included, so the local
+  merge lands through a pull request merged **fast-forward only**. Any other
+  merge style leaves the tag naming a commit `main` does not contain. The full
+  sequence is in [branching.md](branching.md).
+- **The mirror is not a guarantee.** A push-mirror can be configured, run on
+  schedule, fail every time, and report that only inside its own settings page.
+  Ours did exactly that for eleven days after the repository was renamed. Treat
+  "it mirrors automatically" as a claim to verify at release time, not a fact.
 
 Users receive it by installing from the marketplace, which resolves to `main`:
 
@@ -48,6 +57,11 @@ That leaves four signals, in the order they arrive:
 | CI green on `main` | The published branch still passes | Actions, `validate` workflow |
 | The plugin loads | Manifests parse, skills register, hooks do not break a session | `/plugin` in any Claude Code session |
 | Issues | A human hit something the guards do not model | GitHub issues |
+
+**As of v0.1.0 the first signal has never fired.** No runner has executed the
+`release` workflow — its steps were exercised locally, including against a
+deliberately wrong tag, and that is not the same thing. Until a run appears, the
+release pipeline is a claim like any other.
 
 The fourth is the only one that finds a defect the first three cannot, which is
 why [the README asks for a specific kind of report](../README.md#contributing): a

@@ -57,17 +57,39 @@ shipped together*.
 
 ```sh
 git checkout -b release/0.2.0 develop
-# version bumps, changelog, release notes - no new features
+# version bumps in both manifests, changelog, release notes - no new features
 git checkout main
 git merge --no-ff release/0.2.0
 git tag -a v0.2.0 -m "..."
 git checkout develop
 git merge --no-ff release/0.2.0     # back-merge, never skip
-git branch -d release/0.2.0
 ```
 
 A `release/*` branch is for stabilising, not for finishing. A feature that
 arrives after the branch is cut goes to `develop` and ships in the next version.
+
+**`main` is protected on the origin, and the protection refuses every direct
+push — administrators included.** So the local merge above is only half the
+procedure. Publishing it means pushing the `release/*` branch and landing it
+through a pull request, merged **fast-forward only**:
+
+```sh
+git push origin develop v0.2.0
+git push origin release/0.2.0
+# open release/0.2.0 -> main, merge with fast-forward-only, then:
+git push origin --delete release/0.2.0
+git branch -d release/0.2.0
+```
+
+Fast-forward-only is the part that matters. Any other merge style makes the
+origin invent its own commit, and the tag you just pushed ends up naming a commit
+`main` does not contain — a released version that officially happened somewhere
+else. `main` is always a fast-forward from the release merge, so the style is
+always available.
+
+**Push `develop` and the tag before the pull request, not after.** The pull
+request is the slow step, and a tag that arrives late is a window where `main`
+carries the release without saying which version it is.
 
 **A hotfix** follows the same shape, branching from `main` instead of `develop`,
 and back-merging with the same discipline. `sarah-hotfix` records which gates it
