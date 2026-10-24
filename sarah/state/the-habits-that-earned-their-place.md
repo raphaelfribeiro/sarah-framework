@@ -102,8 +102,9 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 1 | 1 template move, 2 probes | this branch | done (3e42be2, c7eaa2a) |
 | 2 | 3+4 defaults and state size | `feature/habits-s03-defaults-and-size` | building |
 | 2 | 5 install engine | `feature/habits-s05-install-engine` | building |
-| 2 | 7 executor and brief | `feature/habits-s07-executor` | building |
-| 3 | 8+9 decisions, short rituals; 6+10 init interview, grants; 11+12 exceptions, gitflow, changelog fragment | — | after 5 |
+| 2 | 7 executor and brief | `feature/habits-s07-executor` | merged (9d2096c) |
+| 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | building |
+| 3 | 6+10 init interview, grants; 11+12 exceptions, gitflow, changelog fragment | — | after 5 |
 | 4 | 13 dispatch guard, 14 Stop hook, 15 tracker | — | after 11 |
 | 5 | 16 docs gate and release prep | — | last |
 
