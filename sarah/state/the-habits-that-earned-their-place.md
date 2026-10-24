@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** design-ux (Gate 2 closed 2026-10-24) · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** implement (Gate 3 closed 2026-10-24) · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -93,9 +93,10 @@ Approved by the user as proposed, 2026-10-24.
 
 ## In flight
 
-Design / UX: the `/sarah-init` habit-catalog interview. Inputs: the approved spec
-`docs/specs/the-habits-that-earned-their-place.md` and the approved design
-`docs/specs/the-habits-that-earned-their-place.architecture.md`.
+Implementation. Inputs: the spec, the design
+(`docs/specs/the-habits-that-earned-their-place.architecture.md`) and the UX spec
+(`docs/specs/the-habits-that-earned-their-place.ux.md`). First, the four platform
+probes; then the plan for approval.
 
 ## Blocked
 
@@ -119,6 +120,18 @@ R24 (Q7).
 collaborator's agent — revisit when a team adopts it (ADR-010). `python3` is
 needed by any habit that installs or calls a script, the tracker included.
 
+## Decisions at Gate 3 (2026-10-24)
+
+| Decision | Choice |
+| --- | --- |
+| Init interview | **Always the full catalog**, in plain words without technical terms; technical names only on "details" |
+| What init recommends the agent may do unattended | Push feature branches; merge, force-push and deletion still ask |
+| The close | One question, "Commit (Recommended)"; the agent commits |
+| Compaction offer | Once a day, in the opening or after the first task |
+| Opening and closing | At most 10 lines, no headings; **a short table when there are more than 2 items** |
+
+The new patterns listed in the UX spec §9 were approved with the design.
+
 **First thing implementation does:** four probes of untested platform behaviour —
 effort set per call, the hook seeing executor launches, an executor naming the
 model it ran on, always-ask rules under permissive modes. A failed probe switches
@@ -131,7 +144,8 @@ to the fallback named in the design.
 | Brainstorm exit - problem agreed, scope picked | passed | 2026-10-24 |
 | 1. Spec approved | passed | 2026-10-24 |
 | 2. Architecture approved | passed | 2026-10-24 |
-| 3. Design approved | open | |
+| 3. Design approved | passed | 2026-10-24 |
+| Plan approved | open | |
 
 ## Found along the way
 
@@ -148,7 +162,6 @@ to the fallback named in the design.
 
 ## Next
 
-`sarah-phase-design-ux`: the `/sarah-init` interview — how the catalog is shown,
-the order of questions, defaults, the empty and error states (no `python3`, no
-token, tracker unreachable), and how a habit is removed later. Then implement.
-The user's own install stays pinned on `v0.1.0` while the pilot runs.
+`sarah-phase-implement`: run the four probes, then present the implementation
+plan and the test plan for approval. The user's own install stays pinned on
+`v0.1.0` while the pilot runs.
