@@ -100,7 +100,7 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | Wave | Steps | Branch | Status |
 | --- | --- | --- | --- |
 | 1 | 1 template move, 2 probes | this branch | done (3e42be2, c7eaa2a) |
-| 2 | 3+4 defaults and state size | `feature/habits-s03-defaults-and-size` | building |
+| 2 | 3+4 defaults and state size | `feature/habits-s03-defaults-and-size` | merged |
 | 2 | 5 install engine | `feature/habits-s05-install-engine` | building |
 | 2 | 7 executor and brief | `feature/habits-s07-executor` | merged (9d2096c) |
 | 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | merged |
@@ -112,6 +112,19 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 At most three slices run at once, each in its own worktree branched from this
 branch, then merged back here. Developers write the tests from the test
 engineer's plan, rather than a separate test engineer per slice.
+
+**Carried from merged slices, to settle before review:**
+
+- The session-start hook's worst case is ~356 of 400 tokens. The Habits, Tracker,
+  Audit and Exceptions lines still to come need ~70, so older lines must shrink.
+- The test plan's `SARAH_TODAY` seam was not built; dates are controlled by a
+  `date` shadowed on `PATH`, as the phase rules require.
+- Token budgets in tests use chars/4, the measure CI already uses for the
+  bootstrap; `scripts/token_budget.py` rates the same text ~15% higher.
+- The shell suite passes under dash (the `/bin/sh` of the CI runner) as well as
+  locally; as root, the unreadable-file cases skip by design.
+- Step 3's first commit is not green on its own (one worst-case assertion needs
+  step 4); the merge is.
 
 ## Blocked
 
