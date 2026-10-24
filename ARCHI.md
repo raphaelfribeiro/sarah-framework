@@ -227,12 +227,12 @@ for them this table is the authority.
   installation smoke test would need CLI authentication on a runner; recorded in
   `docs/operating.md` as a gap rather than closed. **Structural green is
   necessary and never sufficient.**
-- **The v0.2.0 design rests on four platform facts nobody has tested.** Each is
-  probed before it is built on, and each has a named fallback:
-  - per-call `effort` on the Agent tool, seen in a tool schema but not in the public docs (fallback: one executor file per effort level);
-  - the PreToolUse matcher `Agent` and its `tool_input` fields;
-  - whether an executor can name the model it actually ran on after a silent platform fallback;
-  - whether a project `permissions.ask` rule still prompts in permissive modes.
+- **The v0.2.0 design rests on platform behaviour the public docs do not
+  promise.** Per-call `effort` on the Agent tool, the `Agent` PreToolUse input,
+  the executor naming its own model, and `permissions.ask` holding in permissive
+  modes were all probed on CLI 2.1.308 and held. **`CLAUDE_CODE_EFFORT_LEVEL`
+  removes per-call effort without a word**, and a forced fallback could not be
+  provoked, so that case is unverified. Re-probe on a CLI major version.
 
   Also documented: the platform's model fallback never fires on a rate limit
   (429), so the orchestrator re-dispatches itself.

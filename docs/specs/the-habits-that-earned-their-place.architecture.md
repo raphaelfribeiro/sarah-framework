@@ -14,9 +14,9 @@ Checked against the Claude Code documentation (code.claude.com/docs: sub-agents,
 | --- | --- | --- |
 | F1 | Plugin agents accept `model` and `effort` in frontmatter. `hooks`, `mcpServers` and `permissionMode` are ignored for plugin agents | verified |
 | F2 | A `model` set on the call overrides the agent's frontmatter `model` | verified |
-| F3 | The Agent tool takes `model` (aliases only: `sonnet`, `opus`, `haiku`, `fable`), `effort` (`low` to `max`) and `isolation: "worktree"` per call | observed. Per-call `effort` is **not** in the public docs |
+| F3 | The Agent tool takes `model` (aliases only: `sonnet`, `opus`, `haiku`, `fable`), `effort` (`low` to `max`) and `isolation: "worktree"` per call | verified by probe P1, CLI 2.1.308: each subagent request carried its dispatched effort (`low`, `high`, `low`) while the session ran at `medium` |
 | F4 | Per-call `effort` may be set only when the user or a skill explicitly asks for that effort. A skill that says "dispatch at the effort the task file declares" meets that condition | observed. It is a rule on model behavior, not an API guarantee |
-| F5 | `CLAUDE_CODE_EFFORT_LEVEL` overrides frontmatter effort, and `maxEffortLevel` caps it | verified. Whether the variable also overrides per-call `effort` is **unverified** |
+| F5 | `CLAUDE_CODE_EFFORT_LEVEL` overrides frontmatter effort, and `maxEffortLevel` caps it | verified. Probe P1, CLI 2.1.308: with the variable set, the Agent tool **loses its `effort` parameter entirely** and every subagent runs at the variable's level. Per-call effort is then silently unavailable; the operating docs must say so |
 | F6 | The `fallbackModel` chain applies to subagents on overload or unavailability. Rate-limit (429), auth and billing errors never trigger it | verified |
 | F7 | Every plugin agent's description is listed to the main agent in every session | observed |
 | F8 | Subagent worktrees branch from the remote default branch unless `worktree.baseRef: "head"` is set. `.worktreeinclude` copies gitignored files. Dependencies are not installed | verified |
@@ -27,9 +27,9 @@ Checked against the Claude Code documentation (code.claude.com/docs: sub-agents,
 | F13 | Plugin `userConfig` with `sensitive: true` reaches only hooks and MCP servers, never Bash commands | verified |
 | F14 | Optional `userConfig` prompting at plugin enable | dropped: irrelevant once D4 chose environment variables |
 | F15 | `attribution.commit` and `attribution.pr` can be set in project settings | verified (settings index row) |
-| F16 | The PreToolUse matcher for subagent dispatch is `Agent`, and its `tool_input` carries `subagent_type`, `model`, `effort` and `isolation` | **assumed**. A probe hook verifies it first |
-| F17 | A subagent can name the model it actually ran on | **assumed** |
-| F18 | A project `permissions.ask` rule still prompts when the user runs in a permissive mode | **assumed**. A probe verifies it |
+| F16 | The PreToolUse matcher for subagent dispatch is `Agent`, and its `tool_input` carries `subagent_type`, `model`, `effort` and `isolation` | verified by probe P2, CLI 2.1.308: `tool_input` was `{"subagent_type","model","effort","run_in_background","isolation"}` |
+| F17 | A subagent can name the model it actually ran on | verified by probe P3 for a normal dispatch, CLI 2.1.308: `resolvedModel` matched the subagent's own answer in 6 of 6. A forced platform fallback could not be triggered, so that case stays covered by the D1 fallback |
+| F18 | A project `permissions.ask` rule still prompts when the user runs in a permissive mode | verified by probe P4, CLI 2.1.308: the ask rule refused `git push` under `bypassPermissions` and under `acceptEdits`; a control run without it pushed |
 
 ---
 
@@ -338,9 +338,16 @@ Unchanged: never load the full roster (D1 adds one description); five commands; 
 | A ceiling on `sarah/decisions.md` | The file does not exist yet |
 | Server-side branch protection | Advice only |
 
-## 8. To verify first in implementation
+## 8. Verified first in implementation
 
-1. F16: a probe PreToolUse `Agent` hook that logs its input.
-2. F3, F4: dispatch at `haiku`/`low` and at `opus`/`high`. If effort is not applied, D1 switches to option (c).
-3. F17: does the report name the actual model after a forced fallback?
-4. F18: does a project `permissions.ask` rule still prompt in the user's permissive modes?
+All four probes ran on 2026-10-24 against CLI 2.1.308, in a throwaway project,
+and **all held**: no fallback applies. Verdicts are in the F3, F5, F16, F17 and
+F18 rows above. Two consequences:
+
+1. **`CLAUDE_CODE_EFFORT_LEVEL` silently removes per-call effort.** The
+   operating docs say so, and the executor report names the effort it actually
+   ran at.
+2. **A forced platform fallback cannot be triggered on demand**, so F17 holds for
+   a normal dispatch only; the D1 fallback re-dispatch covers the rest.
+
+Re-run the probes when the CLI's major version changes.
