@@ -64,6 +64,13 @@ jobs:
           done
           exit $fail
 
+      - name: Tests pass
+        run: |
+          # Includes the static checks: every references/ link a skill names
+          # must resolve inside that skill's own directory, as a regular file.
+          # A symlink there passes here and fails once the plugin is installed.
+          python3 -m unittest discover -s tests -t . -v
+
       - name: sarah-bootstrap stays inside its context budget
         run: |
           # Injected into every session, so its size is charged to every task

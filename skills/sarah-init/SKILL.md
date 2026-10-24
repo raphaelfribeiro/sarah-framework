@@ -106,7 +106,6 @@ Templates ship alongside this skill. Read them with paths relative to this file,
 - [references/ARCHI-template.md](references/ARCHI-template.md)
 - [references/README-template.md](references/README-template.md)
 - [references/state-template.md](references/state-template.md)
-- [references/task-template.md](references/task-template.md)
 
 **Read each template with the Read tool before writing the file it produces.** Do not generate from memory or from the descriptions in this skill. A template is a structure to be filled, not a description to be paraphrased — and paraphrasing it is the single most likely way this step goes wrong.
 
@@ -135,7 +134,7 @@ Whichever you propose, say which case you judged it to be and why, and show the 
 
 **`sarah/state.md`** from `references/state-template.md`. It is an index: default level, mode, the date, and an empty **In flight** table. Do not invent a task to put in it — "Nothing in flight" is the correct state of a project that has not started.
 
-Task state lives in `sarah/state/<branch-slug>.md`, one file per task, created from `references/task-template.md` when work actually begins. Do not create the directory now; the first task creates it.
+Task state lives in `sarah/state/<branch-slug>.md`, one file per task, created by `sarah-bootstrap` from its own task template when work actually begins. Do not create the directory now; the first task creates it.
 
 **`sarah/changelog/`** — create the directory with a `.gitkeep`.
 
