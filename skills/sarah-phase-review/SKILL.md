@@ -100,6 +100,8 @@ output through `tail` or `grep` rather than swallowing it whole. A reviewer that
 re-reads the entire repository spends its budget on rediscovery instead of on
 finding defects.
 
+**The verdict is a structured question, and the first line of the report says whether a decision is needed.** Conversation defaults, unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Let the implementer review the implementation.

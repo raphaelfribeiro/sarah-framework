@@ -48,7 +48,8 @@ field() {
     grep -i "^| \*\*$1\*\*" "$state" 2>/dev/null |
         head -n 1 |
         awk -F'|' '{ print $3 }' |
-        sed 's/^[[:space:]]*//; s/[[:space:]]*$//' 2>/dev/null || true
+        sed 's/^[[:space:]]*//; s/[[:space:]]*$//' 2>/dev/null |
+        cut -c1-60 2>/dev/null || true
 }
 
 level=$(field 'Default level')
@@ -105,13 +106,53 @@ fi
 if [ -n "$task" ] && [ "$task" != "none" ]; then
     echo "Current task: $task"
 elif [ "${in_flight_count:-0}" -gt 0 ]; then
-    echo "In flight: ${in_flight_count} task(s). Their state is in sarah/state/, one file per task - read only the one the request belongs to."
+    echo "In flight: ${in_flight_count} task(s). State is in sarah/state/, one file per task - read only the one you need."
 fi
 
-echo "Before any development work, use the sarah-bootstrap skill: it reads sarah/state.md and ARCHI.md, sizes the request into a scale level, and routes to the right phase with only that phase's specialists in context. Do not start planning or editing without it."
+echo "Before any development work, use the sarah-bootstrap skill: it reads sarah/state.md and ARCHI.md, sizes the request, and routes to the right phase. Do not plan or edit without it."
 
 if [ "${in_flight_count:-0}" -gt 0 ]; then
-    echo "Work is already in flight. Suggest /ill-be-back to the user for a situation report and the day's priorities before starting anything new."
+    echo "Work is in flight: suggest /ill-be-back (situation report, day's priorities) before anything new."
+fi
+
+# ---------------------------------------------------------------------------
+# Conversation defaults (R1-R7, ADR-007).
+#
+# The text lives in hooks/conversation-defaults.txt, one rule per line, each
+# tagged "@name". A rule is dropped when sarah/habits.md has "- name: off"
+# under "## Conversation defaults". Only known-shaped names are read and
+# nothing from habits.md is ever printed, so that file cannot steer the model.
+# A missing, unreadable or malformed habits.md leaves every default on.
+# ---------------------------------------------------------------------------
+
+hook_dir=$(cd "$(dirname "$0")" 2>/dev/null && pwd) || hook_dir=""
+defaults="$hook_dir/../conversation-defaults.txt"
+
+if [ -n "$hook_dir" ] && [ -f "$defaults" ] && [ -r "$defaults" ]; then
+    off_list=""
+    habits="$project_dir/sarah/habits.md"
+    if [ -f "$habits" ] && [ -r "$habits" ]; then
+        off_list=$(
+            awk '
+                NR > 400 { exit }
+                { sub(/\r$/, ""); line = tolower($0) }
+                line ~ /^## / { inside = (line ~ /^## conversation defaults[ \t]*$/); next }
+                inside && line ~ /^[-*][ \t]+[a-z][a-z-]*[ \t]*:[ \t]*off[ \t]*$/ {
+                    sub(/^[-*][ \t]+/, "", line)
+                    sub(/[ \t]*:.*$/, "", line)
+                    print line
+                }
+            ' "$habits" 2>/dev/null | tr '\n' ' ' 2>/dev/null || true
+        )
+    fi
+    awk -v off=" ${off_list} " '
+        /^@[a-z][a-z-]* / {
+            name = substr($1, 2)
+            if (index(off, " " name " ")) next
+            sub(/^@[a-z-]+ /, "")
+        }
+        { print }
+    ' "$defaults" 2>/dev/null || true
 fi
 
 exit 0
