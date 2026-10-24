@@ -105,7 +105,8 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 2 | 7 executor and brief | `feature/habits-s07-executor` | merged (9d2096c) |
 | 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | merged |
 | 3 | 6+10 init interview, grants; 11+12 exceptions, gitflow, changelog fragment | — | after 5 |
-| 4 | 13 dispatch guard, 14 Stop hook, 15 tracker | — | after 11 |
+| 4 | 15 tracker | `feature/habits-s15-tracker` | building (pulled forward) |
+| 4 | 13 dispatch guard, 14 Stop hook | — | after 11 |
 | 5 | 16 docs gate and release prep | — | last |
 
 At most three slices run at once, each in its own worktree branched from this
