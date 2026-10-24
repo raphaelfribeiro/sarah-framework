@@ -1,6 +1,6 @@
 # Measurement pilot — Jukebox Disc
 
-**Branch:** none yet · **Level:** 2 · **Phase:** running, outside this repository · **Updated:** 2026-08-16
+**Branch:** none yet · **Level:** 2 · **Phase:** running, outside this repository · **Updated:** 2026-10-24
 
 The framework is published and unproven. This is the instrument: use S.A.R.A.H.
 on a real greenfield project and collect what it actually does, so fixes come
@@ -87,11 +87,13 @@ is finished and the transcripts are ready to read.
    uninstalls the plugin *and* drops the `ref` pin from `extraKnownMarketplaces`,
    leaving the marketplace tracking the default branch. Both had to be put back
    by hand. A swap that looks successful can still leave you following `main`.
-3. **Around 2026-09-20, verify the retention held** — a transcript older than 30
+3. **Done 2026-10-24 — the retention held:** the 2026-08-16 transcript still
+   exists, 69 days later. Originally: **around 2026-09-20, verify the retention held** — a transcript older than 30
    days must still exist. Configured is not the same as working, which this
    repository learned six times on 2026-08-16. This is the one dated item, and
    it is the only thing between the pilot and losing its own beginning.
-4. **After two or three real sessions**, read the transcripts and write down what
+4. **Started 2026-10-24, partially, after 44 sessions** — the aggregate findings
+   feed `sarah/state/the-habits-that-earned-their-place.md`. Originally: **after two or three real sessions**, read the transcripts and write down what
    the framework did. Only then decide whether an analyser is worth building.
 5. **Copy the pilot's transcripts somewhere backed up.** They exist on one disk.
    Retention protects against cleanup, not against losing the machine.

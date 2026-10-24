@@ -1,6 +1,6 @@
 # S.A.R.A.H. state
 
-**Updated:** 2026-08-16
+**Updated:** 2026-10-24
 
 | | |
 | --- | --- |
@@ -12,9 +12,13 @@
 
 | Task | File | Phase | Level | Waiting on | Since |
 | --- | --- | --- | --- | --- | --- |
-| Measurement pilot — Jukebox Disc | `sarah/state/measurement-pilot.md` | running, outside this repo | 2 | **the first session in `dev/jukebox-disc`** | 2026-08-16 |
+| Measurement pilot — Jukebox Disc | `sarah/state/measurement-pilot.md` | running, outside this repo — 44 sessions, 43 of 47 slices | 2 | the pilot to finish; a partial read began 2026-10-24 | 2026-08-16 |
+| Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | spec | 3 | the friction interview, then the spec | 2026-10-24 |
 
-Nothing else. **v0.1.0 is published**: the mirror was repointed on 2026-08-16, both
+**Reopened 2026-10-24 by the maintainer's decision**, with the pilot still running: the
+user's own install stays pinned to `v0.1.0`, so work here cannot reach the pilot.
+
+**v0.1.0 is published**: the mirror was repointed on 2026-08-16, both
 branches and the tag reached the public repository, CI passed there, and the
 release pipeline built the GitHub Release from the changelog. The Quickstart in
 `README.md` resolves to something for the first time.
