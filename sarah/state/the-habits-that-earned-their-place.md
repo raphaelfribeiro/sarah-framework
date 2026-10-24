@@ -93,10 +93,9 @@ Approved by the user as proposed, 2026-10-24.
 
 ## In flight
 
-Implementation. Inputs: the spec, the design
-(`docs/specs/the-habits-that-earned-their-place.architecture.md`) and the UX spec
-(`docs/specs/the-habits-that-earned-their-place.ux.md`). First, the four platform
-probes; then the plan for approval.
+Implementation, against `docs/specs/the-habits-that-earned-their-place.plan.md`
+(16 steps) and `...test-plan.md` (~140 tests, core 95 first). The four platform
+probes **all held** on CLI 2.1.308, so no fallback applies.
 
 ## Blocked
 
@@ -145,7 +144,7 @@ to the fallback named in the design.
 | 1. Spec approved | passed | 2026-10-24 |
 | 2. Architecture approved | passed | 2026-10-24 |
 | 3. Design approved | passed | 2026-10-24 |
-| Plan approved | open | |
+| Plan approved (16 steps, ~140 tests, full depth) | passed | 2026-10-24 |
 
 ## Found along the way
 
