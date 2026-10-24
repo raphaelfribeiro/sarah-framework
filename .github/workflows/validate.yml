@@ -42,6 +42,24 @@ jobs:
           done
           exit $fail
 
+      - name: Habit payload scripts are POSIX sh and never exit 1
+        run: |
+          # Payloads are copied into users' projects and run as their hooks.
+          # Exit 2 is how a project hook blocks, so it is allowed here; exit 1
+          # is a hook error that does not block, which fails open and silently.
+          # The plugin's own hooks/scripts/ check above stays stricter.
+          fail=0
+          for f in $(find skills/sarah-init/habits -path '*/files/*' -name '*.sh' | sort); do
+            sh -n "$f" || { echo "::error file=$f::not valid POSIX sh"; fail=1; continue; }
+            if grep -nE '^[[:space:]]*exit[[:space:]]+([13-9]|[0-9]{2,})' "$f"; then
+              echo "::error file=$f::payload exits with a code other than 0 or 2"
+              fail=1
+            else
+              echo "ok: $f"
+            fi
+          done
+          exit $fail
+
       - name: Every skill has the frontmatter that makes it loadable
         run: |
           fail=0
