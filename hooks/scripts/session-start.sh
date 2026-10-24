@@ -155,4 +155,47 @@ if [ -n "$hook_dir" ] && [ -f "$defaults" ] && [ -r "$defaults" ]; then
     ' "$defaults" 2>/dev/null || true
 fi
 
+# ---------------------------------------------------------------------------
+# State size (R19, D6). The index may reach 8,192 bytes and a task file 16,384.
+# One line per file over its limit, at most two, then a count. A marker
+# sarah/.local/compact-snoozed holding today's date silences the lines for the
+# day; /sarah-compact writes it when the user says "not today".
+# ---------------------------------------------------------------------------
+
+today=$(date +%Y-%m-%d 2>/dev/null || true)
+snoozed=""
+marker="$project_dir/sarah/.local/compact-snoozed"
+if [ -f "$marker" ] && [ -r "$marker" ]; then
+    snoozed=$(head -n 1 "$marker" 2>/dev/null | tr -d '\r' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' 2>/dev/null || true)
+fi
+
+if [ -z "$today" ] || [ "$snoozed" != "$today" ]; then
+    shown=0
+    hidden=0
+
+    # check_size FILE LIMIT : report FILE if it is over LIMIT bytes.
+    check_size() {
+        [ -f "$1" ] && [ -r "$1" ] || return 0
+        bytes=$(wc -c < "$1" 2>/dev/null | tr -d ' \t' || true)
+        case "$bytes" in '' | *[!0-9]*) return 0 ;; esac
+        [ "$bytes" -gt "$2" ] || return 0
+        if [ "$shown" -ge 2 ]; then
+            hidden=$((hidden + 1))
+            return 0
+        fi
+        shown=$((shown + 1))
+        label=$(printf '%s' "${1#"$project_dir"/}" | tr -c 'A-Za-z0-9._/ -' '?' 2>/dev/null || true)
+        kb=$(awk -v n="$bytes" 'BEGIN { printf "%.1f", n / 1024 }' 2>/dev/null || true)
+        echo "Size: ${label} is ${kb} KB, over its $(($2 / 1024)) KB limit. Offer to compact once, at the first pause."
+    }
+
+    check_size "$state" 8192
+    for task_file in "$project_dir"/sarah/state/*.md; do
+        check_size "$task_file" 16384
+    done
+    if [ "$hidden" -gt 0 ]; then
+        echo "Size: ${hidden} more file(s) are over their limit."
+    fi
+fi
+
 exit 0
