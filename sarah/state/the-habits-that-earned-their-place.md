@@ -97,6 +97,20 @@ Implementation, against `docs/specs/the-habits-that-earned-their-place.plan.md`
 (16 steps) and `...test-plan.md` (~140 tests, core 95 first). The four platform
 probes **all held** on CLI 2.1.308, so no fallback applies.
 
+| Wave | Steps | Branch | Status |
+| --- | --- | --- | --- |
+| 1 | 1 template move, 2 probes | this branch | done (3e42be2, c7eaa2a) |
+| 2 | 3+4 defaults and state size | `feature/habits-s03-defaults-and-size` | building |
+| 2 | 5 install engine | `feature/habits-s05-install-engine` | building |
+| 2 | 7 executor and brief | `feature/habits-s07-executor` | building |
+| 3 | 8+9 decisions, short rituals; 6+10 init interview, grants; 11+12 exceptions, gitflow, changelog fragment | — | after 5 |
+| 4 | 13 dispatch guard, 14 Stop hook, 15 tracker | — | after 11 |
+| 5 | 16 docs gate and release prep | — | last |
+
+At most three slices run at once, each in its own worktree branched from this
+branch, then merged back here. Developers write the tests from the test
+engineer's plan, rather than a separate test engineer per slice.
+
 ## Blocked
 
 Nothing blocked.
@@ -131,11 +145,6 @@ needed by any habit that installs or calls a script, the tracker included.
 
 The new patterns listed in the UX spec §9 were approved with the design.
 
-**First thing implementation does:** four probes of untested platform behaviour —
-effort set per call, the hook seeing executor launches, an executor naming the
-model it ran on, always-ask rules under permissive modes. A failed probe switches
-to the fallback named in the design.
-
 ## Gates
 
 | Gate | Status | When |
@@ -154,13 +163,12 @@ to the fallback named in the design.
   2026-10-24 by moving the development `CLAUDE.md` to `.claude/CLAUDE.md`**,
   which Claude Code still loads as project context and the validator ignores.
   The missing-icon notice is informational and does not change the result.
-- **`sarah-bootstrap` points at `references/task-template.md`, which does not
-  exist next to it.** The template lives in `templates/` and
-  `skills/sarah-init/references/`. A session following the skill literally finds
-  nothing. Fix in this task or as its own Level 0.
+- **`sarah-bootstrap` pointed at a `references/task-template.md` that did not
+  exist next to it.** Fixed in step 1 (3e42be2): the template moved into the
+  bootstrap's own `references/`, and a static test now checks every skill's
+  `references/` links.
 
 ## Next
 
-`sarah-phase-implement`: run the four probes, then present the implementation
-plan and the test plan for approval. The user's own install stays pinned on
-`v0.1.0` while the pilot runs.
+Merge wave 2 here as each slice reports, run the full suite, then start wave 3.
+The user's own install stays pinned on `v0.1.0` while the pilot runs.
