@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** architecture (Gate 1 closed 2026-10-24) · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** design-ux (Gate 2 closed 2026-10-24) · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -93,25 +93,36 @@ Approved by the user as proposed, 2026-10-24.
 
 ## In flight
 
-Architecture. The approved spec is `docs/specs/the-habits-that-earned-their-place.md`:
-24 requirements (R1-R19 and R24 added, R20-R23 modified), cut line written.
+Design / UX: the `/sarah-init` habit-catalog interview. Inputs: the approved spec
+`docs/specs/the-habits-that-earned-their-place.md` and the approved design
+`docs/specs/the-habits-that-earned-their-place.architecture.md`.
 
 ## Blocked
 
 Nothing blocked.
 
-## Pending decisions
+## Decisions at Gate 2 (2026-10-24)
 
-None waiting on the user. Two questions belong to the architect, not the user:
-
-| Question | Spec ref |
+| Decision | Record |
 | --- | --- |
-| Ten executor agent files, or one executor taking model and effort as parameters | Q1 |
-| Where the conversation defaults (R1-R7) live, with the bootstrap ~50 tokens under its ceiling | Q2 |
+| One `executor` agent; model and effort set per call | ADR-006 |
+| Conversation defaults printed by the session-start hook; lasting decisions in `sarah/decisions.md` | ADR-007 |
+| Agreements installed by `scripts/habits.py` into the user's project, which owns them; manifest in `sarah/habits.md`; plugin hooks stay sensors | ADR-008 |
+| Tracker through `scripts/tracker.py`; local state is the source of truth; audit at the day's first session; token from an environment variable, never pasted | ADR-009 |
+| Autonomy grants set at init, expandable later; destructive actions, money and credentials always ask. **With R13 installed, merge runs unattended on green CI**; the release cut stays the user's — supersedes "every merge has a human behind it" for those projects | ADR-010 |
 
-Decided at Gate 1 by the user: commit attribution is chosen at init, **default off**
-(Q4); state files are capped at **8 KB index, 16 KB per task file** (Q5); **board never
-empty enters as R24**, the other three unoffered habits stay out (Q7).
+Decided at Gate 1: commit attribution chosen at init, **default off** (Q4); state
+ceilings **8 KB index, 16 KB per task file** (Q5); **board never empty** enters as
+R24 (Q7).
+
+**Left open on purpose:** grants in a team repository apply to every
+collaborator's agent — revisit when a team adopts it (ADR-010). `python3` is
+needed by any habit that installs or calls a script, the tracker included.
+
+**First thing implementation does:** four probes of untested platform behaviour —
+effort set per call, the hook seeing executor launches, an executor naming the
+model it ran on, always-ask rules under permissive modes. A failed probe switches
+to the fallback named in the design.
 
 ## Gates
 
@@ -119,9 +130,16 @@ empty enters as R24**, the other three unoffered habits stay out (Q7).
 | --- | --- | --- |
 | Brainstorm exit - problem agreed, scope picked | passed | 2026-10-24 |
 | 1. Spec approved | passed | 2026-10-24 |
-| 2. Architecture approved | open | |
+| 2. Architecture approved | passed | 2026-10-24 |
+| 3. Design approved | open | |
 
 ## Found along the way
+
+- **`claude plugin validate . --strict` now fails on `develop` itself**, before
+  any change here: the current CLI warns that a root `CLAUDE.md` is not loaded as
+  plugin context (this one is deliberately for developing the repository) and that
+  the plugin has no icon. `--strict` turns both into errors, so CI will go red on
+  the next push. Fix in this delivery before the PR.
 
 - **`sarah-bootstrap` points at `references/task-template.md`, which does not
   exist next to it.** The template lives in `templates/` and
@@ -130,6 +148,7 @@ empty enters as R24**, the other three unoffered habits stay out (Q7).
 
 ## Next
 
-Design with `sarah-phase-architecture`: answer Q1 and Q2, decide how agreements are installed into a user's project and removed, and how the tracker credential is delivered. Security Advisor consults. The
-pin of the user's own install on `v0.1.0` stays while the pilot runs — this
-branch must not reach the pilot.
+`sarah-phase-design-ux`: the `/sarah-init` interview — how the catalog is shown,
+the order of questions, defaults, the empty and error states (no `python3`, no
+token, tracker unreachable), and how a habit is removed later. Then implement.
+The user's own install stays pinned on `v0.1.0` while the pilot runs.
