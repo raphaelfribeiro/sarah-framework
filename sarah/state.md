@@ -12,7 +12,7 @@
 
 | Task | File | Phase | Level | Waiting on | Since |
 | --- | --- | --- | --- | --- | --- |
-| Measurement pilot — Jukebox Disc | `sarah/state/measurement-pilot.md` | running, outside this repo — 44 sessions, 43 of 47 slices | 2 | the pilot to finish; a partial read began 2026-10-24 | 2026-08-16 |
+| Measurement pilot | `sarah/state/measurement-pilot.md` | running, outside this repo — 44 sessions, 43 of 47 slices | 2 | the pilot to finish; a partial read began 2026-10-24 | 2026-08-16 |
 | Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | implement (plan approved) | 3 | nothing: building | 2026-10-24 |
 
 **Reopened 2026-10-24 by the maintainer's decision**, with the pilot still running: the

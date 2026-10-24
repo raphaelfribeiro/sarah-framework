@@ -1,4 +1,4 @@
-# Measurement pilot — Jukebox Disc
+# Measurement pilot
 
 **Branch:** none yet · **Level:** 2 · **Phase:** running, outside this repository · **Updated:** 2026-10-24
 
@@ -8,10 +8,8 @@ from evidence instead of from reading the prose again.
 
 ## The subject
 
-**Jukebox Disc**, at `dev/jukebox-disc` — an offline music player (FLAC, OGG,
-MP3), track metadata including a 0.00-10.00 quality score, radio by URL, paid
-download, light and dark themes, equaliser. iOS first, Android after. Empty git
-repository, `main`, no commits. Deliberately not a toy: nobody guards a gate they
+**A separate, private product** of Level 3 scope, kept outside this repository. It began
+as an empty git repository, `main`, no commits. Deliberately not a toy: nobody guards a gate they
 do not care about.
 
 ## Setup, done 2026-08-16
@@ -55,7 +53,7 @@ previous studies failed.
 - **Do not write the analyser yet.** Two or three real sessions first. Building
   the ruler before seeing the data is exactly the Phase E error, where everything
   scored 43-44 out of 44.
-- **Watch the cut line.** Jukebox Disc is a Level 3 product. The spec phase should
+- **Watch the cut line.** The pilot's product is Level 3. The spec phase should
   cut a shippable v0.1.0 — local playback, metadata, themes — and defer radio,
   download and the score. If it does that unprompted, that is evidence for the
   framework. If it swallows the whole scope without arguing, that is the first
@@ -75,10 +73,10 @@ Nothing. Everything needed to start is in place.
 ## Next
 
 **Nothing in this repository.** It is closed for the duration: the pilot runs
-against the published tag, so nobody needs to come back here until Jukebox Disc
+against the published tag, so nobody needs to come back here until the pilot's product
 is finished and the transcripts are ready to read.
 
-1. **Start the pilot.** New session with cwd `dev/jukebox-disc`, run `/sarah-init`.
+1. **Start the pilot.** New session with cwd in that product's repository, run `/sarah-init`.
    Not from this repository — a session loaded with the framework's own context
    measures nothing.
 2. **Done 2026-08-16 — the marketplace is on GitHub, pinned to `v0.1.0`**, and the
@@ -100,7 +98,7 @@ is finished and the transcripts are ready to read.
 
 ## What the return visit is for
 
-When Jukebox Disc is done, this repository reopens to answer, from the
+When the pilot's product is done, this repository reopens to answer, from the
 transcripts and the handwritten notes: did the human gates hold; which skills
 never fired; did phase-closing commits actually happen; which itinerary rows were
 always dropped; was the sizing right; and what it cost in tokens per level. Those
