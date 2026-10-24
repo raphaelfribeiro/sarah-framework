@@ -71,6 +71,8 @@ Nothing is tagged with an open item:
 - `ARCHI.md` reflects any architectural change.
 - Tests pass — run them, do not assume.
 
+**The release is a gate, asked as a structured question; the steps around it are not.** Do not ask to continue between them. Conversation defaults, unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Tag with the checklist open. Report the open item and stop.

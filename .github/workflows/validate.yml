@@ -71,6 +71,16 @@ jobs:
           # A symlink there passes here and fails once the plugin is installed.
           python3 -m unittest discover -s tests -t . -v
 
+      - name: Hooks behave when run (defaults, size sensor, 400-token output budget)
+        run: |
+          # Runs each hook against fixture projects in a temp directory, with
+          # `date` shadowed on PATH. Includes the worst-case session-start
+          # output (every optional line present), which must stay at or under
+          # 400 tokens (chars/4). The 200-token ceiling on
+          # hooks/conversation-defaults.txt is checked by the unit tests above,
+          # not repeated here: two copies of one limit are how they drift.
+          sh tests/shell/run.sh
+
       - name: sarah-bootstrap stays inside its context budget
         run: |
           # Injected into every session, so its size is charged to every task

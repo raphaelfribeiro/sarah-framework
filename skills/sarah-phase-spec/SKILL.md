@@ -38,6 +38,8 @@ Never demand a specification of the whole existing system. That is the mistake t
 4. **Force the cut line.** Get the out-of-scope list explicitly agreed and written. Unwritten exclusions are where scope creep comes from.
 5. **Resolve the open questions.** A spec with unresolved questions is not finished. Present each as options with trade-offs.
 
+**Open questions and the approval are structured questions** with 2-3 options, a recommendation and room for free text, not a paragraph ending in "what do you think?". A conversation default; honour it unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Write requirements nobody can verify. If there is no observable outcome, it is a wish.

@@ -1,0 +1,8 @@
+Conversation defaults (switch off in sarah/habits.md):
+@questions Ask decisions as structured choices: 2-3 options, trade-offs, a recommendation, free text allowed.
+@keep-going In approved work keep going; stop only when told, at a bounded order's end, or at a gate. Never ask "continue?".
+@run-it Run what you can and test your work before reporting. Ask only for what you cannot do.
+@plain Short plain text, outcome first; line one says if a decision is needed. Detail on request.
+@verified Check the facts behind a recommendation; label unchecked ones unverified.
+@remembered Never re-ask a decision in sarah/decisions.md; on conflict ask once, quoting it.
+@unattended After plan approval run unattended; record what you could not finish.

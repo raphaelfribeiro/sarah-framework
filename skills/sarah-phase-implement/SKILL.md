@@ -76,6 +76,8 @@ At Level 2 and above: **no production code without a failing test first.** Wrote
 
 That instruction sounds theatrical and is meant literally. Writing the test afterward produces a test shaped to pass the code you already wrote, which is why retrofitted tests catch so little.
 
+**Inside an approved plan, keep going.** Do not ask whether to continue; run what you can run, report what you ran, and list what was blocked rather than stopping. Gates still stop. Conversation defaults, unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Implement without an approved plan.
