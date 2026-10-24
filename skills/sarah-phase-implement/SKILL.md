@@ -66,6 +66,10 @@ When the task file declares an executor, work goes to the `executor` agent in pl
 5. **Fall back once.** On a rate limit or a dispatch error, re-dispatch once on the declared fallback model and record it in the task file. A second failure marks the task blocked; the run goes on with the others.
 6. **Record.** Keep the four sections in the task file. Relay at most four lines. Name the model only when it differs from the declared one. Requested tasks become proposals for the user's next decision, never work started.
 
+## Honoring recorded decisions
+
+At task start, read `sarah/decisions.md`. If the file is absent, there are none: carry on, and never create it here. Never re-ask a recorded decision. If the task contradicts one, including a line under `## Permanent`, stop and ask one question that quotes the decision, its date and the conflict. Never resolve it silently. A decision made during the task is a candidate for `/hasta-la-vista`, which records the ones that still bind.
+
 ## Gate 3 — the test-first gate
 
 At Level 2 and above: **no production code without a failing test first.** Wrote the code before the test? Delete it and start over.
