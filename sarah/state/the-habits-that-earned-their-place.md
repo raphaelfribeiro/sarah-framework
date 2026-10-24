@@ -135,12 +135,12 @@ to the fallback named in the design.
 
 ## Found along the way
 
-- **`claude plugin validate . --strict` now fails on `develop` itself**, before
-  any change here: the current CLI warns that a root `CLAUDE.md` is not loaded as
-  plugin context (this one is deliberately for developing the repository) and that
-  the plugin has no icon. `--strict` turns both into errors, so CI will go red on
-  the next push. Fix in this delivery before the PR.
-
+- **`claude plugin validate . --strict` had started failing on `develop`**:
+  the current CLI warns that a root `CLAUDE.md` is not loaded as plugin context.
+  CI does not run the validator, so only the pre-PR check saw it. **Fixed
+  2026-10-24 by moving the development `CLAUDE.md` to `.claude/CLAUDE.md`**,
+  which Claude Code still loads as project context and the validator ignores.
+  The missing-icon notice is informational and does not change the result.
 - **`sarah-bootstrap` points at `references/task-template.md`, which does not
   exist next to it.** The template lives in `templates/` and
   `skills/sarah-init/references/`. A session following the skill literally finds

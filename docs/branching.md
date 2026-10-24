@@ -131,7 +131,7 @@ A pull request must:
 3. **Close gate 4.** Reviewed by someone who did not write it.
 4. **Close gate 5.** `ARCHI.md` if the architecture moved, `README.md` if
    anything user-visible changed, and an entry in `sarah/changelog/`.
-5. **Pass the checks** in [`CLAUDE.md`](../CLAUDE.md): `claude plugin validate .
+5. **Pass the checks** in [`.claude/CLAUDE.md`](../.claude/CLAUDE.md): `claude plugin validate .
    --strict` and `sh -n hooks/scripts/*.sh`.
 6. **Say what changed and why.** A diff answers what. Only you can answer why.
 
