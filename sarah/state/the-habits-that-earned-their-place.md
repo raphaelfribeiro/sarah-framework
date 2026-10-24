@@ -101,7 +101,7 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | --- | --- | --- | --- |
 | 1 | 1 template move, 2 probes | this branch | done (3e42be2, c7eaa2a) |
 | 2 | 3+4 defaults and state size | `feature/habits-s03-defaults-and-size` | merged |
-| 2 | 5 install engine | `feature/habits-s05-install-engine` | building |
+| 2 | 5 install engine | `feature/habits-s05-install-engine` | merged |
 | 2 | 7 executor and brief | `feature/habits-s07-executor` | merged (9d2096c) |
 | 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | merged |
 | 3 | 6+10 init interview, grants; 11+12 exceptions, gitflow, changelog fragment | — | after 5 |
@@ -123,6 +123,11 @@ engineer's plan, rather than a separate test engineer per slice.
   bootstrap; `scripts/token_budget.py` rates the same text ~15% higher.
 - The shell suite passes under dash (the `/bin/sh` of the CI runner) as well as
   locally; as root, the unreadable-file cases skip by design.
+- **Before the push:** the local commits on this branch carry the maintainer's
+  personal address as author. New commits use the GitHub no-reply address
+  (decided 2026-10-24); rewrite the unpublished range's author to it once every
+  slice is merged, and not before, or the open worktrees diverge. Published
+  history stays as it is (decided 2026-10-24).
 - Step 3's first commit is not green on its own (one worst-case assertion needs
   step 4); the merge is.
 
