@@ -57,3 +57,23 @@
 -->
 
 - {{a lesson, a constraint, or a trap — with the consequence that makes it matter}}
+
+<!--
+  FORMAT: sarah/decisions.md - durable user decisions (not part of this file).
+
+  Created at the first decision that outlives its task, never by /sarah-init.
+  Every reader tolerates the file being absent. Written by the documentation
+  gate in /hasta-la-vista; read at task start.
+
+    # Decisions
+
+    ## Permanent
+    - YYYY-MM-DD - <exclusion, in the user's words>
+
+    ## Decisions
+    - YYYY-MM-DD - <decision, and the reason in a clause>
+
+  One line per decision, newest first, dated. A "permanent" exclusion goes under
+  its own heading, never among the ordinary lines, so a later task cannot
+  mistake it for something revisitable.
+-->
