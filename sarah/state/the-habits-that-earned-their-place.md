@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** spec (brainstorm closed 2026-10-24) · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** architecture (Gate 1 closed 2026-10-24) · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -60,6 +60,22 @@ decided by the user 2026-10-24.
 | Skills that never fired | `sarah-research`, `sarah-hotfix`, `sarah-compact` (`sarah-phase-release`: no release yet) |
 | A day-1 "permanent" exclusion resurfaced with no visible reconciliation | found by text search; not yet traced |
 
+## Friction interview, 2026-10-24
+
+The pilot kept no handwritten notes; this replaces them, declared as the user's
+own account after the fact.
+
+| Question | Answer |
+| --- | --- |
+| Where ceremony weighed most | All four offered: opening/closing, multi-round review, long texts, continue-or-stop questions |
+| Opening and closing | **Heavy and also essential** — it is where the day is agreed and closed. Keep the ritual, make it short |
+| Continue or stop | **Never ask.** Stop only when told to, or when a bounded order is met ("do x tasks and stop"). No order means keep going |
+| Text | Clear, objective, succinct, **less technical**; technical explanation only on request |
+| Taking the first option (89%) | **"Trusted it without reading deeply."** The human gate is mostly trust — so the recommendation carries the weight, and its facts must be verified before it is made |
+| Reading reports and state files | **Almost never.** The agent has to help decide, not hand over reading |
+| What it should have done alone | Parallel fronts; run unattended; test on its own; remember what was decided |
+| Parallelism default | **Parallel fronts with specific agents at specific effort; `/sarah-init` defaults to up to 3 simultaneous tasks** |
+
 ## Itinerary
 
 Approved by the user as proposed, 2026-10-24.
@@ -77,9 +93,8 @@ Approved by the user as proposed, 2026-10-24.
 
 ## In flight
 
-Spec. Inputs still to collect: the friction interview (accepted by the user,
-~10 min), the trace of the resurfaced exclusion, and the state-bloat measurement
-per session.
+Architecture. The approved spec is `docs/specs/the-habits-that-earned-their-place.md`:
+24 requirements (R1-R19 and R24 added, R20-R23 modified), cut line written.
 
 ## Blocked
 
@@ -87,19 +102,24 @@ Nothing blocked.
 
 ## Pending decisions
 
-| Decision | Options | Waiting since |
-| --- | --- | --- |
-| "Keep going without asking" vs. the approval gates | proposed: decision gates stay, continuation questions go | 2026-10-24 |
-| Reference project bans AI `Co-Authored-By`; the framework signs commits | proposed: an option of the gitflow module | 2026-10-24 |
-| Executor matrix adds ten agents, each description costing context every session | ten files vs. one executor taking model and effort as parameters — architecture decides | 2026-10-24 |
-| Four habits not yet offered: regression test per incident proven by mutation; "green is not proof" gates; shared-resource lock; board never empty at session end | in or out | 2026-10-24 |
+None waiting on the user. Two questions belong to the architect, not the user:
+
+| Question | Spec ref |
+| --- | --- |
+| Ten executor agent files, or one executor taking model and effort as parameters | Q1 |
+| Where the conversation defaults (R1-R7) live, with the bootstrap ~50 tokens under its ceiling | Q2 |
+
+Decided at Gate 1 by the user: commit attribution is chosen at init, **default off**
+(Q4); state files are capped at **8 KB index, 16 KB per task file** (Q5); **board never
+empty enters as R24**, the other three unoffered habits stay out (Q7).
 
 ## Gates
 
 | Gate | Status | When |
 | --- | --- | --- |
-| Brainstorm exit — problem agreed, scope picked | passed | 2026-10-24 |
-| 1. Spec approved | open | |
+| Brainstorm exit - problem agreed, scope picked | passed | 2026-10-24 |
+| 1. Spec approved | passed | 2026-10-24 |
+| 2. Architecture approved | open | |
 
 ## Found along the way
 
@@ -110,6 +130,6 @@ Nothing blocked.
 
 ## Next
 
-Run the friction interview, then write the spec with `sarah-phase-spec`. The
+Design with `sarah-phase-architecture`: answer Q1 and Q2, decide how agreements are installed into a user's project and removed, and how the tracker credential is delivered. Security Advisor consults. The
 pin of the user's own install on `v0.1.0` stays while the pilot runs — this
 branch must not reach the pilot.
