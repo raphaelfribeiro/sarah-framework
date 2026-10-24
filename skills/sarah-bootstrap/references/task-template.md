@@ -26,6 +26,18 @@
 | --- | --- | --- |
 | {{step}} | {{yes / no}} | {{reason, from this request — or "dropped by you"}} |
 
+## Premises
+
+<!-- What this task assumes is true about the code, the plan or the platform. One line each, with the date it was last checked. Stale premises are re-checked before dispatch. -->
+
+## Executor
+
+<!-- Declared before dispatch, one row per task. Model is an alias: sonnet, opus, haiku or fable. Effort is low to max. Fallback is the model to re-dispatch on after a rate limit or dispatch error. Delete this section when no executor is used. -->
+
+| Executor | Model | Effort | Fallback |
+| --- | --- | --- | --- |
+| executor | {{model}} | {{effort}} | {{fallback model}} |
+
 ## In flight
 
 <!-- What is actually happening on this task right now. Two or three lines. -->
