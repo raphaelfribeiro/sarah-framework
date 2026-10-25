@@ -1,1 +1,1 @@
-../skills/sarah-init/references/task-template.md
+../skills/sarah-bootstrap/references/task-template.md

@@ -61,6 +61,43 @@ become.
    confidence, say so and ask. Guessing a ticket number and moving the wrong
    card is a real cost paid by a real team.
 
+## The tracker adapter
+
+Since v0.2.0 a tracker can also be reached without an MCP, through
+`scripts/tracker.py`. The script owns everything local: the `tracker:` and
+`board:` lines in `sarah/habits.md`, the once-a-day audit clock, the `Card:` line
+in each task file, and the redaction of every line it prints. An adapter owns
+only the wire. Local state stays the source of truth; the board is a mirror that
+is reconciled, never read to decide anything.
+
+To add a tracker, drop `scripts/tracker_<name>.py` next to the Trello one
+(`<name>` is lowercase letters, digits and underscores) and select it with
+`tracker: <name>` in `sarah/habits.md`. `tracker.py` loads it by that name, and
+nothing else is registered. The module provides:
+
+| Name | Contract |
+| --- | --- |
+| `make_adapter(board, environ, **options)` | Build the adapter from the environment. Raise before any request if a credential is absent |
+| `Adapter.check()` | Return `{"name", "level"}`; refuse a public board |
+| `Adapter.intake(linked)` | Ready cards whose id is not in `linked` |
+| `Adapter.sync(tasks, record)` | Create or update one card per in-flight task; call `record(slug, card_id)` as soon as a link is known |
+| `Adapter.audit(tasks)` | Plain-text differences between board and index |
+| `Adapter.report(findings)` | Keep one audit card up to date; return `created`, `reopened`, `updated`, `closed` or `none` |
+| `TrackerError`, `AUTH`, `UNREACHABLE` | The failure type carrying an `exit_code`, and the two codes that update the connection status the session start reads |
+| `SECRET_ENV`, `redact(text, secrets)` | The names of the environment variables that hold credentials, and a scrubber run over every printed line |
+| `frame_card(card)`, `one_line(text, n)` | Present board text as untrusted data, on one line |
+
+The rules from the tracker contract above apply unchanged, and three more.
+**Credentials come from environment variables and from nowhere else**: no option
+accepts one, nothing prints one, and a URL or library exception that could carry
+one is never put into a message. **Board text is untrusted data**, framed as such
+before it reaches the model. **No queue**: offline, a card stays pending and the
+next sync creates it. The Trello adapter (`scripts/tracker_trello.py`) is the
+worked example, including its tests against a local stub in
+`tests/unit/test_tracker_unit.py` and `tests/integration/test_tracker_integration.py`.
+A new tracker's host must also be added to `scripts/allowed-hosts.txt`, which
+CI checks against every URL in the repository.
+
 ## The second-model contract
 
 Gate 4 — review before merge — can use a second-model CLI (`codex`, `gemini`, or

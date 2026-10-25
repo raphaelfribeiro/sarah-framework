@@ -1,6 +1,6 @@
 ---
 name: sarah-init
-description: Set up S.A.R.A.H. in a project. Detects whether the repository is greenfield or brownfield, classifies its scale level, and generates ARCHI.md, README.md and sarah/state.md through an interview. Use when the user runs /sarah-init, says "set up sarah", "initialize sarah", "start using this framework here", "onboard this repo", or asks to begin structured development in a project that has no sarah/state.md yet. Also use when another S.A.R.A.H. skill finds the project uninitialized.
+description: Set up S.A.R.A.H. in a project. Detects whether the repository is greenfield or brownfield, classifies its scale level, and generates ARCHI.md, README.md and sarah/state.md through an interview. Use when the user runs /sarah-init, says "set up sarah", "initialize sarah", "start using this framework here", "onboard this repo", or asks to begin structured development in a project that has no sarah/state.md yet. Also use when another S.A.R.A.H. skill finds the project uninitialized, and when the user wants to change the working agreement later: "add the Trello board", "remove the release-note habit", "you can use <machine> without asking", "stop letting yourself save online".
 ---
 
 # /sarah-init — establish the mission
@@ -37,7 +37,7 @@ Then say which parts of it this project will actually use, once you know its sca
 
 ## Step 0.5 — Refuse to clobber
 
-If `sarah/state.md` already exists, this project is initialized. Do not overwrite it. Report the current phase and level, and offer three choices: leave it alone, refresh `ARCHI.md` against the current codebase, or start over from scratch with the old files backed up. Wait for the answer.
+If `sarah/state.md` already exists, this project is initialized. Do not overwrite it. Report the current phase and level, show the current habits (section 6 of [references/habits-catalog.md](references/habits-catalog.md)), and offer: leave it alone, add or remove a habit, refresh `ARCHI.md` against the current codebase, or start over with the old files backed up. Wait for the answer. A later request to add, remove, allow or revoke something arrives here too and takes the same path.
 
 ## Step 1 — Read the ground
 
@@ -99,6 +99,16 @@ The level is per task, not per project. What gets recorded now is the project's 
 
 Recommend by honest default: a new product is Level 3, an existing codebase receiving ordinary maintenance is Level 1, and a codebase about to receive a significant feature is Level 2.
 
+## Step 3.5 — Working agreement
+
+The user chooses how we work, in plain words. Technical names, rule IDs and file names appear only when they say "details". Every panel, its exact copy and the commands are in [references/habits-catalog.md](references/habits-catalog.md). Read it before asking anything here.
+
+1. Read the ground silently (catalog section 1). Walk the whole catalog; there is no light version. Offer a habit only if its payload exists and its prerequisite was found. Omit the rest with one line, never installed half-working.
+2. Print `Decision needed: a few quick choices about how we work.` and the defaults. Ask in two calls of at most four questions: defaults (the limit is 3 tasks at once), what you may do unattended, then each habit group. No answer is never a yes.
+3. The recommended grant is pushing `feature/*` branches. Merging, force-pushing and deleting still ask. Deleting for good, rewriting history, spending money and touching passwords or keys are always asked and cannot be granted.
+4. Show `habits.py plan`, ask once, write only after a yes. Run `apply always-ask <habits>` and `grant add ... --quote "<their words>"`. If they declined everything, run `habits.py apply --none` so a re-run knows.
+5. Never write an `allow` rule on your own. `habits.py grant allow` shows the diff; `--write` only after a yes. Grants grow later only on the user's quoted instruction. After `apply always-ask`, each write to `sarah/habits.md` or `grant add` asks once; that is expected, not a fault to route around.
+
 ## Step 4 — Generate
 
 Templates ship alongside this skill. Read them with paths relative to this file, exactly as written here — never as an absolute path, and never through `${CLAUDE_PLUGIN_ROOT}`. An installed plugin cannot read files outside its own directory, so an absolute path fails at exactly the moment it matters:
@@ -106,7 +116,6 @@ Templates ship alongside this skill. Read them with paths relative to this file,
 - [references/ARCHI-template.md](references/ARCHI-template.md)
 - [references/README-template.md](references/README-template.md)
 - [references/state-template.md](references/state-template.md)
-- [references/task-template.md](references/task-template.md)
 
 **Read each template with the Read tool before writing the file it produces.** Do not generate from memory or from the descriptions in this skill. A template is a structure to be filled, not a description to be paraphrased — and paraphrasing it is the single most likely way this step goes wrong.
 
@@ -135,7 +144,7 @@ Whichever you propose, say which case you judged it to be and why, and show the 
 
 **`sarah/state.md`** from `references/state-template.md`. It is an index: default level, mode, the date, and an empty **In flight** table. Do not invent a task to put in it — "Nothing in flight" is the correct state of a project that has not started.
 
-Task state lives in `sarah/state/<branch-slug>.md`, one file per task, created from `references/task-template.md` when work actually begins. Do not create the directory now; the first task creates it.
+Task state lives in `sarah/state/<branch-slug>.md`, one file per task, created by `sarah-bootstrap` from its own task template when work actually begins. Do not create the directory now; the first task creates it.
 
 **`sarah/changelog/`** — create the directory with a `.gitkeep`.
 
@@ -148,11 +157,11 @@ grep -c '<!--' ARCHI.md README.md sarah/state.md   # must be 0 everywhere
 grep -n '{{' ARCHI.md README.md sarah/state.md     # must return nothing
 ```
 
-Then confirm against the templates you read that every heading survived, in order. A non-zero count or a missing section means you paraphrased instead of filling. Fix it before continuing — do not report a file as written when it does not match its template.
+Run `habits.py status`; it must list exactly the chosen set. Then confirm against the templates you read that every heading survived, in order. A non-zero count or a missing section means you paraphrased instead of filling. Fix it before continuing — do not report a file as written when it does not match its template.
 
 ## Step 6 — Confirm and hand over
 
-Show the user what was written, as a short list of paths with one line each. Then state the size of `ARCHI.md` against its budget: the hard ceiling is 10% of the context window, and `/sarah-compact` measures and compacts it when it drifts.
+Show the user what was written, as a short list of paths with one line each, and the habits handover from the catalog (section 4). Then state the size of `ARCHI.md` against its budget: the hard ceiling is 10% of the context window, and `/sarah-compact` measures and compacts it when it drifts.
 
 Close with what happens next: the phase they are now in and the first real task. Do not send them off to run another command — the phase skills fire on intent, so the honest instruction is simply to describe what they want to build next. Only five commands exist, and `/sarah-init` was one of them.
 

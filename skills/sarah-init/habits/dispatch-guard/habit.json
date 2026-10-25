@@ -1,0 +1,13 @@
+{
+  "description": "Dispatch guard (R10, R15, R17). A PreToolUse check on Agent that refuses an executor dispatch without a model, over the task limit, without its own worktree, or with an unchecked premise; also makes a fresh worktree start from the current branch with the personal settings file copied in. May block; exceptions per R16.",
+  "requires": [],
+  "settings": [
+    {"event": "PreToolUse", "matcher": "Agent", "file": "sarah/hooks/dispatch-guard/guard.sh"}
+  ],
+  "keys": [
+    {"path": "worktree.baseRef", "value": "head"}
+  ],
+  "include": [
+    ".claude/settings.local.json"
+  ]
+}

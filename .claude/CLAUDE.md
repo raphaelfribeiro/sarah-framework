@@ -80,7 +80,7 @@ imagery, artwork, logos, or extended quotation anywhere in the repository.
 ## Branching
 
 This repository follows **gitflow**, documented in full in
-[`docs/branching.md`](docs/branching.md). `main` holds released versions,
+[`docs/branching.md`](../docs/branching.md). `main` holds released versions,
 `develop` holds the next one, and work happens on `feature/*` branched from
 `develop`. Never commit directly to either permanent branch.
 

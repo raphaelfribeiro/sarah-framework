@@ -11,7 +11,7 @@ This command answers one question — *where does the work stand?* — and it an
 
 ## What to read
 
-`sarah/state.md` — the index — and, only when the user asks about one task in particular, that task's file in `sarah/state/`. Nothing else: not `ARCHI.md`, not the codebase, not the test suite. Those cost tokens and time to answer a question the index already answers.
+`sarah/state.md` — the index — and, only when the user asks about one task in particular, that task's file in `sarah/state/`. Nothing else but the exceptions table below: not `ARCHI.md`, not the codebase, not the test suite. Those cost tokens and time to answer a question the index already answers.
 
 **With several tasks in flight, the index is the answer.** One row each, and the `Waiting on` column read out loud. Opening every task file to produce a fuller report is how a thirty-second command becomes a five-minute one nobody runs.
 
@@ -43,6 +43,7 @@ Mark anything waiting on the user as waiting on the user, in those words. The wh
 3. **Blocked.** What cannot move, and what it waits on. Name the blocker, not just the blocked thing.
 4. **Pending decisions.** Choices waiting on the user, with how long they have waited. These are stop signs for the work behind them.
 5. **Open gates.** Which gates are still open for the current task, at this level. Skip the ones marked not applicable — listing gates that do not apply trains people to skim the list.
+6. **Exceptions.** Only when `sarah/habits.md` exists. Run `sh -c '. sarah/hooks/_lib/exceptions.sh; sarah_exceptions_list .'` and show what it prints: a table of active rows first, then rows that expired in the last 14 days marked `expired`, with their use counts, or the line `Exceptions: none active.` A row marked `invalid, not honored` is a finding: say why (empty reason, malformed date, more than 14 days). If the library is not installed, read the Exceptions table yourself and compare its dates to today. Read-only: never create or edit a row, because only the user grants an exception.
 
 ## What never happens here
 

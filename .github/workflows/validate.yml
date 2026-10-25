@@ -42,6 +42,24 @@ jobs:
           done
           exit $fail
 
+      - name: Habit payload scripts are POSIX sh and never exit 1
+        run: |
+          # Payloads are copied into users' projects and run as their hooks.
+          # Exit 2 is how a project hook blocks, so it is allowed here; exit 1
+          # is a hook error that does not block, which fails open and silently.
+          # The plugin's own hooks/scripts/ check above stays stricter.
+          fail=0
+          for f in $(find skills/sarah-init/habits -path '*/files/*' -name '*.sh' | sort); do
+            sh -n "$f" || { echo "::error file=$f::not valid POSIX sh"; fail=1; continue; }
+            if grep -nE '^[[:space:]]*exit[[:space:]]+([13-9]|[0-9]{2,})' "$f"; then
+              echo "::error file=$f::payload exits with a code other than 0 or 2"
+              fail=1
+            else
+              echo "ok: $f"
+            fi
+          done
+          exit $fail
+
       - name: Every skill has the frontmatter that makes it loadable
         run: |
           fail=0
@@ -63,6 +81,23 @@ jobs:
             fi
           done
           exit $fail
+
+      - name: Tests pass
+        run: |
+          # Includes the static checks: every references/ link a skill names
+          # must resolve inside that skill's own directory, as a regular file.
+          # A symlink there passes here and fails once the plugin is installed.
+          python3 -m unittest discover -s tests -t . -v
+
+      - name: Hooks behave when run (defaults, size sensor, 400-token output budget)
+        run: |
+          # Runs each hook against fixture projects in a temp directory, with
+          # `date` shadowed on PATH. Includes the worst-case session-start
+          # output (every optional line present), which must stay at or under
+          # 400 tokens (chars/4). The 200-token ceiling on
+          # hooks/conversation-defaults.txt is checked by the unit tests above,
+          # not repeated here: two copies of one limit are how they drift.
+          sh tests/shell/run.sh
 
       - name: sarah-bootstrap stays inside its context budget
         run: |
@@ -129,8 +164,12 @@ jobs:
           # exclusion: /h[o]me/ matches the paths and does not match the line
           # you are reading. An exclusion is a place a leak can hide, and this
           # guard no longer has one.
-          if grep -rnE '/h[o]me/[a-zA-Z0-9._-]+|/U[s]ers/[a-zA-Z0-9._-]+' \
-               --exclude-dir=.git . ; then
+          #
+          # It reads every tracked file, which is everything the repository
+          # publishes. The test steps above leave bytecode in the working tree,
+          # and bytecode embeds the runner's own home path; untracked, it is
+          # never published, and reading it made the guard fail on the runner.
+          if git grep -nE '/h[o]me/[a-zA-Z0-9._-]+|/U[s]ers/[a-zA-Z0-9._-]+' ; then
             echo "::error::a home-directory path names a developer's machine"
             exit 1
           fi

@@ -1,0 +1,7 @@
+{
+  "description": "Work does not idle: a session does not end with nothing in progress while ready work waits in the task index.",
+  "requires": [],
+  "settings": [
+    {"event": "Stop", "file": "sarah/hooks/no-idle/stop.sh"}
+  ]
+}
