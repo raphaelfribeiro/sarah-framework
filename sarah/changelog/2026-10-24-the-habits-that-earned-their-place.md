@@ -1,6 +1,6 @@
 # The habits that earned their place
 
-**Date:** 2026-10-24 · **Level:** 3 · **Phase:** 6-review
+**Date:** 2026-10-24 · **Level:** 3 · **Phase:** 7-release · **Version:** 0.2.0
 
 User-facing: `/sarah-init` now offers an opt-in catalog of working habits, each tied to the failure it prevents, and installs only the ones you pick.
 
@@ -63,3 +63,20 @@ raises the bar for a mistaken agent and is no boundary against a hostile one.
   removes per-call effort. Both are written down in `docs/operating.md`.
 - **No study measures whether the habits help.** The pilot is the first reading
   and is partial.
+
+## Open after the release
+
+Carried from the task file, which is deleted now that the work has shipped.
+
+- Session-start output is 389 of 400 tokens in the worst case. No headroom.
+- Guards need `git`, `python3` and `jq`; without `jq` they allow, by design.
+- `gh pr create` without `--base` and a local `git merge` into a permanent branch
+  are not guarded. `env -C` and `env -S` are not judged by the gitflow guard.
+- The dispatch guard's task count rests on an orchestrator marking a task in
+  progress, which no skill instructs yet, and rows waiting on the user count as
+  running. Its three entries share one payload.
+- `remove` keeps files adopted before records existed. The "shared library
+  missing" fallback still speaks on stderr only.
+- `gh pr merge --auto` with no checks configured stays blocked, by design.
+- The UX spec keeps older wording, `ill-be-back` now writes the audit card despite
+  "writes nothing", and architecture D6's 8,768-byte figure is unverified.
