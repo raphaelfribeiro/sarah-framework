@@ -224,6 +224,8 @@ It proposes before it writes.
 
 **This repository's own `sarah/state.md` is 8,768 bytes.** The delivery must compact it below the limit.
 
+*Done in the same commit that approved this design (60ca851): the index went from 8,768 to 3,556 bytes. Later readings of about 3.5 KB are that compaction, not a wrong figure.*
+
 ### D7 — The bootstrap's task template (R23)
 
 **Approved: move** `task-template.md` from `skills/sarah-init/references/` to `skills/sarah-bootstrap/references/`. `sarah-init` never creates a task file, and the move adds zero tokens to the bootstrap. Repoint the `templates/` symlink and update `sarah-init` lines 109 and 138. The moved template gains the executor declaration table (R10) and a Premises section (R15). A CI check for dead `references/` links closes the ARCHI §8 gap that let this happen.
