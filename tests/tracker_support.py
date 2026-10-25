@@ -138,7 +138,9 @@ class StubTrello:
                     return self._send(200, {"id": parts[2], "name": "Fake Board", "prefs": {"permissionLevel": stub.permission}})
                 if parts[:2] == ["1", "boards"] and parts[3:] == ["lists"]:
                     return self._send(200, stub.lists)
-                if parts[:2] == ["1", "boards"] and parts[3:] == ["cards"]:
+                if parts[:2] == ["1", "boards"] and parts[3:] == ["cards"]:  # open cards only, as Trello does
+                    return self._send(200, [c for c in stub.cards if not c["closed"]])
+                if parts[:2] == ["1", "boards"] and parts[3:] == ["cards", "all"]:  # the documented form for archived ones too
                     return self._send(200, stub.cards)
                 if self.command == "POST" and parts == ["1", "cards"]:
                     card = {

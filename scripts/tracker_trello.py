@@ -84,7 +84,8 @@ def untrusted(text, limit: int = 500) -> str:
     text = _ANSI.sub("", str(text if text is not None else ""))
     text = text.replace("\t", " ").replace("\r", "")
     text = "".join(c for c in text if c == "\n" or unicodedata.category(c) not in ("Cc", "Cf", "Cs", "Co", "Cn"))
-    text = text.replace("<<<", "< < <").replace(">>>", "> > >")
+    # Every angle bracket goes, one by one: a run of them can never leave a delimiter behind.
+    text = text.replace("<", "\u2039").replace(">", "\u203a")
     if len(text) > limit:
         text = text[:limit] + " [truncated]"
     return text
@@ -92,6 +93,11 @@ def untrusted(text, limit: int = 500) -> str:
 
 def one_line(text, limit: int = 80) -> str:
     return " ".join(untrusted(text, limit).split())
+
+
+def frame_text(text, limit: int = 80) -> str:
+    """Board text inside a sentence of ours: one short frame, so it still reads as data."""
+    return f"<<<UNTRUSTED BOARD TEXT: {one_line(text, limit)}>>>"
 
 
 def frame_card(card: dict) -> str:
@@ -143,6 +149,8 @@ class TrelloClient:
 
     def __init__(self, key, token, *, base_url=API_BASE, timeout=DEFAULT_TIMEOUT, sleep=None):
         parts = urllib.parse.urlsplit(base_url)
+        if "\\" in parts.netloc or "@" in parts.netloc:  # userinfo and backslash tricks make parsers disagree on the host
+            raise ValueError("base_url must be https://api.trello.com or a loopback host")
         loopback = parts.scheme == "http" and parts.hostname in LOOPBACK
         trello = parts.scheme == "https" and parts.hostname == "api.trello.com" and parts.port in (None, 443)
         if not (loopback or trello):
@@ -265,7 +273,11 @@ def _category(list_name: str):
 
 def is_blocked(task: dict) -> bool:
     waiting = (task.get("waiting") or "").strip().lower()
-    return waiting not in ("", "-", "none", "—") and not waiting.startswith("nothing")
+    return waiting not in ("", "-", "none", "nobody", "\u2014") and not waiting.startswith("nothing")
+
+
+def _is_ready(task: dict) -> bool:
+    return (task.get("phase") or "").strip().lower() == "ready" and not is_blocked(task)
 
 
 def diff_findings(tasks, cards, lists) -> list:
@@ -294,7 +306,7 @@ def diff_findings(tasks, cards, lists) -> list:
         expected = "blocked" if is_blocked(t) else "doing"
         if where in ("doing", "blocked", "done") and where != expected:
             findings.append(
-                f'"{title}" is in {one_line(list_name.get(card.get("idList")), 40)} '
+                f'"{title}" is in {frame_text(list_name.get(card.get("idList")), 40)} '
                 f"but the task is {'blocked' if expected == 'blocked' else 'active'}."
             )
 
@@ -306,7 +318,7 @@ def diff_findings(tasks, cards, lists) -> list:
             continue  # a card created just before a lost response; the next sync adopts it
         if _category(list_name.get(card.get("idList"), "")) in ("ready", "done"):
             continue
-        findings.append(f'Card "{one_line(card.get("name"), 60)}" has no task.')
+        findings.append(f'Card {frame_text(card.get("name"), 60)} has no task.')
     return findings
 
 
@@ -323,7 +335,7 @@ def _task_desc(task: dict) -> str:
 
 
 class Adapter:
-    """The five verbs. Each one is a few requests; none keeps a queue."""
+    """The verbs. Each one is a few requests; none keeps a queue."""
 
     def __init__(self, client: TrelloClient, board: str):
         self.client = client
@@ -333,9 +345,8 @@ class Adapter:
         return self.client.request("GET", f"/1/boards/{self.board}/lists", {"fields": "name"})
 
     def _cards(self):
-        return self.client.request(
-            "GET", f"/1/boards/{self.board}/cards", {"filter": "all", "fields": "name,desc,idList,closed"}
-        )
+        # /cards/all is the documented form that includes archived cards; a filter parameter is not.
+        return self.client.request("GET", f"/1/boards/{self.board}/cards/all", {"fields": "name,desc,idList,closed"})
 
     @staticmethod
     def _id(card) -> str:
@@ -350,7 +361,7 @@ class Adapter:
         level = prefs.get("permissionLevel") if isinstance(prefs, dict) else None
         if level not in ("private", "org"):  # public, or anything this code does not know: refuse
             raise TrackerError("That board is public, so I will not use it.", PUBLIC)
-        return {"name": one_line(data.get("name"), 80), "level": level}
+        return {"name": one_line(data.get("name"), 80), "level": level}  # board text: the caller frames it
 
     def intake(self, linked) -> list:
         lists = {l["id"]: l.get("name", "") for l in self._lists()}
@@ -362,13 +373,36 @@ class Adapter:
         ]
 
     def _list_for(self, task, lists):
-        wanted = "blocked" if is_blocked(task) else "doing"
+        wanted = "blocked" if is_blocked(task) else "ready" if _is_ready(task) else "doing"
+        for l in lists:
+            if _category(l.get("name")) == wanted:
+                return l["id"]
+        wanted = "blocked" if wanted == "blocked" else "doing"  # no Ready list: Doing is the nearest honest place
         for l in lists:
             if _category(l.get("name")) == wanted:
                 return l["id"]
         if not lists:
             raise TrackerError("The board has no lists to put a card in.", API)
         return lists[0]["id"]
+
+    def finish(self, card_ids) -> int:
+        """Move the cards of shipped tasks to the Done list. Returns how many moved; archived or gone cards are left alone."""
+        wanted = [c for c in card_ids if c not in (None, "pending")]
+        if not wanted:
+            return 0
+        lists = self._lists()
+        done = next((l["id"] for l in lists if _category(l.get("name")) == "done"), None)
+        if done is None:
+            return 0
+        by_id = {c["id"]: c for c in self._cards()}
+        moved = 0
+        for cid in wanted:
+            card = by_id.get(cid)
+            if card is None or card.get("closed") or card.get("idList") == done:
+                continue
+            self.client.request("PUT", f"/1/cards/{self._id(card)}", {"idList": done})
+            moved += 1
+        return moved
 
     def sync(self, tasks, record) -> list:
         """Upsert every task's card. record(slug, card_id) is called the moment a link is known."""
