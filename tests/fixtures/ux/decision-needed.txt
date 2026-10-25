@@ -1,0 +1,5 @@
+Decision needed: today's plan.
+Last session: shipped the export screen. The login change is still in review.
+Waiting on you: how sync should work (4 days).
+In flight: export screen (done), login change (review), sync (blocked).
+Heads-up: 3 files changed and not committed.

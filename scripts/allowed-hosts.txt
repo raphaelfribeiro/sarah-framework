@@ -22,6 +22,11 @@ anthropic.com
 semver.org
 keepachangelog.com
 
+# The tracker adapter (scripts/tracker_trello.py): the API it calls, and the
+# board links it accepts.
+api.trello.com
+trello.com
+
 # Loopback, for examples and generated project templates.
 localhost
 127.0.0.1

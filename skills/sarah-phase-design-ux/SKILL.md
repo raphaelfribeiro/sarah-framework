@@ -36,6 +36,8 @@ If the change has no user-facing surface at all, skip it. Say you are skipping i
 
 A slightly worse pattern used everywhere beats a slightly better one used once. When the designer introduces a pattern the project does not have, that is a decision to surface to the user, not a detail to slip in.
 
+**Design choices go to the user as a structured question** with a recommendation, and user-facing text is short and plain, outcome first. Conversation defaults, unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Design a surface for a flow the user has not agreed to. Go back to the spec.

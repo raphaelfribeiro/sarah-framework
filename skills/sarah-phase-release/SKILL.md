@@ -56,6 +56,8 @@ Secrets never enter the repository, the image layers, the build logs, or a clien
 
 Spawn the `release-manager` with the entries in `sarah/changelog/`.
 
+**The `User-facing:` line is the release note.** A changelog entry may carry one line that starts exactly `User-facing: ` followed by one sentence for a user. Hand the release-manager those sentences as the note for each delivery, verbatim, and group them by the entry's date. An entry without the line (a project that did not choose the changelog habit) is summarized from its body instead; never invent a line for it. Breaking changes still go first.
+
 **Semantic versioning, strictly.** One breaking change makes it a major release regardless of what else is in it. The rule is not a vote.
 
 **Release notes are written for the reader**, not the author: what changed for a user, not which function moved. Breaking changes go at the top with the migration step. A breaking change discovered after upgrading is the worst release note failure there is.
@@ -71,6 +73,8 @@ Nothing is tagged with an open item:
 - `ARCHI.md` reflects any architectural change.
 - Tests pass — run them, do not assume.
 
+**The release is a gate, asked as a structured question; the steps around it are not.** Do not ask to continue between them. Conversation defaults, unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Tag with the checklist open. Report the open item and stop.
@@ -84,4 +88,4 @@ Nothing is tagged with an open item:
 
 Released, tagged, and the task's file in `sarah/state/` updated to reflect the new version and an empty runway — all of it committed, and the release branch merged the way the project's branching model prescribes.
 
-If a tracker MCP is connected, offer to move the related cards or close the issues — as an option. If none is connected, the subject never comes up.
+If `sarah/habits.md` records `tracker: trello`, the cards of the shipped tasks should already be in Done (`/hasta-la-vista` moves them with `tracker.py done`); if one is not, offer to run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" done --task <slug>` while the task file still exists — as an option. Without that habit, the subject never comes up.

@@ -1,6 +1,6 @@
 ---
 name: sarah-compact
-description: Measure ARCHI.md against its context budget and compact it without losing coverage. Use when the user runs /sarah-compact, says "ARCHI is too big", "compact the architecture doc", "trim ARCHI.md", when a session start reports the file over budget, or when the architecture memory has grown into a dump instead of a map.
+description: Measure ARCHI.md against its context budget and compact it without losing coverage, and trim sarah/state.md and the task files in sarah/state/ when they outgrow their size limits. Use when the user runs /sarah-compact, says "ARCHI is too big", "compact the architecture doc", "trim ARCHI.md", "the state file is too big", "trim the notes", when a session start reports a `Size:` line or the file over budget, or when the architecture memory has grown into a dump instead of a map.
 allowed-tools:
   - Read
   - Edit
@@ -11,9 +11,12 @@ allowed-tools:
   - Bash(python3 "${CLAUDE_PLUGIN_ROOT}/scripts/token_budget.py" *)
   - Bash(git *)
   - Bash(wc *)
+  - Bash(date *)
 ---
 
 # /sarah-compact — hold the line on ARCHI.md
+
+This command trims two things: `ARCHI.md` (steps 1-5) and the state files (the last section; go straight there when the session start reported a `Size:` line). Neither is touched unless it is over its limit.
 
 `ARCHI.md` has a hard ceiling: 10% of the context window. The ceiling is not tidiness. A file too expensive to read gets skimmed, and a skimmed memory is worse than no memory — it is trusted without being read.
 
@@ -68,9 +71,38 @@ A file that is still over budget after honest compaction is telling you somethin
 - **Split by subsystem.** A root `ARCHI.md` pointing at per-subsystem files. For genuinely large systems.
 - **Accept the overrun deliberately.** Sometimes a system really is complex. That is the user's call to make explicitly — not a default to drift into.
 
+## The state files
+
+`sarah/state.md` (the index) may reach 8,192 bytes and each `sarah/state/*.md` task file 16,384. The session start prints a `Size:` line for a file over its limit. Measure before anything else:
+
+```bash
+wc -c sarah/state.md sarah/state/*.md
+```
+
+**If every file is within its limit, stop and say so.** Same rule as above: do not tidy what fits.
+
+Otherwise, work through these four steps in order and stop as soon as the files fit:
+
+1. **Delete the files of shipped tasks.** A task whose work is merged and recorded in `sarah/changelog/` no longer needs its file. Remove its row from the index too.
+2. **Move finished narrative to the changelog.** Completed phases, long histories and "what happened" prose belong in a `sarah/changelog/` entry, not in state.
+3. **Move durable lessons** into `ARCHI.md` section 8 or into `docs/`, one line and a link where the detail already lives.
+4. **Move decisions that still bind** into `sarah/decisions.md`: one dated line per decision, newest first, creating the file if it does not exist. A "permanent" exclusion is stored as permanent, not as an ordinary line.
+
+**Propose before writing.** Show which files would be deleted, what moves where, and the sizes before and after. Then ask with `AskUserQuestion`, header `Notes size`, for example question `The state index is 9.1 KB (limit 8 KB). Trim it?`:
+
+- `Trim it (Recommended)`: "Nothing is lost: finished tasks move to the changelog. I show what moves before I write."
+- `Not today`: "I will not ask again until tomorrow."
+
+The user decides, then you write, then you measure again and report one line: `Trimmed: state index 9.1 KB to 5.8 KB. 2 task files removed; their text is in the changelog.`
+
+**On "Not today"**, write today's date (from `date +%Y-%m-%d`) as the only line of `sarah/.local/compact-snoozed`, creating the directory if needed. The session-start hook reads that marker and stays quiet about size for the rest of the day. Change nothing else.
+
+Never delete a task file whose work is not shipped, and never drop a decision to save bytes.
+
 ## What never happens here
 
 - Compacting a file that is within budget.
 - Cutting invariants, sharp edges, or reasoning to hit a number.
-- Rewriting without approval.
+- Rewriting without approval, for `ARCHI.md` and for the state files alike.
+- Deleting a task file whose work has not shipped.
 - Reporting the estimate as an exact count.

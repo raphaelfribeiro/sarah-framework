@@ -1,0 +1,7 @@
+{
+  "description": "Inert fixture for the install engine tests. Not offered in the catalog.",
+  "requires": [],
+  "settings": [
+    {"event": "PreToolUse", "matcher": "Bash", "file": "sarah/hooks/_fixture/fixture.sh"}
+  ]
+}

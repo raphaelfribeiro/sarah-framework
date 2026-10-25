@@ -5,63 +5,26 @@ description: End-of-session debrief - what was delivered today, what is still op
 
 # /hasta-la-vista — debrief
 
-The session that ends without a debrief is the session whose state file is wrong tomorrow. This is where the day's work becomes something the next session can pick up.
+The session that ends without a debrief is the session whose state file is wrong tomorrow.
 
-Under a page, and it writes.
+**Write first, then report.**
+- Each task touched today: `sarah/state/<slug>.md` (phase, in flight, blocked, gates, then `Next`, written last). Then `sarah/state.md`, one row per task, `Waiting on` current.
+- A task that shipped loses its file and its row (run the tracker step below first). Its entry in `sarah/changelog/` is the record: `# <title>`, then `**Date:** YYYY-MM-DD · **Level:** N · **Phase:** <phase>`, what changed and why, what is deliberately not done, and, when `sarah/habits.md` chooses `changelog-fragment`, one line starting `User-facing: ` with one sentence for a user. One entry per delivery; none for a day without one.
+- Decisions that still bind go into `sarah/decisions.md`: one dated line each, newest first, a "Permanent" exclusion under its own `## Permanent` heading. If the file is absent, create it with the first one.
+- Delete exceptions older than 14 days.
+- When `sarah/habits.md` records `tracker: trello` under `## Tracker`: for each task that shipped, run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" done --task <slug>` before deleting its file (it moves the card to Done), then `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" sync` once the files are current. Silent unless one fails; then relay its sentence. Without the habit, say nothing about a board.
 
-## 1. What was delivered
+**Documentation gate.** Close the documentation gate for what shipped. Level 0-1: `sarah/state.md` current. Level 2+: also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and the changelog entry. Report what is missing; never fix it silently.
 
-From `git log` since the session started, `git status --short`, and what actually happened in this conversation. Two or three lines, concrete.
+**Output.** No headings. At most 10 lines of about 110 characters, in this order, a line omitted when empty:
+1. `Decision needed: <what>.` or `No decision needed. <why>.`
+2. `Shipped:` what was delivered, the check run and its result. Code never run goes under Open.
+3. `Open:` up to 3, each with what it waits on, readable with no memory of today.
+4. `Decided today:` up to 3, each ending "Saved."
+5. `Docs:` `Missing: <item>.` when the gate fails.
 
-Distinguish **delivered** from **touched**. Code written but never run is not delivered, and recording it as delivered is how a project's state file quietly becomes fiction.
+More than 2 items on a line: one short table. A day with no delivery: `No decision needed. Nothing shipped today; recorded as such.`
 
-## 2. What is still open
+**Panel.** At most 2 questions. A missing doc: `Fix it now (Recommended)` or `Carry it to next time`. If files changed: `Commit the N changed files to <branch>?` with `Commit (Recommended)`, naming the message and "Not sent online", or `Leave them uncommitted`. Act on the answers, then sign off once: `Hasta la vista.` Nothing after it. Pushing is never part of the close.
 
-What was started and not finished, what is blocked, what decisions are still waiting. Where the next session should pick up — written for someone with no memory of today, because on Monday that is exactly who reads it.
-
-A table once there is more than one open item, with what each one waits on. The person reading this is deciding where tomorrow starts, and a paragraph makes them extract the list themselves.
-
-## 3. Update the state
-
-Rewrite the **task file** for each task touched today — `sarah/state/<slug>.md`: phase, in flight, blocked, pending decisions, gates, and the `Next` section. Write `Next` last and write it carefully — it is what `/ill-be-back` reads tomorrow to propose the day.
-
-Then update `sarah/state.md`, the index: one row per task, and the `Waiting on` column current. The index is what a reader sees first, and a stale `Waiting on` sends them to the wrong task.
-
-**A task that shipped loses its file.** Delete `sarah/state/<slug>.md` and drop its row from the index — the changelog entry is the permanent record. A directory of finished task files is a graveyard that makes the index harder to read every week.
-
-If something delivered today, add an entry to `sarah/changelog/`:
-
-```markdown
-# <what was delivered>
-
-**Date:** YYYY-MM-DD · **Level:** N · **Phase:** <phase>
-
-What changed, why, and anything the next person needs to know.
-Name what is deliberately not done.
-```
-
-One entry per delivery, not one per session. A day with no delivery gets no entry, and that is a truthful record rather than a gap.
-
-## 4. Check the documentation gate
-
-For everything delivered today, at its level:
-
-- **Level 0–1:** `sarah/state.md` current. Done.
-- **Level 2+:** also `ARCHI.md` if anything architectural moved, `README.md` if anything user-visible changed, and the changelog entry.
-
-**Report what is missing rather than quietly fixing it.** If the README should have changed and did not, say so — the user decides whether to fix it now or carry it. A gate that closes itself is not a gate.
-
-If a tracker MCP is connected, offer to sync the cards. If none is connected, never mention it.
-
-## 5. Suggest the commit
-
-Propose a commit message for what is uncommitted. Suggest it; do not run it. Committing is the user's call, and so is pushing — which on a public repository means publishing.
-
-Then sign off. Once, briefly.
-
-## What never happens here
-
-- **No new work.** Someone said they were done. Starting something is the opposite of listening.
-- **No invented delivery.** A day that produced nothing is recorded as a day that produced nothing.
-- **No corporate summary.** Under a page. If the debrief is long enough to skim, it will be skimmed, and then the state file rots anyway.
-- **No silent fixing of the documentation gate.** Report it. The user decides.
+**Never:** start new work, or record touched code as delivered.

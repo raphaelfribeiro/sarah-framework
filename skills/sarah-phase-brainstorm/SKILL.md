@@ -36,6 +36,8 @@ Spawn the `product-analyst` agent for the analysis. It returns the shaped proble
 
 Use `AskUserQuestion` when the options are genuinely a choice between paths. Use plain prose when you are asking the user to tell you something you do not know.
 
+**Scope options are a structured question:** 2-3 options with trade-offs, a recommendation, and room for free text. This is one of the conversation defaults; honour it unless the user switched it off in `sarah/habits.md`.
+
 ## What you never do
 
 - Propose a stack, a framework, or a database. Not yours, not this phase.

@@ -5,7 +5,7 @@ contributing here means following the same gates that S.A.R.A.H. asks of any
 project using it. That is deliberate: a framework whose own repository violates
 its documentation gate is one nobody should trust.
 
-Read [`CLAUDE.md`](CLAUDE.md) first. It is the operating manual for working on
+Read [`.claude/CLAUDE.md`](.claude/CLAUDE.md) first. It is the operating manual for working on
 this repository, and it overrides anything here that contradicts it.
 
 ## What this repository is made of

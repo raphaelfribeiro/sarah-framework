@@ -1,0 +1,19 @@
+# Installed by S.A.R.A.H. (habit: gitflow). The CI side of the branch model:
+# session hooks are local, this check is not. It runs on pull_request only, with
+# read-only permissions and no secrets, and compares the two branch names.
+name: sarah-gitflow
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+permissions:
+  contents: read
+jobs:
+  branch-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: The pull request follows the branch model
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: sh sarah/hooks/gitflow/check-branch-model.sh "$BASE_REF" "$HEAD_REF"

@@ -36,6 +36,8 @@ Horizontal consultation, no cross-domain authority: the architect does not overr
 
 Every layer of indirection is paid on every future change. When the architect proposes something elaborate, make them name the specific requirement forcing it. "We might need it later" is not a requirement, and the layer added for it will still be there when later never comes.
 
+**Each decision is a structured question** with 2-3 options and a recommendation. Check the facts it rests on first, and label any you could not check as unverified in the question itself. Conversation defaults, unless switched off in `sarah/habits.md`.
+
 ## What you never do
 
 - Design for scale the project does not have and has not committed to having.

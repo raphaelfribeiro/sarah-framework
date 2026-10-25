@@ -33,8 +33,11 @@ running into them:
   sequence is in [branching.md](branching.md).
 - **The mirror is not a guarantee.** A push-mirror can be configured, run on
   schedule, fail every time, and report that only inside its own settings page.
-  Ours did exactly that for eleven days after the repository was renamed. Treat
-  "it mirrors automatically" as a claim to verify at release time, not a fact.
+  Ours did exactly that for eleven days after the repository was renamed, and
+  the state file repeated "it mirrors automatically" as a fact the whole time.
+  Treat it as a claim to verify at release time: **read what actually arrived**,
+  not what was supposed to. It carries heads and tags and nothing else — checked
+  by listing the refs on the far side rather than by reasoning about it.
 
 Users receive it by installing from the marketplace, which resolves to `main`:
 
@@ -58,10 +61,18 @@ That leaves four signals, in the order they arrive:
 | The plugin loads | Manifests parse, skills register, hooks do not break a session | `/plugin` in any Claude Code session |
 | Issues | A human hit something the guards do not model | GitHub issues |
 
-**As of v0.1.0 the first signal has never fired.** No runner has executed the
-`release` workflow — its steps were exercised locally, including against a
-deliberately wrong tag, and that is not the same thing. Until a run appears, the
-release pipeline is a claim like any other.
+**The first signal fired for the first time on v0.1.0**, and it passed: both the
+called validation and the publish job, producing the release from the changelog
+section. Before that it was a claim — its steps had been exercised locally,
+including against a deliberately wrong tag, which is not the same thing.
+
+One trap it revealed, worth knowing before the next repository is set up. **A
+first push into an empty remote does not fire a release.** Every ref arrives at
+once, and the remote registered a workflow run for the default branch only —
+nothing for the other branch, nothing for the tag, even though the workflow file
+was present in the tag's own tree. Deleting the tag and pushing it again as an
+isolated event ran the pipeline correctly. It is an artefact of an empty
+repository and does not recur, which is exactly why nobody remembers it.
 
 The fourth is the only one that finds a defect the first three cannot, which is
 why [the README asks for a specific kind of report](../README.md#contributing): a
@@ -76,11 +87,42 @@ run against a fresh project. That is expensive, it is not automated, and it is
 not part of this pipeline. Treat structural green as necessary and never as
 sufficient.
 
+## What v0.2.0 leans on, and where it is blind
+
+The habits catalog rests on platform behaviour the public documentation does not
+promise. Four probes on Claude Code CLI 2.1.308 held: per-call `effort` on the
+Agent tool, the Agent input reaching a `PreToolUse` hook, a subagent naming the
+model it ran on, and `permissions.ask` still prompting in permissive modes. Re-run
+them on a CLI major version; a green CI cannot say whether they still hold.
+
+Two limits are stated rather than hidden:
+
+- **A forced platform model fallback is not reported (the F17 gap).** The executor
+  names the model it ran on, and that matched the dispatched model in 6 of 6
+  ordinary calls. A forced fallback could not be provoked on demand, so whether
+  the report would name the fallback model is unverified. The orchestrator's own
+  check of the report is the only cover.
+- **With `CLAUDE_CODE_EFFORT_LEVEL` set, the Agent tool loses its per-call
+  `effort` parameter** (fact F5 in section 0 of the
+  [architecture](specs/the-habits-that-earned-their-place.architecture.md)). Every
+  executor then runs at that level, whatever its task file declares, and nothing
+  says so at the time. If you rely on per-task effort, leave the variable unset.
+
+The platform's own fallback never fires on a rate limit (429), so the
+orchestrator re-dispatches itself. The tracker has been tested against a local
+stub only; it has not yet met the live Trello API.
+
+The Trello key and token live in environment variables, and the agent's shell can
+read them, as can every command it runs. Mint the token with an expiration (30
+days is a good default) and the narrowest scope, `read,write`, ideally from a
+dedicated Trello account that is a member of only the board in use. Renew it when
+session start reports a rejected token.
+
 ## The way back
 
 Written now, because an incident is the worst moment to design one.
 
-**For a user.** Pin the previous tag instead of tracking `main`:
+**For a user.** Pin the previous tag instead of tracking `main`. The same works going forward: a project that wants no surprise installs a chosen tag and moves it when it decides to. Habits already installed into a project are the project's own and are not touched by a plugin update or downgrade.
 
 ```
 /plugin uninstall sarah@sarah-framework

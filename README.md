@@ -17,7 +17,7 @@ letting the workflow become a project of its own.
 ---
 
 > [!WARNING]
-> **v0.1 is not released.** The comparative study has now run three times. It
+> **The evidence is inconclusive.** The comparative study has run three times. It
 > does not show that S.A.R.A.H. produces better software than plain Claude Code.
 > [Evidence](#evidence) has the numbers, including the ones that argue against
 > us.
@@ -114,6 +114,17 @@ brownfield, and interviews you only for what it could not learn on its own.
 After that, stop typing commands. Describe what you want and the framework
 routes itself.
 
+**Prerequisites.** Claude Code, and nothing else, for the workflow itself. The
+habits below that install or call a script need `python3` (standard library
+only), and the ones that guard a tool call also need `jq`. If either is missing,
+`/sarah-init` says which habits it is leaving out and why; nothing is installed
+half-working.
+
+**Staying on a version.** The marketplace follows the default branch. To stay on
+a release you have checked, install from a checkout of its tag; the steps are in
+[the way back](docs/operating.md#the-way-back). Habits you installed are copies in
+your project and a plugin update never rewrites them.
+
 ## How it works
 
 Every request passes through `sarah-bootstrap`, which reads the state index, the file of the task it belongs to, and
@@ -142,6 +153,44 @@ Then five gates, each with a human behind it:
 
 Walkthroughs: [Level 1](docs/walkthrough-level-1.md) ·
 [Level 3](docs/walkthrough-level-3.md) (a real, instrumented run).
+
+## Habits you can choose
+
+Version 0.2.0 adds a catalog of working habits that `/sarah-init` walks you
+through in plain words. Each one exists to prevent one named failure, and
+**every one is opt-in and removable**: decline them all and nothing is installed
+and nothing can block you. The plugin's own hooks never block; a habit that can
+stop an action is a file in *your* project, written only after you approve the
+exact diff, listed in `sarah/habits.md`, and taken out again by asking.
+
+| Habit | What it prevents | What it may stop |
+| --- | --- | --- |
+| Keep demands on a Trello board | Requests lost between sessions | Nothing |
+| Pick the AI model for each task | Work running on a model nobody chose | Starting a task with no model set |
+| Check the task still makes sense | Work built on something no longer true | A task whose starting point is false |
+| Each task gets its own copy | Parallel work colliding in one folder | A 4th task while 3 run |
+| Keep working while work is waiting | A session ending with ready work untouched | Stopping once, until you say stop |
+| Protect the main line | Work piling up in one place, untested merges | Saving onto the main line; joining work with failing tests |
+| A release-note line per delivery | Release notes rebuilt from memory | Sending work for review without its note |
+
+Alongside them, working defaults are on from the first session and can be
+switched off one by one: decisions arrive as questions with a recommendation, no
+"shall I continue?" inside an approved plan, the agent runs what it can run and
+tests its own work, reports are short and plain, facts are checked before a
+recommendation, and what you decided is remembered. What the agent may do
+unattended is a short list you grant at init and can revoke; deleting for good,
+rewriting history, spending money and touching passwords or keys are always
+asked.
+
+**Trello credentials never travel through the chat.** You set `TRELLO_API_KEY`
+and `TRELLO_TOKEN` as environment variables yourself; the repository keeps only
+the board link, and no option of the tracker script accepts a secret.
+
+**Shorter rituals.** `/ill-be-back` and `/hasta-la-vista` are at most ten lines
+each, verdict first, with the decision you owe at the top and one question to
+commit at the close. Work is delegated to an `executor` agent whose model and
+effort are chosen per task, and it answers in a fixed four-part report: done,
+proof, not finished, requested tasks.
 
 ## Commands
 

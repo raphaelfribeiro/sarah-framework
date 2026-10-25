@@ -13,6 +13,13 @@
 
 **Branch:** `{{feature/branch-name}}` · **Level:** {{0-3}} · **Phase:** {{phase}} · **Updated:** {{DATE}}
 
+<!--
+  Only when a tracker is installed: the card this task belongs to. `pending`
+  means the card is not created yet; the next sync creates it. No line at all
+  reads as pending. Delete this line in projects without a tracker.
+-->
+Card: {{card id, or pending}}
+
 ## Itinerary
 
 <!--
@@ -25,6 +32,24 @@
 | Step | In | Why |
 | --- | --- | --- |
 | {{step}} | {{yes / no}} | {{reason, from this request — or "dropped by you"}} |
+
+## Premises
+
+<!--
+  What this task assumes is true about the code, the plan or the platform. One
+  line each, exactly `- YYYY-MM-DD - <premise>`, where the date is the day it was
+  last checked. Every premise is re-checked against the code and sarah/decisions.md
+  right before dispatch and given that day's date; a premise checked earlier is
+  stale. A task that assumes nothing says `- YYYY-MM-DD - none`.
+-->
+
+## Executor
+
+<!-- Declared before dispatch, one row per task. Model is an alias: sonnet, opus, haiku or fable. Effort is low to max. Fallback is the model to re-dispatch on after a rate limit or dispatch error. Delete this section when no executor is used. -->
+
+| Executor | Model | Effort | Fallback |
+| --- | --- | --- | --- |
+| executor | {{model}} | {{effort}} | {{fallback model}} |
 
 ## In flight
 
