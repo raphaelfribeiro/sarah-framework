@@ -37,6 +37,9 @@
   has stopped. Name the person or the thing, not the state. "You, since
   2026-08-12" beats "blocked".
 
+  A task that is approved and could start, with nothing begun, has Phase
+  `ready` and Waiting on `nobody`. Scripts read that pair to find the next work.
+
   Past five rows, say so once. More in flight than a person can hold is worth a
   sentence, not a policy.
 -->

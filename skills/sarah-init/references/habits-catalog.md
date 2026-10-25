@@ -100,11 +100,13 @@ When this is chosen it adds two grants: save work online, and join finished work
 ### Keep working while work is waiting
 
 - Habit: no-idle
-- Status: pending (payload not built yet)
-- Failure: a session ending with ready work untouched and an idle board.
-- Blocks: stopping once, when work is ready. The user can still say stop.
+- Status: available
+- Failure: a session ending with ready work untouched, so you have to say "keep going" every time.
+- Blocks: stopping once, when work is ready and nothing waits on you. Telling me to stop is honoured for that day.
 - Needs: python3
 - Group: Tasks
+
+Ready work is a row in `sarah/state.md` whose Phase is `ready` and whose Waiting on is `nobody`. It reads only local state, never the board.
 
 Three entries share the `dispatch-guard` payload; the tracker entry has no payload directory. Group rules: a group with no offered entry is dropped from the panels.
 

@@ -104,10 +104,10 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 2 | 5 install engine | `feature/habits-s05-install-engine` | merged |
 | 2 | 7 executor and brief | `feature/habits-s07-executor` | merged (9d2096c) |
 | 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | merged |
-| 3 | 6+10 init interview, grants | `feature/habits-s06-init-grants` | building |
+| 3 | 6+10 init interview, grants | `feature/habits-s06-init-grants` | merged |
 | 3 | 11+12 exceptions, gitflow, changelog fragment | `feature/habits-s11-exceptions-gitflow` | building |
 | 4 | 15 tracker | `feature/habits-s15-tracker` | merged |
-| 4 | 14 Stop hook | `feature/habits-s14-no-idle` | building |
+| 4 | 14 Stop hook | `feature/habits-s14-no-idle` | merged |
 | 4 | 13 dispatch guard | — | after 11 |
 | 5 | 16 docs gate and release prep | — | last |
 
@@ -136,6 +136,13 @@ engineer's plan, rather than a separate test engineer per slice.
   with the user's own credentials set outside the session, belongs before the
   release. Base URL is a constructor argument limited to loopback or the Trello
   host, for tests only: flag for review.
+- **For review, from steps 6, 10 and 14:** the always-ask list holds 40 rules,
+  some routine (`rebase`, `--amend`, `branch -d`, `printenv`): weigh friction
+  against protection. Rule syntax is verified only for `git push` (F18). No `ask`
+  rule guards `sarah/habits.md`, so an agent could forge a grant row there:
+  security review decides. The Stop hook reads "ready" as Phase `ready` with
+  Waiting on `nobody`, now documented in the state template; its stop marker is
+  dated and honoured only that day.
 - Step 3's first commit is not green on its own (one worst-case assertion needs
   step 4); the merge is.
 
