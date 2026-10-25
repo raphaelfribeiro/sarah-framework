@@ -122,7 +122,7 @@ class Prose(unittest.TestCase):
         text = BOOTSTRAP.read_text()
         line = next(l for l in text.splitlines() if "Every merge has a human behind it" in l)
         self.assertIn("green CI", line)
-        self.assertIn("opt", line.lower())
+        self.assertIn("merge-on-green", line)   # the exception is the recorded grant, not the habit being installed
 
     def test_bootstrap_stays_in_budget(self):
         self.assertLessEqual(len(BOOTSTRAP.read_text()) / 4, 2000)

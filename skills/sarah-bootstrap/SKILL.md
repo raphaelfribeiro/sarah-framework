@@ -73,7 +73,7 @@ These hold at every level unless the row says otherwise. Full text: `docs/qualit
 4. **The author never reviews.** Review happens in a separate context before merge.
 5. **Documented and committed is part of done.** The task's file always; at Level 2+ also `ARCHI.md`, `README.md` and `sarah/changelog/` when each applies. Every phase ends with a commit on a `feature/*` branch. If it isn't documented, it isn't done — if it isn't committed, it didn't happen.
 
-Every gate has a guardian. Every merge has a human behind it, unless the project opted in to the gitflow habit: then a feature branch merges on green CI (ADR-010).
+Every gate has a guardian. Every merge has a human behind it, unless `sarah/habits.md` grants `merge-on-green`: then a feature branch merges on green CI (ADR-010).
 
 ## 5. How decisions get made
 

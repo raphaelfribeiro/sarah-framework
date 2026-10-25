@@ -107,7 +107,7 @@ The user chooses how we work, in plain words. Technical names, rule IDs and file
 2. Print `Decision needed: a few quick choices about how we work.` and the defaults. Ask in two calls of at most four questions: defaults (the limit is 3 tasks at once), what you may do unattended, then each habit group. No answer is never a yes.
 3. The recommended grant is pushing `feature/*` branches. Merging, force-pushing and deleting still ask. Deleting for good, rewriting history, spending money and touching passwords or keys are always asked and cannot be granted.
 4. Show `habits.py plan`, ask once, write only after a yes. Run `apply always-ask <habits>` and `grant add ... --quote "<their words>"`. If they declined everything, run `habits.py apply --none` so a re-run knows.
-5. Never write an `allow` rule on your own. `habits.py grant allow` shows the diff; `--write` only after a yes. Grants grow later only on the user's quoted instruction.
+5. Never write an `allow` rule on your own. `habits.py grant allow` shows the diff; `--write` only after a yes. Grants grow later only on the user's quoted instruction. After `apply always-ask`, each write to `sarah/habits.md` or `grant add` asks once; that is expected, not a fault to route around.
 
 ## Step 4 — Generate
 

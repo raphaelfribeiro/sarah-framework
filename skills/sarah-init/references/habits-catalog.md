@@ -68,7 +68,14 @@ Then run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" check` and relay on
 - Needs: python3, git, gh, remote
 - Group: Main line
 
-When this is chosen it adds two grants: save work online, and join finished work once its tests pass. Both appear in the summary, and each can be removed. If the project has no automatic tests, say: `This project has no automatic tests yet, so "passing" will mean only the branch check.`
+When this is chosen it adds two grants: save work online, and join finished work once its tests pass. Both appear in the summary, and each can be removed. Record them after the user's yes:
+
+```
+$HABITS grant add push-feature --scope 'feature/*' --quote "<the user's words>"
+$HABITS grant add merge-on-green --scope 'feature/*' --quote "<the user's words>"
+```
+
+The second has no allow rule: it is a row, and joining finished work without asking is legitimate only while that row is in the Autonomy section. `grant revoke merge-on-green` ends it. If the project has no automatic tests, say: `This project has no automatic tests yet, so "passing" will mean only the branch check.`
 
 Install it as `apply _lib gitflow`: both guards share `_lib`, and without it they allow and say so. One sub-question, `Add a line crediting the AI in each commit?`, with `No (Recommended)` first. `No` writes nothing, since off is the default; `Yes` adds `- attribution: on` under Settings in `sarah/habits.md`. With it off, the guard refuses commits carrying `Co-Authored-By`.
 
@@ -263,7 +270,7 @@ Print the "saved with the project" line only if a grant exists. If nothing was t
 ## 5. Autonomy: grants and the always-asked list
 
 - The recommended grant is **pushing `feature/*` branches**. Merging, force-pushing and deleting still ask, whatever is granted.
-- **Always asked, whatever the list says**, and it cannot be granted away: deleting for good (recursive delete, force-push, deleting branches, rewriting history), spending money, touching passwords or keys. `habits.py` installs these as `permissions.ask` rules (the `always-ask` payload). They only tighten, they are in the project's settings, and `remove always-ask` takes out exactly what was added. Probe F18 verified they still prompt under permissive modes. Patterns are textual, so money has few of them; the rest is the agent's own rule.
+- **Always asked, whatever the list says**, and it cannot be granted away: deleting for good (recursive delete, force-push, deleting branches, rewriting history), spending money, touching passwords or keys. `habits.py` installs these as `permissions.ask` rules (the `always-ask` payload). They only tighten, they are in the project's settings, and `remove always-ask` takes out exactly what was added. Probe F18 verified they still prompt under permissive modes. Patterns are textual, so money has few of them; the rest is the agent's own rule. The list also asks before edits to `sarah/habits.md`, `sarah/exceptions.log` and `sarah/hooks/**` and before `grant add` and `grant allow --write`, so an allow rule or a grant row is never written without a prompt; each such write after `apply always-ask` asks once, which is expected (a yes is the user's gate). It raises the bar for a mistaken agent and is not a boundary against a hostile one.
 - A plan does not authorise a risky action. Only a row in the Autonomy section does.
 - **Grants are written only on the user's explicit instruction in that turn, quoted**: at init the panel answer, later the user's own sentence. `grant add` refuses an empty quote and any always-asked wording (`That one is always asked, whatever you allow: <item>. I will keep asking.`). Scope not named: one question `Which?` with the narrowest option first.
 - Confirm with `Allowed from now on: <action> (you said: "<quote>").`, then offer the prompts question:
