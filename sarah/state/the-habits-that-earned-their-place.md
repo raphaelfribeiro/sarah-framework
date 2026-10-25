@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** Gate 4 re-review of the fixes · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** review passed; live Trello smoke next · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -138,7 +138,9 @@ engineer's plan, rather than a separate test engineer per slice.
 Two reviewers in clean contexts, correctness and security. No credential leak, no
 code execution through crafted input. Blocking findings, all re-verified, were
 fixed test-first in three slices, merged (2b7871e, fe1ea83, 30447d5); 350 Python
-tests and the shell suite green, dash included. A re-review of the fixes runs next:
+tests and the shell suite green, dash included. A re-review of the fixes passed with no blocking finding; its three cheap items are
+fixed (quoted `habits.py` form, `git clean -n` false prompt, ADR-010 note on
+`merge-on-green` being a record):
 
 | Slice | Branch | Fixes |
 | --- | --- | --- |
@@ -197,7 +199,7 @@ The new patterns listed in the UX spec §9 were approved with the design.
 | 2. Architecture approved | passed | 2026-10-24 |
 | 3. Design approved | passed | 2026-10-24 |
 | Plan approved (16 steps, ~140 tests, full depth) | passed | 2026-10-24 |
-| 4. Review | run; fixes merged; re-review of the fixes next | 2026-10-24 |
+| 4. Review | passed: fixes merged and re-reviewed | 2026-10-24 |
 | 5. Documented and committed | written in step 16; re-check after review | — |
 
 ## Found along the way
@@ -215,9 +217,8 @@ The new patterns listed in the UX spec §9 were approved with the design.
 
 ## Next
 
-1. Re-review the Gate 4 fixes (`35df6c5..HEAD`) in a clean context.
-2. The live Trello smoke on a throwaway board, credentials set outside the session.
-3. The release: PR against `develop`, rewrite the unpublished range's author, tag.
+1. The live Trello smoke on a throwaway board, credentials set outside the session.
+2. The release: PR against `develop`, rewrite the unpublished range's author, tag.
 
 Test-plan section 10 finding 2 (the Premises format) is resolved by the task
 template's `## Premises` section. Architecture D6's 8,768-byte claim is left as

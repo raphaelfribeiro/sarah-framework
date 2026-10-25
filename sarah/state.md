@@ -13,7 +13,7 @@
 | Task | File | Phase | Level | Waiting on | Since |
 | --- | --- | --- | --- | --- | --- |
 | Measurement pilot | `sarah/state/measurement-pilot.md` | running, outside this repo — 44 sessions, 43 of 47 slices | 2 | the pilot to finish; a partial read began 2026-10-24 | 2026-08-16 |
-| Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | Gate 4 re-review | 3 | re-review of the fixes, then the live Trello smoke, then the release | 2026-10-24 |
+| Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | review passed | 3 | you: the live Trello smoke, then the release decision | 2026-10-24 |
 
 **Reopened 2026-10-24 by the maintainer's decision**, with the pilot still running: the
 user's own install stays pinned to `v0.1.0`, so work here cannot reach the pilot.

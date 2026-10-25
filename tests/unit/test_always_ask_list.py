@@ -17,7 +17,7 @@ SELF_GRANT = [
     "Edit(/sarah/habits.md)", "Write(/sarah/habits.md)",
     "Edit(/sarah/exceptions.log)", "Write(/sarah/exceptions.log)",
     "Edit(/sarah/hooks/**)", "Write(/sarah/hooks/**)",
-    "Bash(*habits.py grant allow --write*)", "Bash(*habits.py grant add*)",
+    "Bash(*habits.py* grant allow*--write*)", "Bash(*habits.py* grant add*)",
 ]
 PUSH = [
     "Bash(git push *:*)", "Bash(git push * -d*)", "Bash(git push -d*)",
@@ -28,7 +28,7 @@ PUSH = [
 ]
 DESTRUCTIVE = [
     "Bash(rm -r*)", "Bash(rm -R*)", "Bash(rm -fr*)", "Bash(rm -fR*)", "Bash(rm -f -r*)", "Bash(rm -f -R*)",
-    "Bash(git clean -*f*)", "Bash(git clean * -*f*)", "Bash(git clean --force*)",
+    "Bash(git clean -df*)", "Bash(git clean -fd*)", "Bash(git clean * -f*)", "Bash(git clean --force*)",
     "Bash(git checkout .)", "Bash(git restore .)", "Bash(git stash clear)",
 ]
 SECRETS = [

@@ -59,8 +59,13 @@
     "Bash(git push origin feature/* *)",
     "Bash(git push -u origin feature/* *)",
     "Bash(git push --set-upstream origin feature/* *)",
-    "Bash(git clean -*f*)",
-    "Bash(git clean * -*f*)",
+    "Bash(git clean -df*)",
+    "Bash(git clean -fd*)",
+    "Bash(git clean -xf*)",
+    "Bash(git clean -fx*)",
+    "Bash(git clean -dxf*)",
+    "Bash(git clean -xdf*)",
+    "Bash(git clean * -f*)",
     "Bash(git clean --force*)",
     "Bash(git checkout .)",
     "Bash(git restore .)",
@@ -87,7 +92,7 @@
     "Write(/sarah/exceptions.log)",
     "Edit(/sarah/hooks/**)",
     "Write(/sarah/hooks/**)",
-    "Bash(*habits.py grant allow --write*)",
-    "Bash(*habits.py grant add*)"
+    "Bash(*habits.py* grant allow*--write*)",
+    "Bash(*habits.py* grant add*)"
   ]
 }
