@@ -107,7 +107,8 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 3 | 6+10 init interview, grants | `feature/habits-s06-init-grants` | building |
 | 3 | 11+12 exceptions, gitflow, changelog fragment | `feature/habits-s11-exceptions-gitflow` | building |
 | 4 | 15 tracker | `feature/habits-s15-tracker` | merged |
-| 4 | 13 dispatch guard, 14 Stop hook | — | after 11 |
+| 4 | 14 Stop hook | `feature/habits-s14-no-idle` | building |
+| 4 | 13 dispatch guard | — | after 11 |
 | 5 | 16 docs gate and release prep | — | last |
 
 At most three slices run at once, each in its own worktree branched from this
