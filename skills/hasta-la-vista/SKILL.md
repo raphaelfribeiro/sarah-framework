@@ -9,9 +9,10 @@ The session that ends without a debrief is the session whose state file is wrong
 
 **Write first, then report.**
 - Each task touched today: `sarah/state/<slug>.md` (phase, in flight, blocked, gates, then `Next`, written last). Then `sarah/state.md`, one row per task, `Waiting on` current.
-- A task that shipped loses its file and its row. Its entry in `sarah/changelog/` is the record: `# <title>`, then `**Date:** YYYY-MM-DD · **Level:** N · **Phase:** <phase>`, what changed and why, what is deliberately not done, and, when `sarah/habits.md` chooses `changelog-fragment`, one line starting `User-facing: ` with one sentence for a user. One entry per delivery; none for a day without one.
+- A task that shipped loses its file and its row (run the tracker step below first). Its entry in `sarah/changelog/` is the record: `# <title>`, then `**Date:** YYYY-MM-DD · **Level:** N · **Phase:** <phase>`, what changed and why, what is deliberately not done, and, when `sarah/habits.md` chooses `changelog-fragment`, one line starting `User-facing: ` with one sentence for a user. One entry per delivery; none for a day without one.
 - Decisions that still bind go into `sarah/decisions.md`: one dated line each, newest first, a "Permanent" exclusion under its own `## Permanent` heading. If the file is absent, create it with the first one.
-- Delete exceptions older than 14 days. With a tracker connected, sync it silently and report failures only.
+- Delete exceptions older than 14 days.
+- When `sarah/habits.md` records `tracker: trello` under `## Tracker`: for each task that shipped, run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" done --task <slug>` before deleting its file (it moves the card to Done), then `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" sync` once the files are current. Silent unless one fails; then relay its sentence. Without the habit, say nothing about a board.
 
 **Documentation gate.** Close the documentation gate for what shipped. Level 0-1: `sarah/state.md` current. Level 2+: also `ARCHI.md` if architecture moved, `README.md` if anything user-visible changed, and the changelog entry. Report what is missing; never fix it silently.
 

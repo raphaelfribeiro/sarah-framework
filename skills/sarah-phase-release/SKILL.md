@@ -88,4 +88,4 @@ Nothing is tagged with an open item:
 
 Released, tagged, and the task's file in `sarah/state/` updated to reflect the new version and an empty runway — all of it committed, and the release branch merged the way the project's branching model prescribes.
 
-If a tracker MCP is connected, offer to move the related cards or close the issues — as an option. If none is connected, the subject never comes up.
+If `sarah/habits.md` records `tracker: trello`, the cards of the shipped tasks should already be in Done (`/hasta-la-vista` moves them with `tracker.py done`); if one is not, offer to run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" done --task <slug>` while the task file still exists — as an option. Without that habit, the subject never comes up.
