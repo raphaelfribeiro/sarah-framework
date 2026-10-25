@@ -18,7 +18,9 @@ nowhere else. No option accepts one, and nothing here prints one.
 
 Local files this reads and writes:
     sarah/habits.md      `tracker: <name>` and `board: <id or link>` lines, and
-                         `Last audit: YYYY-MM-DD` under a `## Tracker` heading
+                         `Last audit: YYYY-MM-DD` and `Last status: connected |
+                         token rejected DATE | not answering DATE` under a
+                         `## Tracker` heading (the session-start hook reads the status)
     sarah/state.md       the In flight table, one row per task
     sarah/state/<slug>.md  a `Card: <id>` line, or `Card: pending`
 
@@ -66,6 +68,8 @@ class _Parser(argparse.ArgumentParser):
 
 _CONFIG = re.compile(r"^\s*(?:[-*]\s+)?`?(tracker|board)`?\s*[:=]\s*`?(\S+?)`?\s*$", re.I)
 _LAST_AUDIT = re.compile(r"^Last audit:[ \t]*(\S*)[ \t]*$")
+_LAST_STATUS = re.compile(r"^Last status:[ \t]*(.*?)[ \t]*$")
+_STATUS_VALUE = re.compile(r"^(?:connected|(?:token rejected|not answering) \d{4}-\d{2}-\d{2})$")
 _HEADING = re.compile(r"^#{1,2}\s")
 _TRACKER_HEADING = re.compile(r"^##\s+Tracker\s*$", re.I)
 _ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -124,11 +128,44 @@ def read_last_audit(root):
 
 
 def write_last_audit(root, day: str) -> None:
+    _write_tracker_line(root, _LAST_AUDIT, f"Last audit: {day}")
+
+
+def read_status(root):
+    """The last recorded outcome (`connected`, `token rejected <date>`, `not answering <date>`), or None.
+
+    The session-start hook reads this line instead of calling the network.
+    """
+    text = _read(_habits(root))
+    if text is None:
+        return None
+    lines = text.splitlines(keepends=True)
+    bounds = _section_bounds(lines)
+    if bounds is None:
+        return None
+    for line in lines[bounds[0] + 1:bounds[1]]:
+        m = _LAST_STATUS.match(line.rstrip("\r\n"))
+        if m:
+            return m.group(1) if _STATUS_VALUE.match(m.group(1)) else None
+    return None
+
+
+def write_status(root, value: str) -> None:
+    """Record the outcome of a tracker request. Never creates habits.md and never fails the caller."""
+    if not _STATUS_VALUE.match(value) or not _habits(root).is_file():
+        return
+    try:
+        if read_status(root) != value:
+            _write_tracker_line(root, _LAST_STATUS, f"Last status: {value}")
+    except OSError:
+        pass  # a status nobody could save is not worth failing the verb that produced it
+
+
+def _write_tracker_line(root, pattern, new: str) -> None:
     path = _habits(root)
     text = _read(path) or ""
     eol = "\r\n" if "\r\n" in text else "\n"
     lines = text.splitlines(keepends=True)
-    new = f"Last audit: {day}"
     bounds = _section_bounds(lines)
     if bounds is None:
         if lines and not lines[-1].endswith("\n"):
@@ -138,7 +175,7 @@ def write_last_audit(root, day: str) -> None:
         lines += [f"## Tracker{eol}", eol, new + eol] if lines else [f"# Habits{eol}", eol, f"## Tracker{eol}", eol, new + eol]
     else:
         start, end = bounds
-        hit = next((i for i in range(start + 1, end) if _LAST_AUDIT.match(lines[i].rstrip("\r\n"))), None)
+        hit = next((i for i in range(start + 1, end) if pattern.match(lines[i].rstrip("\r\n"))), None)
         if hit is not None:
             ending = lines[hit][len(lines[hit].rstrip("\r\n")):]
             lines[hit] = new + (ending or "")
@@ -313,6 +350,7 @@ def run_verb(module, args, root, say, adapter_options):
             say("Details are on the audit card.")
         elif outcome == "closed":
             say("Board check: clean. The audit card is closed.")
+    write_status(root, "connected")
     return 0
 
 
@@ -341,6 +379,12 @@ def main(argv=None, adapter_options=None) -> int:
         return run_verb(module, args, root, say, adapter_options or {})
     except Exception as exc:  # noqa: BLE001
         code = getattr(exc, "exit_code", None)
+        # Only the adapter's own failures say anything about the connection.
+        if module is not None and isinstance(exc, getattr(module, "TrackerError", ())):
+            if code == getattr(module, "AUTH", None):
+                write_status(root, "token rejected " + today())
+            elif code == getattr(module, "UNREACHABLE", None):
+                write_status(root, "not answering " + today())
         if code is None:
             # An error nobody planned for: its text could carry anything, so only its class is shown.
             print(f"tracker: unexpected error ({type(exc).__name__}).")

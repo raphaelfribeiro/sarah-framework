@@ -287,6 +287,56 @@ class AuditTests(Base):
         self.assertEqual(self.stub.cards, [])
 
 
+class StatusRecordTests(Base):
+    """The session-start hook cannot call the network, so the last outcome is written down."""
+
+    def status(self, root):
+        return tracker.read_status(root)
+
+    def test_success_records_connected(self):
+        root = self.project(habits="## Tracker\n\ntracker: trello\nboard: " + BOARD + "\nLast status: token rejected 2026-10-20\n")
+        self.assertEqual(self.run_cli(["check"], root)[0], 0)
+        self.assertEqual(self.status(root), "connected")
+
+    def test_rejected_token_records_the_day(self):
+        root = self.project()
+        code, _, _ = self.run_cli(["check"], root, env={"TRELLO_API_KEY": KEY, "TRELLO_TOKEN": "WRONG-TOKEN-0000"})
+        self.assertEqual(code, 4)
+        self.assertEqual(self.status(root), "token rejected " + TODAY)
+
+    def test_unreachable_records_the_day(self):
+        url = self.stub.url
+        self.stub.__exit__()
+        root = self.project()
+        self.assertEqual(self.run_cli(["sync"], root, base_url=url)[0], 5)
+        self.assertEqual(self.status(root), "not answering " + TODAY)
+
+    def test_missing_credentials_record_nothing(self):
+        root = self.project(habits="## Tracker\n\ntracker: trello\nboard: " + BOARD + "\nLast status: connected\n")
+        self.assertEqual(self.run_cli(["check"], root, env={})[0], 3)
+        self.assertEqual(self.status(root), "connected")
+
+    def test_a_public_board_is_not_a_connection_failure(self):
+        self.stub.permission = "public"
+        root = self.project(habits="## Tracker\n\ntracker: trello\nboard: " + BOARD + "\nLast status: token rejected 2026-10-20\n")
+        self.assertEqual(self.run_cli(["check"], root)[0], 6)
+        self.assertEqual(self.status(root), "token rejected 2026-10-20")
+
+    def test_an_audit_that_is_not_due_makes_no_request_and_records_nothing(self):
+        root = self.project(habits="## Tracker\n\ntracker: trello\nboard: " + BOARD + "\nLast audit: " + TODAY + "\n")
+        self.assertEqual(self.run_cli(["report"], root)[0], 0)
+        self.assertEqual(self.stub.requests, [])
+        self.assertIsNone(self.status(root))
+
+    def test_no_habits_file_is_not_created_by_a_failure(self):
+        root = self.project(habits=None)
+        url = self.stub.url
+        self.stub.__exit__()
+        code, _, _ = self.run_cli(["check", "--tracker", "trello", "--board", BOARD], root, base_url=url)
+        self.assertEqual(code, 5)
+        self.assertFalse((root / "sarah" / "habits.md").exists())
+
+
 class CanaryTests(Base):
     def test_the_credential_goes_only_to_the_stub_and_into_no_output_or_file(self):
         root = self.project([("a", "Alpha", "build", "", "pending")])
