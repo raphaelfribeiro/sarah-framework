@@ -220,7 +220,7 @@ class Install(HabitsCase):
         plugin = self.other_plugin("p4", {"needy": {**alpha(), "requires": ["remote"]}})
         code, out = self.run_cli("apply", "needy", plugin=plugin)
         self.assertEqual(code, 1, out)
-        subprocess.run(["git", "-C", str(self.project), "remote", "add", "origin", "https://example.com/x.git"], check=True)
+        subprocess.run(["git", "-C", str(self.project), "remote", "add", "origin", "../origin.git"], check=True)
         self.assertEqual(self.run_cli("apply", "needy", plugin=plugin)[0], 0)
 
     def test_in11_a_crash_at_any_point_leaves_a_state_status_explains_and_rerun_finishes(self):
