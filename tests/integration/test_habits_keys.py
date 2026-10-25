@@ -8,14 +8,17 @@ remove takes out exactly that, and a value of the user's own is a conflict.
 import json
 import shutil
 
-from tests.habits_support import HabitsCase, alpha, make_plugin, tree
+from tests.habits_support import HOOK, HabitsCase, alpha, make_plugin, tree
 
 KEYS = [{"path": "worktree.baseRef", "value": "head"}]
 INCLUDE = [".claude/settings.local.json"]
 
 
 def wt(keys=KEYS, include=INCLUDE):
-    spec = alpha()
+    spec = {
+        "files": {"sarah/hooks/wt/guard.sh": HOOK},
+        "settings": [{"event": "PreToolUse", "matcher": "Agent", "file": "sarah/hooks/wt/guard.sh"}],
+    }
     spec["keys"] = keys
     spec["include"] = include
     return spec
@@ -25,7 +28,7 @@ class Keys(HabitsCase):
     def setUp(self):
         super().setUp()
         self.git_init()
-        shutil.rmtree(self.plugin.parent)
+        shutil.rmtree(self.plugin)
         self.plugin = make_plugin(self.base, {"wt": wt(), "alpha": alpha()})
 
     def apply(self, *extra):
@@ -92,7 +95,12 @@ class Keys(HabitsCase):
         self.apply()
         code, out = self.run_cli("remove", "wt")
         self.assertEqual(code, 0, out)
-        self.assertEqual(tree(self.project), before)
+        after = tree(self.project)
+        habits = after.pop("sarah/habits.md").decode()
+        after.pop("sarah")
+        self.assertEqual(after, before)
+        self.assertNotIn("- key:", habits)
+        self.assertNotIn("- include:", habits)
 
     def test_remove_takes_out_only_what_was_added(self):
         self.write(".claude/settings.json", json.dumps({"worktree": {"other": 1}, "theme": "x"}))
@@ -148,7 +156,7 @@ class Keys(HabitsCase):
 
 class Containment(HabitsCase):
     def refused(self, spec):
-        shutil.rmtree(self.plugin.parent)
+        shutil.rmtree(self.plugin)
         self.plugin = make_plugin(self.base, {"bad": spec})
         before = tree(self.project)
         code, out = self.run_cli("apply", "bad")

@@ -76,6 +76,7 @@ STAMP = re.compile(rb"# sarah-habit: ([a-z0-9_][a-z0-9_-]*) (\S+) sha256:([0-9a-
 PREFIXES = ("sarah/hooks/", ".github/workflows/sarah-")
 
 SETTINGS = ".claude/settings.json"
+WORKTREEINCLUDE = ".worktreeinclude"
 SETTINGS_LOCAL = ".claude/settings.local.json"
 HABITS_MD = "sarah/habits.md"
 GITIGNORE = ".gitignore"
@@ -83,6 +84,14 @@ IGNORE_LINE = "sarah/.local/"
 REQUIRES = ("git", "gh", "remote")
 SECTIONS = ("Chosen", "Settings", "Conversation defaults", "Tracker", "Autonomy", "Manifest", "Exceptions")
 TMP_PREFIX = ".sarah-tmp-"
+
+# A payload may also add scalar keys to the project's settings file, under these
+# roots only, and lines to .worktreeinclude. Later habits extend KEY_ROOTS in the
+# same commit that needs them. Hooks and permissions have their own, stricter paths.
+KEY_ROOTS = ("worktree",)
+KEY_PATH = re.compile(r"([A-Za-z][A-Za-z0-9]*)\.([A-Za-z][A-Za-z0-9]*)")
+KEY_TEXT = re.compile(r"[A-Za-z0-9._/-]{1,40}")
+INCLUDE_LINE = re.compile(r"[A-Za-z0-9._][A-Za-z0-9._/-]{0,119}")
 
 # A payload may tighten permissions and never loosen them.
 FORBIDDEN_KEYS = ("allow", "deny", "defaultMode", "permissions")
@@ -154,6 +163,28 @@ def classify(data, payload_digest: str, manifest_digest) -> str:
 
 
 # --- names and containment ---------------------------------------------------
+
+
+def check_key(name, key):
+    """(root, leaf, value) of a payload `keys` entry, or Refused."""
+    path = key.get("path") if isinstance(key, dict) else None
+    m = KEY_PATH.fullmatch(path) if isinstance(path, str) else None
+    if not m or m.group(1) not in KEY_ROOTS:
+        raise Refused(f"habit {name}: a `keys` path must be <root>.<key> with root one of {', '.join(KEY_ROOTS)}")
+    value = key.get("value")
+    if isinstance(value, str):
+        ok = bool(KEY_TEXT.fullmatch(value))
+    else:
+        ok = isinstance(value, (bool, int))
+    if not ok:
+        raise Refused(f"habit {name}: the value of {path} must be a plain string, number or boolean")
+    return m.group(1), m.group(2), value
+
+
+def check_include(name, line):
+    if not isinstance(line, str) or not INCLUDE_LINE.fullmatch(line) or any(p in ("", ".", "..") for p in line.split("/")):
+        raise Refused(f"habit {name}: {line!r} is not a plain project-relative path for .worktreeinclude")
+    return line
 
 
 def check_habit_name(name: str) -> None:
@@ -542,8 +573,9 @@ def command_for(rel: str) -> str:
 
 
 class Payload:
-    def __init__(self, name, files, settings, requires, ask=()):
+    def __init__(self, name, files, settings, requires, ask=(), keys=(), include=()):
         self.name, self.files, self.settings, self.requires, self.ask = name, files, settings, requires, list(ask)
+        self.keys, self.include = list(keys), list(include)
 
 
 def plugin_version(plugin: Path) -> str:
@@ -574,6 +606,11 @@ def load_payload(plugin: Path, name: str) -> Payload:
     requires = meta.get("requires", [])
     if not isinstance(requires, list) or any(r not in REQUIRES for r in requires):
         raise Refused(f"habit {name}: `requires` may only list {', '.join(REQUIRES)}")
+    keys_meta, include_meta = meta.get("keys", []), meta.get("include", [])
+    if not isinstance(keys_meta, list) or not isinstance(include_meta, list):
+        raise Refused(f"habit {name}: `keys` and `include` must be lists")
+    keys = [check_key(name, k) for k in keys_meta]
+    include = list(dict.fromkeys(check_include(name, l) for l in include_meta))
     files = {}
     root = base / "files"
     for dirpath, dirnames, filenames in os.walk(root, followlinks=False):
@@ -594,7 +631,7 @@ def load_payload(plugin: Path, name: str) -> Payload:
         if s["file"] not in files:
             raise Refused(f"habit {name}: settings entry names {s['file']}, which the payload does not ship")
         settings.append((s["event"], s.get("matcher") or "", s["file"]))
-    return Payload(name, files, settings, requires, dict.fromkeys(ask))
+    return Payload(name, files, settings, requires, dict.fromkeys(ask), keys, include)
 
 
 def unmet(root: Path, requirement: str) -> bool:
@@ -626,6 +663,8 @@ class Plan:
         self.warnings = []
         self.ask_added = []    # (habit, rule) written to permissions.ask by this run
         self.records = {}      # Settings lines the engine owns, by prefix
+        self.keys_added = []   # (habit, root, leaf, value) written to the settings file by this run
+        self.include_added = []  # (habit, line) to append to .worktreeinclude
 
 
 def parse_resolutions(items):
@@ -762,8 +801,10 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
 
     asks_wanted = [(p.name, r) for p in payloads for r in p.ask]
     old_asks = habits_md.records("ask")
-    plan.records = {"ask": list(old_asks)}
-    if wanted_settings or asks_wanted:
+    plan.records = {"ask": list(old_asks), "key": habits_md.records("key"), "include": habits_md.records("include")}
+    old_records = copy.deepcopy(plan.records)
+    keys_wanted = [(p.name, *k) for p in payloads for k in p.keys]
+    if wanted_settings or asks_wanted or keys_wanted:
         obj, bom, existed = read_settings(contain(root, SETTINGS))
         before = copy.deepcopy(obj)
         merged = merge_settings(copy.deepcopy(obj), wanted_settings)
@@ -774,6 +815,27 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
                 if record not in plan.records["ask"]:
                     plan.records["ask"].append(record)
                 plan.lines.append(f"settings add ask {rule}")
+        for habit, root_key, leaf, value in keys_wanted:
+            container = merged.get(root_key)
+            if container is None:
+                merged[root_key] = {leaf: value}
+            elif not isinstance(container, dict):
+                plan.lines.append(f"conflict settings {root_key}.{leaf}: {root_key} is not an object (yours; left alone)")
+                plan.pending = True
+                continue
+            elif leaf not in container:
+                container[leaf] = value
+            elif container[leaf] == value and type(container[leaf]) is type(value):
+                continue
+            else:
+                plan.lines.append(f"conflict settings {root_key}.{leaf} is {json.dumps(container[leaf])} (yours; left alone)")
+                plan.pending = True
+                continue
+            plan.keys_added.append((habit, root_key, leaf, value))
+            plan.lines.append(f"settings add key {root_key}.{leaf}")
+            record = f"{habit} {root_key}.{leaf}={json.dumps(value)}"
+            if record not in plan.records["key"]:
+                plan.records["key"].append(record)
         if merged != before:
             have = set()
             for event, _, command in wanted_settings:
@@ -785,6 +847,16 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
                     plan.lines.append(f"settings add {event} {matcher or '*'} {command}")
                     plan.settings.append((event, matcher, command))
             plan.settings_obj = (merged, bom)
+    if any(p.include for p in payloads):
+        data = read_file(contain(root, WORKTREEINCLUDE))
+        present = [l.strip() for l in (data or b"").decode("utf-8", errors="replace").splitlines()]
+        for p in payloads:
+            for line in p.include:
+                if line not in present:
+                    present.append(line)
+                    plan.include_added.append((p.name, line))
+                    plan.lines.append(f"worktreeinclude add {line}")
+                    plan.records["include"].append(f"{p.name} {line}")
     plan.gitignore = habits_md.gitignore
     if plan.chosen:
         path = contain(root, GITIGNORE)
@@ -799,7 +871,7 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
             plan.gitignore = "existing"
 
     new_state = (plan.chosen, plan.rows, plan.gitignore)
-    changed = new_state != old_state or plan.records["ask"] != old_asks
+    changed = new_state != old_state or plan.records != old_records
     plan.habits_md = (habits_md, changed or not (root / HABITS_MD).exists() and bool(plan.chosen))
     if plan.habits_md[1]:
         plan.lines.append("habits.md update")
@@ -815,9 +887,17 @@ def execute_apply(root: Path, plan: Plan) -> None:
         atomic_write(contain(root, HABITS_MD), habits_md.render().encode("utf-8"), 0o644)
     for rel, data, mode, _ in plan.writes:
         atomic_write(contain(root, rel), data, mode)
-    if plan.settings or plan.ask_added:
+    if plan.settings or plan.ask_added or plan.keys_added:
         merged, bom = plan.settings_obj
         atomic_write(contain(root, SETTINGS), dump_settings(merged, bom), 0o644)
+    if plan.include_added:
+        path = contain(root, WORKTREEINCLUDE)
+        data = read_file(path)
+        text = data.decode("utf-8", errors="replace") if data is not None else ""
+        if text and not text.endswith("\n"):
+            text += "\n"
+        text += "".join(f"{line}\n" for _, line in plan.include_added)
+        atomic_write(path, text.encode("utf-8"), 0o644 if data is None else (path.stat().st_mode & 0o777))
     if plan.ignore_action == "append":
         path = contain(root, GITIGNORE)
         data = read_file(path)
@@ -858,7 +938,8 @@ def do_remove(root: Path, names, dry: bool):
     raw = read_file(sp)
     ask_records = habits_md.records("ask")
     mine = [r.split(" ", 1) for r in ask_records if r.split(" ", 1)[0] in targets]
-    needs_settings = raw is not None and (any(f"sarah/hooks/{n}/".encode() in raw for n in targets) or bool(mine))
+    key_records = [r.split(" ", 1) for r in habits_md.records("key") if r.split(" ", 1)[0] in targets]
+    needs_settings = raw is not None and (any(f"sarah/hooks/{n}/".encode() in raw for n in targets) or bool(mine) or bool(key_records))
     if needs_settings:
         settings_obj, bom, _ = read_settings(sp)   # Refused here aborts before anything is touched
         for n in targets:
@@ -870,6 +951,35 @@ def do_remove(root: Path, names, dry: bool):
             if drop_rules(settings_obj, "ask", [rule]):
                 removed_any_setting = True
                 lines.append(f"settings {verb('removed', 'remove')} ask {rule}")
+        for _, spec in key_records:
+            path, _, raw_value = spec.partition("=")
+            root_key, _, leaf = path.partition(".")
+            container = settings_obj.get(root_key)
+            try:
+                value = json.loads(raw_value)
+            except ValueError:
+                value = object()
+            if isinstance(container, dict) and leaf in container and container[leaf] == value and type(container[leaf]) is type(value):
+                del container[leaf]
+                if not container:
+                    del settings_obj[root_key]
+                removed_any_setting = True
+                lines.append(f"settings {verb('removed', 'remove')} key {path}")
+            elif isinstance(container, dict) and leaf in container:
+                lines.append(f"kept settings {path} changed (yours now; no longer managed)")
+                pending = True
+
+    include_records = habits_md.records("include")
+    mine_include = [r.split(" ", 1)[1] for r in include_records if r.split(" ", 1)[0] in targets and " " in r]
+    inc_path = contain(root, WORKTREEINCLUDE)
+    inc_data = read_file(inc_path) if mine_include else None
+    inc_left = None
+    if inc_data is not None:
+        inc_left = inc_data.decode("utf-8", errors="replace").splitlines()
+        for line in mine_include:
+            if line in [l.strip() for l in inc_left]:
+                inc_left = [l for l in inc_left if l.strip() != line]
+                lines.append(f"{verb('removed', 'remove')} {WORKTREEINCLUDE} line {line}")
 
     for habit, rel, sha in rows:
         if habit not in targets:
@@ -897,6 +1007,11 @@ def do_remove(root: Path, names, dry: bool):
             pending = True
 
     if not dry:
+        if inc_left is not None and inc_left != inc_data.decode("utf-8", errors="replace").splitlines():
+            if any(l.strip() for l in inc_left):
+                atomic_write(inc_path, ("\n".join(inc_left) + "\n").encode("utf-8"), inc_path.stat().st_mode & 0o777)
+            else:
+                inc_path.unlink()
         if removed_any_setting:
             if settings_obj == {}:
                 sp.unlink()
@@ -916,7 +1031,9 @@ def do_remove(root: Path, names, dry: bool):
             gitignore = None
         if exists:
             kept_asks = [r for r in ask_records if r.split(" ", 1)[0] not in targets]
-            compose_habits_md(habits_md, left, remaining, gitignore, {"ask": kept_asks})
+            kept_keys = [r for r in habits_md.records("key") if r.split(" ", 1)[0] not in targets]
+            kept_include = [r for r in include_records if r.split(" ", 1)[0] not in targets]
+            compose_habits_md(habits_md, left, remaining, gitignore, {"ask": kept_asks, "key": kept_keys, "include": kept_include})
             atomic_write(contain(root, HABITS_MD), habits_md.render().encode("utf-8"), 0o644)
     elif any(n in chosen for n in targets):
         lines.append("habits.md update")
@@ -979,6 +1096,27 @@ def do_status(root: Path, plugin: Path):
             for rule in wanted:
                 if rule not in have:
                     lines.append(f"missing ask rule {rule} for {habit} (run apply again)")
+                    problems = True
+    for habit in chosen:
+        try:
+            payload = load_payload(plugin, habit)
+        except Refused:
+            continue
+        if payload.keys:
+            try:
+                have = read_settings(contain(root, SETTINGS))[0]
+            except Refused:
+                have = {}
+            for root_key, leaf, value in payload.keys:
+                held = have.get(root_key)
+                if not (isinstance(held, dict) and held.get(leaf) == value):
+                    lines.append(f"missing settings key {root_key}.{leaf} for {habit} (run apply again)")
+                    problems = True
+        if payload.include:
+            present = [l.strip() for l in (read_file(contain(root, WORKTREEINCLUDE)) or b"").decode("utf-8", errors="replace").splitlines()]
+            for line in payload.include:
+                if line not in present:
+                    lines.append(f"missing {WORKTREEINCLUDE} line {line} for {habit} (run apply again)")
                     problems = True
     if chosen:
         data = read_file(contain(root, GITIGNORE)) or b""
