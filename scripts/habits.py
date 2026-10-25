@@ -44,7 +44,12 @@ Exit codes:
     3  done, but at least one file needs a decision or was left alone
 
 Payload layout:
-    habits/<name>/habit.json   {"description", "requires", "settings"}
+    habits/<name>/habit.json   {"description", "requires", "settings", "ask", "keys", "include"}
+                               keys: [{"path": "worktree.baseRef", "value": "head"}] adds a
+                               scalar to .claude/settings.json (a value of the user's own
+                               is a conflict, never overwritten); include: lines for
+                               .worktreeinclude. Both are recorded in Settings, so
+                               `remove` takes out exactly what was added.
     habits/<name>/files/...    mirrors the project tree; every file starts with
                                no stamp, the script adds one as a `#` comment
                                line, so payload files must tolerate one

@@ -35,7 +35,13 @@ Card: {{card id, or pending}}
 
 ## Premises
 
-<!-- What this task assumes is true about the code, the plan or the platform. One line each, with the date it was last checked. Stale premises are re-checked before dispatch. -->
+<!--
+  What this task assumes is true about the code, the plan or the platform. One
+  line each, exactly `- YYYY-MM-DD - <premise>`, where the date is the day it was
+  last checked. Every premise is re-checked against the code and sarah/decisions.md
+  right before dispatch and given that day's date; a premise checked earlier is
+  stale. A task that assumes nothing says `- YYYY-MM-DD - none`.
+-->
 
 ## Executor
 

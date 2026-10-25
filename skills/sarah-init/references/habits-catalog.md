@@ -53,7 +53,7 @@ Then run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" check` and relay on
 ### Pick the AI model for each task
 
 - Habit: dispatch-guard
-- Status: pending (payload not built yet)
+- Status: available
 - Failure: work running on a model nobody chose.
 - Blocks: starting a task whose model is not set.
 - Needs: python3
@@ -86,7 +86,7 @@ Install it as `apply _lib changelog-fragment`. The note is one line in the deliv
 ### Check the task still makes sense
 
 - Habit: dispatch-guard
-- Status: pending (payload not built yet)
+- Status: available
 - Failure: work built on something that is no longer true.
 - Blocks: a task whose starting point is false.
 - Needs: python3
@@ -95,7 +95,7 @@ Install it as `apply _lib changelog-fragment`. The note is one line in the deliv
 ### Each task gets its own copy
 
 - Habit: dispatch-guard
-- Status: pending (payload not built yet)
+- Status: available
 - Failure: parallel work colliding in one folder.
 - Blocks: a 4th task while 3 are running.
 - Needs: python3, git
@@ -112,7 +112,14 @@ Install it as `apply _lib changelog-fragment`. The note is one line in the deliv
 
 Ready work is a row in `sarah/state.md` whose Phase is `ready` and whose Waiting on is `nobody`. It reads only local state, never the board.
 
-Three entries share the `dispatch-guard` payload; the tracker entry has no payload directory. Group rules: a group with no offered entry is dropped from the panels.
+Three entries share the `dispatch-guard` payload; the tracker entry has no payload directory. Install it as `apply _lib dispatch-guard` once, whichever of the three were ticked, then write under `## Settings` in `sarah/habits.md`, replacing any earlier copy of these lines and keeping every other line:
+
+```
+- dispatch checks: model, premise, limit
+- limit: 3
+```
+
+`dispatch checks` lists only the ticked entries, in this spelling: `model` for "Pick the AI model for each task", `premise` for "Check the task still makes sense", `limit` for "Each task gets its own copy" (the limit and the separate copy go together). The guard runs only the listed checks; with none ticked, write no `dispatch checks` line and do not install the payload. `limit` is written in every case, even when "Each task gets its own copy" is not ticked, because it is then the number the orchestrator honours on its own: 3 when the defaults were kept, or the number the user gave under "Change some" (a whole number from 1 to 99; the guard does not enforce anything else). Optional lines the user may add by hand: `- setup: <command>` (what a fresh copy runs before work, such as installing dependencies) and `- check: <command>` (the project's own checks); the executor runs both and reports the baseline. The install also sets the platform so a new copy starts from the current branch and copies the personal settings file into it; a value the user already set there is a conflict and stays as it is. Group rules: a group with no offered entry is dropped from the panels.
 
 ## 3. Panels
 
