@@ -286,8 +286,8 @@ printf '{"tool_input":{"subagent_type":7,"model":[],"prompt":{}}}' | fuzz "wrong
 printf '{"tool_input":{"subagent_type":"executor","model":7,"prompt":7,"isolation":[]}}' | fuzz "executor with wrong types"
 printf '{"tool_input":{"subagent_type":"executor","model":null,"prompt":null}}' | fuzz "executor with nulls"
 printf '{"tool_input":{"subagent_type":"sarah:executor","model":"sonnet","isolation":"worktree","prompt":"sarah/state/alpha.md"}}' | fuzz "a good call"
-big=$(dd if=/dev/zero bs=1024 count=1024 2>/dev/null | tr '\0' 'a')
-jq -nc --arg p "$big" '{tool_input:{subagent_type:"executor",model:"sonnet",isolation:"worktree",prompt:$p}}' | fuzz "1 MB prompt"
+dd if=/dev/zero bs=1024 count=1024 2>/dev/null | tr '\0' 'a' >"$T_TMP/big"
+jq -nc --rawfile p "$T_TMP/big" '{tool_input:{subagent_type:"executor",model:"sonnet",isolation:"worktree",prompt:$p}}' | fuzz "1 MB prompt"
 printf '\377\376{"tool_input"' | fuzz "binary garbage"
 printf '{"tool_input":{"subagent_type":"executor","prompt":"sarah/state/a\\u0000b.md"}}' | fuzz "NUL in the task name"
 rm -f "$P/sarah/state.md"
