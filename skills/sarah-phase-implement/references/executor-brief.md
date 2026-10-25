@@ -10,7 +10,16 @@ What the orchestrator hands an `executor` for one task. The brief carries the pl
 
 Every depth ends with the same report contract. Every depth puts outside text in an untrusted block.
 
-<!-- Step 0 (branch, task file, setup, baseline) is added here by the dispatch guard habit. Keep this place. -->
+## Step 0
+
+Applies when `sarah/habits.md` lists `dispatch-guard` under Chosen. Every depth starts the brief with it, before any other work:
+
+1. Rename the branch of your worktree to `feature/<slug>`, the slug of the task file the brief names.
+2. If `sarah/state/<slug>.md` is missing in your copy, write it from the brief.
+3. Run the `- setup:` and `- check:` commands recorded under Settings in `sarah/habits.md`, if any.
+4. Report the baseline (what passed and what already failed) in your first lines of Done, then start.
+
+The brief names the task file as `sarah/state/<slug>.md`; the dispatch guard refuses a brief that does not.
 
 ## Full
 

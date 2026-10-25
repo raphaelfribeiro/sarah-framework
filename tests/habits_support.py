@@ -49,8 +49,9 @@ def make_plugin(base, habits=None, version="0.2.0"):
             if rel.endswith(".sh"):
                 target.chmod(0o755)
         meta = {"description": "test habit", "requires": spec.get("requires", []), "settings": spec.get("settings", [])}
-        if "ask" in spec:
-            meta["ask"] = spec["ask"]
+        for extra in ("ask", "keys", "include"):
+            if extra in spec:
+                meta[extra] = spec[extra]
         (payload / "habit.json").write_text(json.dumps(meta))
     return plugin
 
