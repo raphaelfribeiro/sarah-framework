@@ -1,0 +1,7 @@
+{
+  "description": "Gitflow guard and green-CI merge (R13). A PreToolUse check on Bash plus a pull_request CI check of the branch model. May block; exceptions per R16.",
+  "requires": ["git", "gh", "remote"],
+  "settings": [
+    {"event": "PreToolUse", "matcher": "Bash", "file": "sarah/hooks/gitflow/guard.sh"}
+  ]
+}
