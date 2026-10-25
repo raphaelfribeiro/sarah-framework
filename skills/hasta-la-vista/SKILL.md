@@ -9,7 +9,7 @@ The session that ends without a debrief is the session whose state file is wrong
 
 **Write first, then report.**
 - Each task touched today: `sarah/state/<slug>.md` (phase, in flight, blocked, gates, then `Next`, written last). Then `sarah/state.md`, one row per task, `Waiting on` current.
-- A task that shipped loses its file and its row. Its entry in `sarah/changelog/` is the record: `# <title>`, then `**Date:** YYYY-MM-DD · **Level:** N · **Phase:** <phase>`, what changed and why, what is deliberately not done. One entry per delivery; none for a day without one.
+- A task that shipped loses its file and its row. Its entry in `sarah/changelog/` is the record: `# <title>`, then `**Date:** YYYY-MM-DD · **Level:** N · **Phase:** <phase>`, what changed and why, what is deliberately not done, and, when `sarah/habits.md` chooses `changelog-fragment`, one line starting `User-facing: ` with one sentence for a user. One entry per delivery; none for a day without one.
 - Decisions that still bind go into `sarah/decisions.md`: one dated line each, newest first, a "Permanent" exclusion under its own `## Permanent` heading. If the file is absent, create it with the first one.
 - Delete exceptions older than 14 days. With a tracker connected, sync it silently and report failures only.
 

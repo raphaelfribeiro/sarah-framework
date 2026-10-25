@@ -62,7 +62,7 @@ Then run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" check` and relay on
 ### Protect the main line
 
 - Habit: gitflow
-- Status: pending (payload not built yet)
+- Status: available
 - Failure: work piling up in one place, and merges nobody tested.
 - Blocks: saving straight onto the main line, and joining work whose tests fail. It may join finished work itself once its tests pass.
 - Needs: python3, git, gh, remote
@@ -70,14 +70,18 @@ Then run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" check` and relay on
 
 When this is chosen it adds two grants: save work online, and join finished work once its tests pass. Both appear in the summary, and each can be removed. If the project has no automatic tests, say: `This project has no automatic tests yet, so "passing" will mean only the branch check.`
 
+Install it as `apply _lib gitflow`: both guards share `_lib`, and without it they allow and say so. One sub-question, `Add a line crediting the AI in each commit?`, with `No (Recommended)` first. `No` writes nothing, since off is the default; `Yes` adds `- attribution: on` under Settings in `sarah/habits.md`. With it off, the guard refuses commits carrying `Co-Authored-By`.
+
 ### A release-note line per delivery
 
 - Habit: changelog-fragment
-- Status: pending (payload not built yet)
+- Status: available
 - Failure: release notes rebuilt from memory.
 - Blocks: sending work for review without its one-line note.
 - Needs: python3, git, gh
 - Group: Main line
+
+Install it as `apply _lib changelog-fragment`. The note is one line in the delivery's `sarah/changelog/` entry that starts exactly `User-facing: ` and holds one sentence; release notes are read from it.
 
 ### Check the task still makes sense
 

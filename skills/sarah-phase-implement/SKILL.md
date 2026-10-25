@@ -104,6 +104,9 @@ Five to ten lines: what changed, why, and anything the next person needs to know
 Name what is deliberately not done.
 ```
 
+When `sarah/habits.md` chooses `changelog-fragment`, add one line starting
+`User-facing: ` with one sentence for a user: it becomes the release note.
+
 If it isn't documented, it isn't done.
 
 Then **commit** — on the feature branch, small and frequent while the work
