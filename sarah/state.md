@@ -1,12 +1,12 @@
 # S.A.R.A.H. state
 
-**Updated:** 2026-10-24
+**Updated:** 2026-10-25
 
 | | |
 | --- | --- |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Released** | `v0.2.0`, 2026-10-24 |
+| **Released** | `v0.2.1`, 2026-10-25 (documentation only; `v0.2.0` shipped the habits) |
 
 ## In flight
 
