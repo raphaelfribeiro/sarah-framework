@@ -14,11 +14,6 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    # The test suite would otherwise leave bytecode behind, and bytecode embeds
-    # the runner's own home path, which the machine-path guard then reports.
-    # Writing none keeps that guard free of exclusions.
-    env:
-      PYTHONDONTWRITEBYTECODE: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -169,8 +164,12 @@ jobs:
           # exclusion: /h[o]me/ matches the paths and does not match the line
           # you are reading. An exclusion is a place a leak can hide, and this
           # guard no longer has one.
-          if grep -rnE '/h[o]me/[a-zA-Z0-9._-]+|/U[s]ers/[a-zA-Z0-9._-]+' \
-               --exclude-dir=.git . ; then
+          #
+          # It reads every tracked file, which is everything the repository
+          # publishes. The test steps above leave bytecode in the working tree,
+          # and bytecode embeds the runner's own home path; untracked, it is
+          # never published, and reading it made the guard fail on the runner.
+          if git grep -nE '/h[o]me/[a-zA-Z0-9._-]+|/U[s]ers/[a-zA-Z0-9._-]+' ; then
             echo "::error::a home-directory path names a developer's machine"
             exit 1
           fi
