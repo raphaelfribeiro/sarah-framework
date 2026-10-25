@@ -78,7 +78,7 @@ class AskRules(HabitsCase):
         payload = self.engine.load_payload(ROOT, "always-ask")
         rules = "\n".join(payload.ask)
         for needle in ["rm -rf", "git push --force", "git push --delete", "git branch -D", "git reset --hard",
-                       "git rebase", "git commit --amend", "terraform apply", ".env", ".ssh", "get-secret-value"]:
+                       "terraform apply", ".env", ".ssh", "get-secret-value"]:
             self.assertIn(needle, rules, needle)
         self.assertEqual(payload.files, {})
         self.assertEqual(payload.settings, [])

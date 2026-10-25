@@ -37,9 +37,11 @@ SECRETS = [
     "Read(~/.netrc)", "Read(~/.git-credentials)", "Read(~/.kube/**)", "Read(~/.gnupg/**)",
 ]
 KEPT = [
-    "Bash(rm -rf *)", "Bash(rm -fr *)", "Bash(rm -r *)", "Bash(git push * :*)", "Bash(git rebase *)",
-    "Bash(git commit --amend*)", "Bash(git branch -d *)", "Bash(printenv*)", "Read(./.env)", "Read(./.env.*)",
+    "Bash(rm -rf *)", "Bash(rm -fr *)", "Bash(rm -r *)", "Bash(git push * :*)", "Bash(git branch -D *)",
+    "Read(./.env)", "Read(./.env.*)",
 ]
+# Routine and recoverable from the reflog; dropped by the user's decision, 2026-10-24.
+DROPPED = ["Bash(git rebase *)", "Bash(git commit --amend*)", "Bash(git branch -d *)", "Bash(printenv*)"]
 
 
 class AlwaysAskList(HabitsCase):
@@ -54,6 +56,10 @@ class AlwaysAskList(HabitsCase):
     def test_no_existing_rule_was_dropped(self):
         for rule in KEPT:
             self.assertIn(rule, self.rules, rule)
+
+    def test_routine_rules_no_longer_ask(self):
+        for rule in DROPPED:
+            self.assertNotIn(rule, self.rules, rule)
 
     def test_every_rule_passes_the_engine_and_none_repeats(self):
         payload = self.engine.load_payload(ROOT, "always-ask")

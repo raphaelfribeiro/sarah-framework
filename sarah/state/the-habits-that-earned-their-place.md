@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** review passed; live Trello smoke next · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** review passed; push and PR next · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -123,8 +123,8 @@ engineer's plan, rather than a separate test engineer per slice.
 - **Before the push:** the unpublished range carries the maintainer's personal
   address as author; rewrite it to the GitHub no-reply address once every slice is
   merged (decided 2026-10-24). Published history stays as it is.
-- **The tracker has never met the live Trello API.** A manual smoke on a throwaway
-  board, credentials set by the user outside the session, belongs before release.
+- **The tracker has never met the live Trello API.** The user chose to release
+  without the smoke; it stays a known limit.
 - Guards need `git`, `python3` and `jq`; without `jq` they allow, by design.
 - The CI gitflow check ignores local exceptions; `gh pr create` without `--base`
   and a local `git merge` into a permanent branch stay unguarded (documented).
@@ -152,9 +152,12 @@ Also from the fixes: the tracker gained a sixth verb, `done`, run by
 `/hasta-la-vista` before a shipped task file is deleted (ADR-009 amendment);
 files adopted before this change carry no adopt record, so `remove` keeps them.
 
-Left for the user: drop routine always-ask rules (`rebase`, `--amend`,
-`branch -d`, `printenv`)?; the 55 `Claude-Session` trailers in public history;
-the stale D6 8,768-byte claim.
+Decided by the user after review, 2026-10-24: release **without** the live Trello
+smoke, stated as untested in the changelog; the four routine always-ask rules
+(`rebase`, `--amend`, `branch -d`, `printenv`) dropped; push and a PR into
+`develop` approved, after the author rewrite; `Claude-Session` trailers stripped
+from the unpublished range and not added to new commits. The release cut still
+waits on its own yes. Still open: the stale D6 8,768-byte claim.
 
 ## Blocked
 
@@ -217,8 +220,8 @@ The new patterns listed in the UX spec §9 were approved with the design.
 
 ## Next
 
-1. The live Trello smoke on a throwaway board, credentials set outside the session.
-2. The release: PR against `develop`, rewrite the unpublished range's author, tag.
+1. Rewrite the unpublished range's author, push, open the PR against `develop`.
+2. The release cut, on the user's yes.
 
 Test-plan section 10 finding 2 (the Premises format) is resolved by the task
 template's `## Premises` section. Architecture D6's 8,768-byte claim is left as
