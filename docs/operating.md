@@ -27,10 +27,10 @@ Pushing is what publishes it, and it is a decision rather than a step. Two
 things about this origin that the commands above do not show, both learned by
 running into them:
 
-- **`main` refuses every direct push**, administrators included, so the local
-  merge lands through a pull request merged **fast-forward only**. Any other
-  merge style leaves the tag naming a commit `main` does not contain. The full
-  sequence is in [branching.md](branching.md).
+- **`main` and `develop` refuse deletion and non-fast-forward pushes**,
+  administrators included. The local merge lands by pushing it; a merge made on
+  the origin's page leaves the tag naming a commit `main` does not contain. The
+  full sequence is in [branching.md](branching.md).
 - **The mirror is not a guarantee.** A push-mirror can be configured, run on
   schedule, fail every time, and report that only inside its own settings page.
   Ours did exactly that for eleven days after the repository was renamed, and

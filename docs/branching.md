@@ -68,24 +68,26 @@ git merge --no-ff release/0.2.0     # back-merge, never skip
 A `release/*` branch is for stabilising, not for finishing. A feature that
 arrives after the branch is cut goes to `develop` and ships in the next version.
 
-**`main` is protected on the origin, and the protection refuses every direct
-push — administrators included.** So the local merge above is only half the
-procedure. Publishing it means pushing the `release/*` branch and landing it
-through a pull request, merged **fast-forward only**:
+**`main` and `develop` refuse deletion and every non-fast-forward push** on the
+origin, administrators included. History on a permanent branch cannot be
+rewritten, so a mistake there is fixed forward. A fast-forward push is accepted,
+and that is how a release lands: the local merge above is pushed as it is.
 
 ```sh
 git push origin develop v0.2.0
 git push origin release/0.2.0
-# open release/0.2.0 -> main, merge with fast-forward-only, then:
+# open release/0.2.0 -> main as the record, then land it:
+git push origin main
 git push origin --delete release/0.2.0
 git branch -d release/0.2.0
 ```
 
-Fast-forward-only is the part that matters. Any other merge style makes the
-origin invent its own commit, and the tag you just pushed ends up naming a commit
-`main` does not contain — a released version that officially happened somewhere
-else. `main` is always a fast-forward from the release merge, so the style is
-always available.
+Pushing `main` closes the pull request as merged. Do not merge it from the
+origin's page: any merge made there is a commit the origin invents, so the tag
+you just pushed would name a commit `main` does not contain, and the origin
+signs that commit with the account's primary address rather than the no-reply
+one. Feature branches land the same way, merged locally into `develop` and
+pushed.
 
 **Push `develop` and the tag before the pull request, not after.** The pull
 request is the slow step, and a tag that arrives late is a window where `main`
