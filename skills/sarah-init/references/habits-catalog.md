@@ -33,7 +33,7 @@ Each entry has a plain label, the failure it prevents, what it may block, what i
 ### Keep demands on a Trello board
 
 - Habit: tracker
-- Status: pending (the script arrives with the tracker delivery; flip when `scripts/tracker.py` is in this tree)
+- Status: available
 - Failure: demands living only in chat and being lost between sessions.
 - Blocks: nothing. It never blocks.
 - Needs: python3, network

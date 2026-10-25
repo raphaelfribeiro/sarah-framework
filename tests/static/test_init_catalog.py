@@ -103,7 +103,7 @@ class Catalog(unittest.TestCase):
                        "- board: <id or link>", 'tracker.py" check', "public board is refused",
                        "Never ask the user to paste a token into the chat"):
             self.assertIn(needle, body, needle)
-        self.assertEqual(entries()["Keep demands on a Trello board"]["Status"].split(" ")[0], "pending")
+        # Its Status is checked against the disk by test_status_matches_what_is_on_disk.
 
     def test_pending_entries_are_not_offered(self):
         self.assertRegex(text(CATALOG), r"(?i)pending[^\n]*(omit|not offered|never offered)")
