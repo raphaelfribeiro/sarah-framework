@@ -1,12 +1,12 @@
 # S.A.R.A.H. state
 
-**Updated:** 2026-10-24
+**Updated:** 2026-10-25
 
 | | |
 | --- | --- |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Released** | `v0.2.0`, 2026-10-24 |
+| **Released** | `v0.2.1`, 2026-10-25 (documentation only; `v0.2.0` shipped the habits) |
 
 ## In flight
 
@@ -59,9 +59,9 @@ The repository is **public** and pushing is publishing. Commit freely; push only
 on an explicit decision. Nothing versioned may reveal the maintainer's internal
 infrastructure; two CI guards enforce it.
 
-- **`docs/branching.md` says `main` refuses every direct push.** On 2026-10-24
-  the origin reported no protection and no ruleset on `main` or `develop`. Until
-  that is restored, the procedure is the only thing keeping `main` clean.
+- **`main` and `develop` refuse deletion and non-fast-forward pushes** (an origin
+  ruleset since 2026-10-24). Direct fast-forward pushes are accepted, so the
+  release sequence in `docs/branching.md` is discipline, not enforcement.
 - **A merge made by the origin carries the account's primary address**, not the
   no-reply one. Merge locally and push.
 - **The mirror syncs on push**, with an eight-hour fallback and a manual trigger

@@ -69,17 +69,14 @@ allowed_for() {
 	git show "$1:$LIST" 2>/dev/null || cat "$repo_root/$LIST"
 }
 
-while read -r _local_ref local_sha _remote_ref remote_sha; do
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
 	all_zeros "$local_sha" && continue
 
-	# A new branch has no remote side to diff against. Its messages are the
-	# commits no remote has yet: whatever is already published is out of reach,
-	# and re-reading it would block every first push on history nobody can fix.
-	if all_zeros "$remote_sha"; then
-		commits=("$local_sha" --not --remotes)
-	else
-		commits=("${remote_sha}..${local_sha}")
-	fi
+	# The messages read are the commits no remote has yet. Whatever is already
+	# published is out of reach, and re-reading it blocks the push on history
+	# nobody can fix: a first push of a new branch did, and so did a release
+	# merge into main, whose range held commits published on develop long ago.
+	commits=("$local_sha" --not --remotes)
 
 	allowed="$(allowed_for "$local_sha" | grep -vE '^\s*(#|$)' | tr -d ' ')"
 
