@@ -17,7 +17,7 @@ letting the workflow become a project of its own.
 ---
 
 > [!WARNING]
-> **v0.1 is not released.** The comparative study has now run three times. It
+> **The evidence is inconclusive.** The comparative study has run three times. It
 > does not show that S.A.R.A.H. produces better software than plain Claude Code.
 > [Evidence](#evidence) has the numbers, including the ones that argue against
 > us.
