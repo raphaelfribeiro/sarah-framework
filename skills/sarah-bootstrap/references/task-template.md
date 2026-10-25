@@ -13,6 +13,13 @@
 
 **Branch:** `{{feature/branch-name}}` · **Level:** {{0-3}} · **Phase:** {{phase}} · **Updated:** {{DATE}}
 
+<!--
+  Only when a tracker is installed: the card this task belongs to. `pending`
+  means the card is not created yet; the next sync creates it. No line at all
+  reads as pending. Delete this line in projects without a tracker.
+-->
+Card: {{card id, or pending}}
+
 ## Itinerary
 
 <!--

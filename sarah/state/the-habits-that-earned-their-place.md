@@ -106,7 +106,7 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | merged |
 | 3 | 6+10 init interview, grants | `feature/habits-s06-init-grants` | building |
 | 3 | 11+12 exceptions, gitflow, changelog fragment | `feature/habits-s11-exceptions-gitflow` | building |
-| 4 | 15 tracker | `feature/habits-s15-tracker` | building (pulled forward) |
+| 4 | 15 tracker | `feature/habits-s15-tracker` | merged |
 | 4 | 13 dispatch guard, 14 Stop hook | — | after 11 |
 | 5 | 16 docs gate and release prep | — | last |
 
@@ -129,6 +129,12 @@ engineer's plan, rather than a separate test engineer per slice.
   (decided 2026-10-24); rewrite the unpublished range's author to it once every
   slice is merged, and not before, or the open worktrees diverge. Published
   history stays as it is (decided 2026-10-24).
+- **The tracker has never met the live Trello API.** Endpoints and fields are
+  from memory, tested against a stub; credentials travel in the query string
+  and are redacted on every error path. A manual smoke on a throwaway board,
+  with the user's own credentials set outside the session, belongs before the
+  release. Base URL is a constructor argument limited to loopback or the Trello
+  host, for tests only: flag for review.
 - Step 3's first commit is not green on its own (one worst-case assertion needs
   step 4); the merge is.
 
