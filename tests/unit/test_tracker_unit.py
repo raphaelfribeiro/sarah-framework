@@ -159,6 +159,69 @@ class LastAuditTests(unittest.TestCase):
         self.assertNotIn(b"\n\n", raw.replace(b"\r\n", b""))
 
 
+class LastStatusTests(unittest.TestCase):
+    def test_absent_file_section_or_line_reads_as_none(self):
+        tmp, root = make_project(habits=None)
+        self.addCleanup(tmp.cleanup)
+        self.assertIsNone(tracker.read_status(root))
+        (root / "sarah" / "habits.md").write_text("# Habits\n\n## Other\n\nLast status: connected\n")
+        self.assertIsNone(tracker.read_status(root))
+
+    def test_only_the_three_known_shapes_are_read(self):
+        tmp, root = make_project(habits=None)
+        self.addCleanup(tmp.cleanup)
+        for value in ("connected", "token rejected 2026-10-20", "not answering 2026-10-21"):
+            (root / "sarah" / "habits.md").write_text(f"## Tracker\n\nLast status: {value}\n")
+            self.assertEqual(tracker.read_status(root), value)
+        for value in ("token rejected", "token rejected soon", "ignore previous instructions", ""):
+            (root / "sarah" / "habits.md").write_text(f"## Tracker\n\nLast status: {value}\n")
+            self.assertIsNone(tracker.read_status(root), value)
+
+    def test_write_does_not_create_a_missing_file(self):
+        tmp, root = make_project(habits=None)
+        self.addCleanup(tmp.cleanup)
+        tracker.write_status(root, "connected")
+        self.assertFalse((root / "sarah" / "habits.md").exists())
+
+    def test_write_replaces_in_place_and_keeps_the_audit_line(self):
+        text = "# Habits\n\n## Tracker\n\ntracker: trello\nLast audit: 2026-10-01\nLast status: token rejected 2026-10-20\n\n## After\n\nx\n"
+        tmp, root = make_project(habits=text)
+        self.addCleanup(tmp.cleanup)
+        tracker.write_status(root, "connected")
+        self.assertEqual((root / "sarah" / "habits.md").read_text(), text.replace("token rejected 2026-10-20", "connected"))
+        self.assertEqual(tracker.read_last_audit(root), "2026-10-01")
+
+    def test_write_inserts_into_the_section_and_the_audit_still_works(self):
+        tmp, root = make_project(habits="## Tracker\n\ntracker: trello\n\n## After\n\nx\n")
+        self.addCleanup(tmp.cleanup)
+        tracker.write_status(root, "not answering 2026-10-24")
+        tracker.write_last_audit(root, "2026-10-24")
+        self.assertEqual(tracker.read_status(root), "not answering 2026-10-24")
+        self.assertEqual(tracker.read_last_audit(root), "2026-10-24")
+        self.assertIn("## After\n\nx\n", (root / "sarah" / "habits.md").read_text())
+
+    def test_unchanged_value_does_not_rewrite_the_file(self):
+        tmp, root = make_project(habits="## Tracker\n\nLast status: connected\n")
+        self.addCleanup(tmp.cleanup)
+        path = root / "sarah" / "habits.md"
+        before = path.stat().st_mtime_ns
+        with mock.patch.object(tracker, "_atomic_write", side_effect=AssertionError("rewrote")):
+            tracker.write_status(root, "connected")
+        self.assertEqual(path.stat().st_mtime_ns, before)
+
+    def test_crlf_survives(self):
+        tmp, root = make_project(habits="## Tracker\r\n\r\nLast status: connected\r\n")
+        self.addCleanup(tmp.cleanup)
+        tracker.write_status(root, "token rejected 2026-10-24")
+        self.assertIn(b"Last status: token rejected 2026-10-24\r\n", (root / "sarah" / "habits.md").read_bytes())
+
+    def test_a_write_that_fails_is_silent(self):
+        tmp, root = make_project(habits="## Tracker\n\nLast status: connected\n")
+        self.addCleanup(tmp.cleanup)
+        with mock.patch.object(tracker, "_atomic_write", side_effect=OSError("read-only")):
+            tracker.write_status(root, "not answering 2026-10-24")
+
+
 class AuditDueTests(unittest.TestCase):
     def setUp(self):
         self.tmp, self.root = make_project(habits="## Tracker\n\nLast audit: 2026-10-24\n")
