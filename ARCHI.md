@@ -143,7 +143,7 @@ for them this table is the authority.
 
 | # | Decision | Why, in one line | ADR |
 | --- | --- | --- | --- |
-| 010 | Autonomy grants named at init; with R13, unattended merge on green CI | Unattended authority must be explicit and separate from plan approval; supersedes "every merge has a human behind it" for opted-in projects | [010](docs/adr/010-autonomy-grants-and-unattended-merge.md) |
+| 010 | Autonomy grants named at init; with the `merge-on-green` grant, unattended merge on green CI | Unattended authority must be explicit and separate from plan approval; supersedes "every merge has a human behind it" for opted-in projects | [010](docs/adr/010-autonomy-grants-and-unattended-merge.md) |
 | 009 | Tracker via script adapter, local state as truth, audit at first session, credential by environment variable | No CI secret, no token in context, a second tracker is one file | [009](docs/adr/009-tracker-adapter-local-state-env-credential.md) |
 | 008 | Agreements are installed into and owned by the user's project; plugin hooks stay sensors | Blocking is opt-in, visible and removable; the plugin never blocks | [008](docs/adr/008-agreements-owned-by-the-users-project.md) |
 | 007 | Conversation defaults injected by the session-start hook; durable decisions in `sarah/decisions.md` | Survives compaction without growing the bootstrap or writing to user repos | [007](docs/adr/007-conversation-defaults-in-session-start-hook.md) |

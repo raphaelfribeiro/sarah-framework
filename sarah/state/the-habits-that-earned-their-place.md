@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** Gate 4 fixes in progress · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** Gate 4 re-review of the fixes · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -136,14 +136,19 @@ engineer's plan, rather than a separate test engineer per slice.
 ## Gate 4 review (2026-10-24)
 
 Two reviewers in clean contexts, correctness and security. No credential leak, no
-code execution through crafted input. Blocking findings, all re-verified, are
-being fixed in three slices from this branch:
+code execution through crafted input. Blocking findings, all re-verified, were
+fixed test-first in three slices, merged (2b7871e, fe1ea83, 30447d5); 350 Python
+tests and the shell suite green, dash included. A re-review of the fixes runs next:
 
 | Slice | Branch | Fixes |
 | --- | --- | --- |
 | Tracker | `feature/gate4-tracker` | tracker never wired (hook reads `## Tracker`; intake, report, sync in the rituals); `nobody` read as blocked; no Ready list; `cards/all`; frame forgery; unframed board text; `base_url` with `\` or `@`; `set_card` outside `sarah/state/` |
 | Guards | `feature/gate4-guards` | backslash continuation bypass; `env -i`, `/usr/bin/env`, path-to-git; tag pushes refused; `gh pr merge --auto` and `-R`; "Rule not checked" was invisible (exit-0 stderr is never shown) |
 | Permissions | `feature/gate4-permissions` | agent could self-grant and edit `sarah/habits.md`; push grant widened by a refspec and `-d`; forged records on `remove`; `.env` rules cwd-relative; missing destructive forms; merge on green CI becomes a revocable grant |
+
+Also from the fixes: the tracker gained a sixth verb, `done`, run by
+`/hasta-la-vista` before a shipped task file is deleted (ADR-009 amendment);
+files adopted before this change carry no adopt record, so `remove` keeps them.
 
 Left for the user: drop routine always-ask rules (`rebase`, `--amend`,
 `branch -d`, `printenv`)?; the 55 `Claude-Session` trailers in public history;
@@ -192,7 +197,7 @@ The new patterns listed in the UX spec §9 were approved with the design.
 | 2. Architecture approved | passed | 2026-10-24 |
 | 3. Design approved | passed | 2026-10-24 |
 | Plan approved (16 steps, ~140 tests, full depth) | passed | 2026-10-24 |
-| 4. Review | run; blocking fixes in progress | 2026-10-24 |
+| 4. Review | run; fixes merged; re-review of the fixes next | 2026-10-24 |
 | 5. Documented and committed | written in step 16; re-check after review | — |
 
 ## Found along the way
@@ -210,7 +215,7 @@ The new patterns listed in the UX spec §9 were approved with the design.
 
 ## Next
 
-1. Merge the three Gate 4 slices, re-run everything (dash included).
+1. Re-review the Gate 4 fixes (`35df6c5..HEAD`) in a clean context.
 2. The live Trello smoke on a throwaway board, credentials set outside the session.
 3. The release: PR against `develop`, rewrite the unpublished range's author, tag.
 

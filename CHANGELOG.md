@@ -28,18 +28,20 @@ nothing can block you.
   one you already had, is a conflict you decide, never overwritten.
 - **Agreements that live in your project.** The plugin's own hooks still only
   report. The checks that may block are files in your repository: the gitflow
-  guard with merge on green CI, the changelog-fragment guard, the dispatch guard
+  guard, the changelog-fragment guard, the dispatch guard
   (model set, premise re-checked, task limit, own worktree) and a Stop hook that
   blocks once while ready work waits. Exceptions need a reason and expire within
   14 days.
-- **Autonomy grants.** Set at init, quoted in your words, revocable. Deleting for
+- **Autonomy grants.** Set at init, quoted in your words, revocable: pushing
+  feature branches, and merging a feature branch on green CI. Deleting for
   good, rewriting history, spending money and touching credentials are always
-  asked, installed as `permissions.ask` rules.
+  asked, installed as `permissions.ask` rules, and so are edits to the agreements
+  themselves (`sarah/habits.md`, `sarah/hooks/`, `sarah/exceptions.log`).
 - **An `executor` agent**, dispatched with the model and effort each task
   declares, answering in a fixed four-part report (done, proof, not finished,
   requested tasks), plus a three-depth brief and a premises check before dispatch.
 - **A tracker seam.** `scripts/tracker.py` with a Trello adapter: intake of ready
-  cards, card sync, and a once-a-day audit as one self-closing card. Local state is
+  cards, card sync, moving a shipped task's card to Done, and a once-a-day audit as one self-closing card. Local state is
   the source of truth; credentials come from `TRELLO_API_KEY` and `TRELLO_TOKEN`,
   never from the chat, and a public board is refused.
 - **Working defaults** printed at session start (decisions as questions, no
@@ -56,8 +58,8 @@ nothing can block you.
 
 ### Changed
 
-- With the gitflow habit installed, a feature branch merges without a human on
-  green CI. This supersedes "every merge has a human behind it" for those projects
+- With the `merge-on-green` grant recorded, a feature branch merges without a
+  human on green CI; `grant revoke merge-on-green` ends it. This supersedes "every merge has a human behind it" for those projects
   only; cutting a release stays a user decision.
 - `sarah-bootstrap` points at `references/task-template.md` inside its own
   directory, where a skill can read it, and a static test now checks every skill's
@@ -70,6 +72,9 @@ nothing can block you.
 
 ### Known limits
 
+- **The guards are a guardrail against mistakes, not a security boundary.** They
+  judge the usual invocation forms; `sh -c`, `eval`, `xargs`, `sudo` and
+  variables are not parsed, and an agent determined to get round them can.
 - **The tracker has never met the live Trello API.** It is tested against a local
   stub; a smoke test on a throwaway board comes before any claim that it works.
 - **A forced platform model fallback is not reported**, and with
