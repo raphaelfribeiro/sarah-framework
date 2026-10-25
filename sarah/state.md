@@ -6,19 +6,19 @@
 | --- | --- |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Released** | `v0.1.0`, 2026-08-16 (`0.2.0` prepared on the habits branch, not tagged) |
+| **Released** | `v0.2.0`, 2026-10-24 |
 
 ## In flight
 
 | Task | File | Phase | Level | Waiting on | Since |
 | --- | --- | --- | --- | --- | --- |
 | Measurement pilot | `sarah/state/measurement-pilot.md` | running, outside this repo — 44 sessions, 43 of 47 slices | 2 | the pilot to finish; a partial read began 2026-10-24 | 2026-08-16 |
-| Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | in `develop` | 3 | your yes on the release | 2026-10-24 |
 
 **Reopened 2026-10-24 by the maintainer's decision**, with the pilot still running: the
 user's own install stays pinned to `v0.1.0`, so work here cannot reach the pilot.
 
-`v1-readiness` shipped as `v0.1.0`; what it delivered is in `sarah/changelog/`.
+`v1-readiness` shipped as `v0.1.0` and the habits catalog as `v0.2.0`; what each
+delivered is in `sarah/changelog/`.
 This index was compacted on 2026-10-24 to meet the 8 KB ceiling the habits task
 introduces; the long form of each lesson below is in the changelog and git history.
 
@@ -59,8 +59,11 @@ The repository is **public** and pushing is publishing. Commit freely; push only
 on an explicit decision. Nothing versioned may reveal the maintainer's internal
 infrastructure; two CI guards enforce it.
 
-- **`main` refuses every direct push**, admins included. Releases land through a
-  pull request merged **fast-forward only**. Sequence in `docs/branching.md`.
+- **`docs/branching.md` says `main` refuses every direct push.** On 2026-10-24
+  the origin reported no protection and no ruleset on `main` or `develop`. Until
+  that is restored, the procedure is the only thing keeping `main` clean.
+- **A merge made by the origin carries the account's primary address**, not the
+  no-reply one. Merge locally and push.
 - **The mirror syncs on push**, with an eight-hour fallback and a manual trigger
   through the origin's API. It sends heads and tags only.
 - **A brand-new mirror target does not fire its own release.** Re-push the tag as
