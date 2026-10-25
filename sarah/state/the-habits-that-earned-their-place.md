@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** implement (Gate 3 closed 2026-10-24) · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** implement complete; Gate 4 review next · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -110,7 +110,7 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 4 | 14 Stop hook | `feature/habits-s14-no-idle` | merged |
 | 4 | 13 dispatch guard | `feature/habits-s13-dispatch-guard` | merged (babeda3) |
 | 4 | 3b session-start habit lines (Habits, Tracker, Audit, Exceptions) | `feature/habits-s03b-session-lines` | merged (5d41187) |
-| 5 | 16 docs gate and release prep | — | last |
+| 5 | 16 docs gate and release prep | `feature/habits-s16-docs-gate` | done: ARCHI, README, operating, extending, changelog, version 0.2.0 |
 
 At most three slices run at once, each in its own worktree branched from this
 branch, then merged back here. Developers write the tests from the test
@@ -215,6 +215,8 @@ The new patterns listed in the UX spec §9 were approved with the design.
 | 2. Architecture approved | passed | 2026-10-24 |
 | 3. Design approved | passed | 2026-10-24 |
 | Plan approved (16 steps, ~140 tests, full depth) | passed | 2026-10-24 |
+| 4. Review | not run: next | — |
+| 5. Documented and committed | written in step 16; re-check after review | — |
 
 ## Found along the way
 
@@ -231,5 +233,10 @@ The new patterns listed in the UX spec §9 were approved with the design.
 
 ## Next
 
-Merge wave 2 here as each slice reports, run the full suite, then start wave 3.
-The user's own install stays pinned on `v0.1.0` while the pilot runs.
+1. Gate 4 review, in a clean context, on the items carried above.
+2. The live Trello smoke on a throwaway board, credentials set outside the session.
+3. The release: PR against `develop`, rewrite the unpublished range's author, tag.
+
+Test-plan section 10 finding 2 (the Premises format) is resolved by the task
+template's `## Premises` section. Architecture D6's 8,768-byte claim is left as
+it stands, pending the user's word. The user's install stays pinned on `v0.1.0`.
