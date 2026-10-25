@@ -109,6 +109,7 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 4 | 15 tracker | `feature/habits-s15-tracker` | merged |
 | 4 | 14 Stop hook | `feature/habits-s14-no-idle` | merged |
 | 4 | 13 dispatch guard | `feature/habits-s13-dispatch-guard` | building |
+| 4 | 3b session-start habit lines (Habits, Tracker, Audit, Exceptions) | `feature/habits-s03b-session-lines` | building |
 | 5 | 16 docs gate and release prep | — | last |
 
 At most three slices run at once, each in its own worktree branched from this
