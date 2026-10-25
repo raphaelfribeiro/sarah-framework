@@ -49,8 +49,8 @@ The security advisor asked for unattended authority to be explicit, named, and s
 - The framework never writes `allow` rules on its own. At init it offers matching allow rules for granted actions in `.claude/settings.local.json`, as a diff the user approves.
 
 **Unattended merge.**
-- When R13 is installed, its install diff adds two grants: "push feature/*" and "merge feature/* into the integration branch once CI is green".
-- With those grants, the agent merges on its own after `gh pr checks` is green. The R13 hook refuses anything else.
+- When R13 is installed, its install diff adds two grants: "push feature/*" and "merge feature/* into the integration branch once CI is green" (`merge-on-green`, a recorded row with no allow rule).
+- While the `merge-on-green` row is in the Autonomy section of `sarah/habits.md`, the agent merges on its own after `gh pr checks` is green. Without the row it asks, even with R13 installed; `grant revoke merge-on-green` ends it. The R13 hook refuses anything else.
 - Deciding to release stays a user gate, and a merge to `main` is part of a release.
 - Without R13, merge waits for the user.
 - Every phase that produces an artefact still ends with a commit on the task's branch, unattended runs included.
@@ -67,3 +67,11 @@ The security advisor asked for unattended authority to be explicit, named, and s
 ## Revisit when
 
 A team adopts the framework (grants per person), an unattended merge breaks the integration branch, or the platform offers per-agent permission scopes.
+
+## Note, 2026-10-24: what the always-ask list does and does not stop
+
+Gate 4 review found that the agent could write its own `allow` rules (`grant add`, `grant allow --write`) and edit `sarah/habits.md`, `sarah/exceptions.log` and `sarah/hooks/**`, none of which the platform protects. It also found that the `push-feature` allow rule, `git push origin feature/*`, matches a second refspec such as `feature/x:main`, because `*` matches any text.
+
+The always-ask payload now asks before edits to those files, before the two grant commands, and on the colon, `-d`, `--mirror`, `--all` and second-argument push forms. Ask rules are evaluated before allow rules and are not auto-approved in any mode, so a matching rule prompts even where an allow also matches.
+
+This raises the bar for a mistaken or prompt-injected agent. It is not a boundary against a hostile one. The patterns are text: a shell write such as `sed -i` on `sarah/habits.md`, or `rm -r sarah/hooks/_lib`, is not provably covered, because the platform does not say that ask rules extend to Bash file commands as deny rules do, and no rule reaches a write made by a subprocess such as a Python script. The real controls on a push are the gitflow guard and server-side branch protection; the `feature/*` allow rule is a convenience, not an enforcement. The fixed list still does not remove routine rules such as `git rebase` and `printenv`; whether to keep them is the user's call.
