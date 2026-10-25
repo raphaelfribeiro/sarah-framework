@@ -56,6 +56,8 @@ Secrets never enter the repository, the image layers, the build logs, or a clien
 
 Spawn the `release-manager` with the entries in `sarah/changelog/`.
 
+**The `User-facing:` line is the release note.** A changelog entry may carry one line that starts exactly `User-facing: ` followed by one sentence for a user. Hand the release-manager those sentences as the note for each delivery, verbatim, and group them by the entry's date. An entry without the line (a project that did not choose the changelog habit) is summarized from its body instead; never invent a line for it. Breaking changes still go first.
+
 **Semantic versioning, strictly.** One breaking change makes it a major release regardless of what else is in it. The rule is not a vote.
 
 **Release notes are written for the reader**, not the author: what changed for a user, not which function moved. Breaking changes go at the top with the migration step. A breaking change discovered after upgrading is the worst release note failure there is.
