@@ -132,7 +132,7 @@ assert_contains "all defaults off" "$(line_of Habits "$(hook "$p")")" "Defaults:
 mk_tracker() { # NAME STATUS-LINE
     p=$(mk_project "$1")
     {
-        printf '## Chosen\n- tracker\n\n## Tracker\n\n- tracker: trello\n- board: abc123\n'
+        printf '## Chosen\n\n## Tracker\n\n- tracker: trello\n- board: abc123\n'
         [ -z "${2:-}" ] || printf '%s\n' "$2"
     } >"$p/sarah/habits.md"
     echo "$p"
@@ -157,6 +157,14 @@ habits "$p" '## Chosen
 - tracker'
 out=$(hook "$p" creds)
 assert_contains "a repeated name is listed once" "$out" "Habits: Trello. Limit"
+
+# the catalog's own lines are enough: the Tracker section alone chooses it
+p=$(mk_tracker catalog '')
+assert_contains "Tracker section alone shows Trello on the Habits line" "$(line_of Habits "$(hook "$p" creds)")" "Trello"
+p=$(mk_project othertracker); habits "$p" '## Tracker
+- tracker: notion
+- board: abc123'
+assert_not_contains "an unknown tracker is not announced as Trello" "$(hook "$p" creds)" "Trello"
 
 # the environment is never printed
 out=$(hook "$(mk_tracker canary 'Last status: token rejected 2026-10-20')" creds)
@@ -259,7 +267,7 @@ STATE
     pad "$p/sarah/state.md" 20000
     for i in 1 2 3 4 5 6; do f="$p/sarah/state/task-with-a-fairly-long-name-$i.md"; : >"$f"; pad "$f" 30000; done
     {
-        printf '## Chosen\n- tracker\n- gitflow\n- changelog-fragment\n- no-idle\n- dispatch-guard\n\n## Settings\n- limit: 99\n\n## Conversation defaults\n\n## Tracker\n\n- tracker: trello\n- board: abc123\nLast status: token rejected 2026-10-20\n\n## Exceptions\n\n| rule | reason | expires | granted by | date |\n| --- | --- | --- | --- | --- |\n'
+        printf '## Chosen\n- gitflow\n- changelog-fragment\n- no-idle\n- dispatch-guard\n\n## Settings\n- limit: 99\n\n## Conversation defaults\n\n## Tracker\n\n- tracker: trello\n- board: abc123\nLast status: token rejected 2026-10-20\n\n## Exceptions\n\n| rule | reason | expires | granted by | date |\n| --- | --- | --- | --- | --- |\n'
         printf '| changelog-fragment | r | 2026-11-03 | me | 2026-10-24 |\n| gitflow | r | 2026-11-03 | me | 2026-10-24 |\n| gitflow | r | 2026-11-03 | me | 2026-10-24 |\n'
     } >"$p/sarah/habits.md"
     hook "$p" "$2"
@@ -269,7 +277,7 @@ for mode in creds nocreds; do
     t=$(tokens "$out")
     assert_le "worst-case hook output in tokens (chars/4), $mode" "$t" 400
     assert_contains "worst case ($mode) carries the index line" "$out" "Size: sarah/state.md"
-    assert_contains "worst case ($mode) carries the Habits line" "$out" "Habits: Trello"
+    assert_contains "worst case ($mode) carries the Habits line" "$out" "task rules, Trello"
     assert_contains "worst case ($mode) carries the Exceptions line" "$out" "Exceptions: 3 active"
     assert_contains "worst case ($mode) carries the Size summary" "$out" "Size: 5 more file(s)"
 done
