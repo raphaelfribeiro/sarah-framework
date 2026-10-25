@@ -58,6 +58,7 @@ check_push() {
     # shellcheck disable=SC2086
     set -- $SARAH_ARGS
     positional=""
+    tags=0
     skip=0
     while [ $# -gt 0 ]; do
         if [ "$skip" = 1 ]; then
@@ -69,6 +70,7 @@ check_push() {
             --all | --mirror)
                 deny "pushing with $1 sends main and develop too" "Push the branch by name: git push origin feature/<name>."
                 ;;
+            --tags) tags=1 ;;
             --repo | -o | --push-option | --receive-pack | --exec) skip=1 ;;
             -*) ;;
             *) positional="$positional $1" ;;
@@ -78,6 +80,11 @@ check_push() {
     # shellcheck disable=SC2086
     set -- $positional
     if [ $# -le 1 ]; then
+        # --tags with no refspec pushes refs/tags/* and nothing else: it does not
+        # touch a branch, and a release has to push its tag from develop or main.
+        # Only that exact shape is let through; --follow-tags (which also pushes
+        # the branch) and any named refspec still take the checks below.
+        [ "$tags" = 1 ] && return 0
         if protected "$branch"; then
             deny "pushing $branch straight to the origin breaks your project rules" "Push a feature/* branch and open a pull request into develop."
         fi
@@ -124,9 +131,17 @@ check_pr_merge() {
     # shellcheck disable=SC2086
     set -- $SARAH_ARGS
     selector=""
+    repo=""
+    auto=0
     while [ $# -gt 0 ]; do
         case $1 in
-            -R | --repo | -b | --body | -F | --body-file | -t | --subject | -A | --author-email | --match-head-commit)
+            -R | --repo)
+                if [ $# -ge 2 ]; then repo=$2; shift; fi
+                ;;
+            --repo=*) repo=${1#--repo=} ;;
+            -R=*) repo=${1#-R=} ;;
+            --auto) auto=1 ;;
+            -b | --body | -F | --body-file | -t | --subject | -A | --author-email | --match-head-commit)
                 [ $# -ge 2 ] && shift
                 ;;
             -*) ;;
@@ -143,8 +158,15 @@ check_pr_merge() {
         sarah_say_unchecked "$rule" "no temporary file"
         return 0
     }
-    # shellcheck disable=SC2086
-    sarah_run_timeout 10 "$out" "$err" gh pr checks $selector --json name,bucket
+    # The checks are read in the repository the merge names (-R/--repo), not the
+    # one the shell happens to be in.
+    if [ -n "$repo" ]; then
+        # shellcheck disable=SC2086
+        sarah_run_timeout 10 "$out" "$err" gh pr checks $selector -R "$repo" --json name,bucket
+    else
+        # shellcheck disable=SC2086
+        sarah_run_timeout 10 "$out" "$err" gh pr checks $selector --json name,bucket
+    fi
     rc=$?
     verdict=$(jq -r '
         if type != "array" then "garbage"
@@ -161,7 +183,11 @@ check_pr_merge() {
     case $verdict in
         pass) ;;
         fail:*) deny "merging waits for green CI, and these checks are failing: ${verdict#fail:}" "$route" ;;
-        pending:*) deny "merging waits for green CI, and these checks are still running: ${verdict#pending:}" "$route" ;;
+        pending:*)
+            # --auto merges only once the checks pass: it is the safe way to wait.
+            [ "$auto" = 1 ] && return 0
+            deny "merging waits for green CI, and these checks are still running: ${verdict#pending:}" "$route"
+            ;;
         none) deny "merging waits for green CI, and this pull request has no checks" "Wait for the checks to be reported, then merge." ;;
         *)
             if [ "$rc" = 124 ]; then

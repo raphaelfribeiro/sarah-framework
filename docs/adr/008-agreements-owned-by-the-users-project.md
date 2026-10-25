@@ -64,3 +64,7 @@ Further constraints:
 ## Revisit when
 
 The platform offers plugin-scoped blocking hooks that a project can opt into, or a user reports a collision with an existing hook setup that adopt, wrap or skip cannot resolve.
+
+## Note, 2026-10-24: what "the only bypass" covers
+
+The Context calls an exception the only bypass. Read it as the only sanctioned one. The installed guards judge the usual invocation forms (plain commands, `env` and path wrappers, backslash continuations) and do not judge `sh -c`, `bash -c`, `eval`, `xargs`, `sudo`, variables, or a chain such as `git checkout X && git commit`, which is judged on the branch at hook time. They are a guardrail against mistakes, not a security boundary.

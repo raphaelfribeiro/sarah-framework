@@ -164,6 +164,8 @@ rewriting history, spending money, touching passwords or keys.
 
 When any blocking habit is ticked, print once: `Any of these can be bypassed by an exception you grant: it names the rule, gives a reason and an end date, 14 days at most.`
 
+The guards cover the usual invocation forms, including `env` and path wrappers and backslash continuations. They do not read `sh -c`, `bash -c`, `eval`, `xargs`, `sudo` or variables, and a chained `git checkout X && git commit` is judged on the branch at hook time. They are a guardrail against mistakes, not a security boundary.
+
 **Call 2** (the Tasks group, then only the settings that apply):
 
 ```json

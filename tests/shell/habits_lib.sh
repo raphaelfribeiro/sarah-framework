@@ -26,11 +26,13 @@ mk_repo() {
 
 # stub_gh NAME : a stub `gh` directory. Its answer is read from files beside it:
 # checks.out (stdout), checks.err (stderr), checks.rc (exit code), or hang.
+# The arguments of the last call are left in args.
 stub_gh() {
     d=$(new_dir "gh-$1")
     cat >"$d/gh" <<'GH'
 #!/bin/sh
 here=$(dirname "$0")
+printf '%s\n' "$*" >"$here/args"
 if [ -f "$here/hang" ]; then exec sleep 60; fi
 [ -f "$here/checks.out" ] && cat "$here/checks.out"
 [ -f "$here/checks.err" ] && cat "$here/checks.err" >&2

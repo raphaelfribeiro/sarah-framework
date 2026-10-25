@@ -84,7 +84,8 @@ END {
 
 # Splits a shell command into simple commands, one per line. Quoted text is
 # collapsed into single words (separators and spaces inside quotes become _), so
-# a commit message that mentions "git push origin main" is not a push.
+# a commit message that mentions "git push origin main" is not a push. A backslash
+# at the end of a line joins it with the next, as the shell does.
 SARAH_SPLIT_AWK='
 function flush() { if (out != "") print out; out = "" }
 BEGIN { inq = ""; esc = 0; out = "" }
@@ -104,6 +105,9 @@ BEGIN { inq = ""; esc = 0; out = "" }
         if (ch ~ /[;&|()`]/) { flush(); continue }
         out = out ch
     }
+    # A backslash that ends the line, outside single quotes, removes the newline:
+    # the command goes on with the next line (inside double quotes too).
+    if (esc) { esc = 0; next }
     if (inq != "") out = out "_"; else flush()
 }
 END { flush() }'
@@ -155,9 +159,25 @@ sarah_exceptions_list() {
 }
 
 # sarah_say_unchecked RULE REASON : the line for a rule that could not be
-# evaluated. The call is allowed; the guard says so.
+# evaluated. The call is allowed; the guard says so. Claude Code never shows the
+# stderr of a hook that exits 0, so the line also goes to stdout as hook JSON
+# (additionalContext, no permission decision), once, when the guard exits 0.
+# The JSON is built by hand: this fires exactly when jq is missing.
+SARAH_UNCHECKED=""
 sarah_say_unchecked() {
-    printf 'Rule not checked: %s (%s). I let it through.\n' "$1" "$2" >&2
+    _su_line="Rule not checked: $1 ($2). I let it through."
+    printf '%s\n' "$_su_line" >&2
+    SARAH_UNCHECKED="${SARAH_UNCHECKED:+$SARAH_UNCHECKED }$_su_line"
+    trap sarah_emit_unchecked EXIT
+}
+
+# sarah_emit_unchecked : the EXIT trap. Prints the collected lines as hook JSON
+# when the guard allows; a block (exit 2) has its own message and no JSON.
+sarah_emit_unchecked() {
+    _se_rc=$?
+    [ "$_se_rc" = 0 ] && [ -n "$SARAH_UNCHECKED" ] || return 0
+    _se_msg=$(printf '%s' "$SARAH_UNCHECKED" | tr -d '\000-\037' | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","additionalContext":"%s"}}\n' "$_se_msg"
 }
 
 # sarah_not_checked RULE REASON : say it and end the guard, allowing the call.
@@ -201,7 +221,19 @@ sarah_parse_segment() {
     set -- $1
     while [ $# -gt 0 ]; do
         case $1 in
-            [A-Za-z_]*=* | env | command | exec | nohup | time) shift ;;
+            [A-Za-z_]*=* | command | exec | nohup | time) shift ;;
+            env | */env)
+                # env and its options that take no command: -i, -u NAME. Any
+                # other option is not understood, so the command is not judged.
+                shift
+                while [ $# -gt 0 ]; do
+                    case $1 in
+                        -u | --unset) if [ $# -ge 2 ]; then shift 2; else shift; fi ;;
+                        -i | -0 | -v | --ignore-environment | --null | --debug | --unset=* | --) shift ;;
+                        *) break ;;
+                    esac
+                done
+                ;;
             *) break ;;
         esac
     done
