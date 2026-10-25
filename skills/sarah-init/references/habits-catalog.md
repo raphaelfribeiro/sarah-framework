@@ -39,7 +39,7 @@ Each entry has a plain label, the failure it prevents, what it may block, what i
 - Needs: python3, network
 - Group: Board
 
-You set `TRELLO_API_KEY` and `TRELLO_TOKEN` outside the project, never in this chat; a token that expires is best. Removing the board also removes the daily board check.
+You set `TRELLO_API_KEY` and `TRELLO_TOKEN` outside the project, never in this chat. Say plainly: create the token with an expiration (30 days is a good default) and the narrowest scope, `read,write`, ideally from a dedicated account that sees only this board; and these variables sit in the environment, so anything I run in the shell can read them. Removing the board also removes the daily board check.
 
 When chosen: ask for the board link (`Paste the link to the Trello board. The link is safe to share; a key is not. The board must be private.`). Write two lines under `## Tracker` in `sarah/habits.md`, keeping every other line (the script writes `Last audit:` itself):
 

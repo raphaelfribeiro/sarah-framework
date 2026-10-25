@@ -164,6 +164,8 @@ fi
 # the presence of the Trello variables. Nothing here calls the network, nothing
 # from the environment is printed, and only names of a known shape are echoed,
 # so habits.md cannot steer the model. A project without habits.md gets none.
+# The tracker counts as chosen when the Tracker section names `tracker: trello`
+# (what the init catalog writes) or when Chosen lists it.
 # ---------------------------------------------------------------------------
 
 today=$(date +%Y-%m-%d 2>/dev/null || true)
@@ -217,7 +219,10 @@ if [ -n "$habits_ok" ]; then
                 next
             }
             sec == "tracker" {
-                if ($0 ~ /^[-*][ \t]+tracker[ \t]*:[ \t]*[a-z][a-z0-9_]*[ \t]*$/) print "T"
+                if ($0 ~ /^[-*][ \t]+tracker[ \t]*:[ \t]*[a-z][a-z0-9_]*[ \t]*$/) {
+                    print "T"
+                    if ($0 ~ /:[ \t]*trello[ \t]*$/ && !("tracker" in seen)) { seen["tracker"] = 1; print "C tracker" }
+                }
                 else if ($0 ~ /^[-*][ \t]+board[ \t]*:[ \t]*[^ \t]+[ \t]*$/) print "B"
                 else if ($0 ~ /^Last audit:/) { v = $0; sub(/^[^:]*:/, "", v); print "A " trim(v) }
                 else if ($0 ~ /^Last status:/) {

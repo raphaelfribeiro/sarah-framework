@@ -65,3 +65,9 @@ For the audit, a scheduled CI workflow was weighed against the first session of 
 ## Revisit when
 
 A second tracker is added (the five verbs get their first real test), the platform lets secure plugin config reach Bash-launched processes safely, or users report missed audits that mattered.
+
+## Amendment, 2026-10-24 (Gate 4 review)
+
+- **Verbs.** A sixth verb, `done --task SLUG`, moves the card of a shipped task to the Done list. A task file is deleted when its task ships, after which `audit` would report its card as having no task for ever; `/hasta-la-vista` therefore runs `done` before it deletes the file, then `sync`. A card already archived, absent or in Done is left alone, and a missing Done list moves nothing.
+- **Who runs what.** `/ill-be-back` runs `intake` then `report` when session start said `Audit: due today.`; `/hasta-la-vista` runs `done` and `sync`. All of it applies only when `sarah/habits.md` records `tracker: trello` under `## Tracker`; the session-start hook reads that section as the record that the tracker is chosen.
+- **Credential.** The consequence above stands and is now stated to the user: the agent's shell can read `TRELLO_API_KEY` and `TRELLO_TOKEN`. The documented mitigations are a token with an expiration, scope `read,write`, and a dedicated account limited to the one board.

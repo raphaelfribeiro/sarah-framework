@@ -112,6 +112,12 @@ The platform's own fallback never fires on a rate limit (429), so the
 orchestrator re-dispatches itself. The tracker has been tested against a local
 stub only; it has not yet met the live Trello API.
 
+The Trello key and token live in environment variables, and the agent's shell can
+read them, as can every command it runs. Mint the token with an expiration (30
+days is a good default) and the narrowest scope, `read,write`, ideally from a
+dedicated Trello account that is a member of only the board in use. Renew it when
+session start reports a rejected token.
+
 ## The way back
 
 Written now, because an incident is the worst moment to design one.

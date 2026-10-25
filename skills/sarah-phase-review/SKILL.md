@@ -139,6 +139,6 @@ Once the gate closes, the delivery goes to the permanent branch **the way the
 project's branching model says**: under gitflow, a pull request into `develop`.
 The pull request is the delivery boundary, and a human merges it.
 
-If a tracker MCP is connected, offer to sync the card or issue — as an option, never automatically. If none is connected, never mention it.
+If `sarah/habits.md` records `tracker: trello`, offer to run `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/tracker.py" sync` — as an option, never automatically. Without that habit, never mention it.
 
 Every gate has a guardian. Every merge has a human behind it.

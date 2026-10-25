@@ -7,6 +7,7 @@ Usage:
     tracker.py check [--board LINK_OR_ID]    credential valid, board reachable and private
     tracker.py intake                        ready cards not yet linked to a task
     tracker.py sync                          push every in-flight task to its card
+    tracker.py done --task SLUG [--task ..]  move the card of a shipped task to Done (run before its file is deleted)
     tracker.py audit [--force]               list differences between board and index
     tracker.py report [--force]              keep the one audit card up to date
 
@@ -44,7 +45,8 @@ from datetime import date
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-VERBS = ("check", "intake", "sync", "audit", "report")
+VERBS = ("check", "intake", "sync", "done", "audit", "report")
+SLUG = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$")
 NAME = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
 
 
@@ -215,6 +217,23 @@ def _atomic_write(path: Path, text: str) -> None:
 _CARD_LINE = re.compile(r"^Card:[ \t]*(\S+)[ \t]*$", re.M)
 
 
+def _is_task_file(root, path) -> bool:
+    """True for sarah/state/<name>.md under root, after symlinks are resolved."""
+    path = Path(path).resolve()
+    return path.suffix == ".md" and path.parent == Path(root).resolve() / "sarah" / "state"
+
+
+def task_card(root, slug):
+    """The Card line of sarah/state/<slug>.md, or None for a bad slug, no file or no card."""
+    if not SLUG.match(slug or ""):
+        return None
+    path = Path(root) / "sarah" / "state" / f"{slug}.md"
+    if not _is_task_file(root, path):
+        return None
+    m = _CARD_LINE.search(_read(path) or "")
+    return m.group(1) if m and m.group(1) != "pending" else None
+
+
 def load_tasks(root) -> list:
     """The In flight rows of sarah/state.md, each with its task file's title and Card line."""
     root = Path(root).resolve()
@@ -240,7 +259,7 @@ def load_tasks(root) -> list:
         if not m:
             continue
         path = (root / m.group(1)).resolve()
-        if root not in path.parents:  # a row cannot point outside the project
+        if not _is_task_file(root, path):  # a row names a task file, nothing else
             continue
         body = _read(path)
         title = re.search(r"^# (.+)$", body or "", re.M)
@@ -257,8 +276,12 @@ def load_tasks(root) -> list:
 
 
 def set_card(path, card_id: str) -> None:
-    """Record a task's card ID in its file: replace the Card line, or add one under the title."""
+    """Record a task's card ID in its file: replace the Card line, or add one under the title.
+
+    Only a task file, sarah/state/<name>.md, is ever written."""
     path = Path(path)
+    if path.resolve().parent.name != "state" or path.resolve().parent.parent.name != "sarah" or path.suffix != ".md":
+        return
     text = _read(path)
     if text is None:
         return
@@ -298,6 +321,7 @@ def _parser():
     p.add_argument("--tracker")
     p.add_argument("--board")
     p.add_argument("--force", action="store_true")
+    p.add_argument("--task", action="append", default=[])
     return p
 
 
@@ -305,6 +329,8 @@ def run_verb(module, args, root, say, adapter_options):
     verb = args.verb
     if verb in ("audit", "report") and not audit_due(root, args.force):
         return 0  # once a day, and silent in between: no request is made
+    if verb == "done" and not args.task:
+        raise Fail("done needs the task: --task SLUG.", 2)
     config = load_config(root)
     board = args.board or config.get("board")
     if not board:
@@ -315,7 +341,7 @@ def run_verb(module, args, root, say, adapter_options):
 
     if verb == "check":
         info = adapter.check()
-        say(f'Trello connected: board "{info["name"]}", {"private" if info["level"] == "private" else "visible to your workspace only"}.')
+        say(f'Trello connected: board {module.frame_text(info["name"], 80)}, {"private" if info["level"] == "private" else "visible to your workspace only"}.')
     elif verb == "intake":
         linked = {t["card"] for t in tasks if t["card"] != "pending"}
         cards = adapter.intake(linked)
@@ -335,6 +361,11 @@ def run_verb(module, args, root, say, adapter_options):
                 say(f'The card for "{module.one_line(r.get("title"), 60)}" was deleted or archived on the board. I did not recreate it.')
         counts = {a: sum(1 for r in results if r["action"] == a) for a in ("created", "adopted", "updated")}
         say(f"Synced: {counts['created'] + counts['adopted']} created, {counts['updated']} updated.")
+    elif verb == "done":
+        cards = [c for c in (task_card(root, slug) for slug in args.task) if c]
+        moved = adapter.finish(cards) if cards else 0
+        if moved:
+            say(f"Moved {moved} card{'s' if moved != 1 else ''} to Done.")
     elif verb == "audit":
         for finding in adapter.audit(tasks):
             say(finding)
