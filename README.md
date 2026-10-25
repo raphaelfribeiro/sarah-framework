@@ -120,6 +120,18 @@ only), and the ones that guard a tool call also need `jq`. If either is missing,
 `/sarah-init` says which habits it is leaving out and why; nothing is installed
 half-working.
 
+**Updating from an earlier version.** Refresh the marketplace, update the
+plugin, then restart Claude Code so the new version loads:
+
+```
+claude plugin marketplace update sarah-framework
+claude plugin update sarah@sarah-framework
+```
+
+**A project set up before 0.2.0** keeps its files. Run `/sarah-init` again: it
+sees the project is already initialized, overwrites nothing, and offers the
+habits catalog. Asking in plain words works too, such as "add the Trello board".
+
 **Staying on a version.** The marketplace follows the default branch. To stay on
 a release you have checked, install from a checkout of its tag; the steps are in
 [the way back](docs/operating.md#the-way-back). Habits you installed are copies in

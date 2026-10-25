@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Documentation
+
+- The README says how to update from an earlier version, and how a project set
+  up before 0.2.0 gets the habits catalog.
+
 ## [0.2.0] - 2026-10-24
 
 The habits that earned their place. v0.1.0 gave a project structure (phases,
