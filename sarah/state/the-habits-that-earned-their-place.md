@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** implement complete; Gate 4 review next · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** Gate 4 fixes in progress · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -116,61 +116,38 @@ At most three slices run at once, each in its own worktree branched from this
 branch, then merged back here. Developers write the tests from the test
 engineer's plan, rather than a separate test engineer per slice.
 
-**Carried from merged slices, to settle before review:**
+**Carried from implementation, still open after Gate 4:**
 
-- The session-start hook now prints Habits, Tracker, Audit and Exceptions;
-  worst case 389 of 400 tokens, after shortening the bootstrap pointer, the
-  in-flight lines and the cell cut (60 to 40 characters). "Waiting for
-  credentials" shows once, on the Habits line. The tracker records
-  `Last status:` under `## Tracker` for the hook to read.
-- The test plan's `SARAH_TODAY` seam was not built; dates are controlled by a
-  `date` shadowed on `PATH`, as the phase rules require.
-- Token budgets in tests use chars/4, the measure CI already uses for the
-  bootstrap; `scripts/token_budget.py` rates the same text ~15% higher.
-- The shell suite passes under dash (the `/bin/sh` of the CI runner) as well as
-  locally; as root, the unreadable-file cases skip by design.
-- **Before the push:** the local commits on this branch carry the maintainer's
-  personal address as author. New commits use the GitHub no-reply address
-  (decided 2026-10-24); rewrite the unpublished range's author to it once every
-  slice is merged, and not before, or the open worktrees diverge. Published
-  history stays as it is (decided 2026-10-24).
-- **The tracker has never met the live Trello API.** Endpoints and fields are
-  from memory, tested against a stub; credentials travel in the query string
-  and are redacted on every error path. A manual smoke on a throwaway board,
-  with the user's own credentials set outside the session, belongs before the
-  release. Base URL is a constructor argument limited to loopback or the Trello
-  host, for tests only: flag for review.
-- **For review, from steps 6, 10 and 14:** the always-ask list holds 40 rules,
-  some routine (`rebase`, `--amend`, `branch -d`, `printenv`): weigh friction
-  against protection. Rule syntax is verified only for `git push` (F18). No `ask`
-  rule guards `sarah/habits.md`, so an agent could forge a grant row there:
-  security review decides. The Stop hook reads "ready" as Phase `ready` with
-  Waiting on `nobody`, now documented in the state template; its stop marker is
-  dated and honoured only that day.
-- **From steps 11 and 12:** the exceptions library ships as its own payload,
-  `_lib`, installed next to each guard (`apply _lib gitflow`); a guard without
-  it allows and says so. Attribution has no settings key: with it off, the
-  gitflow guard refuses a commit carrying `Co-Authored-By`. The CI gitflow
-  check does not read exceptions, so a granted local exception still fails CI.
-  Not guarded: `gh pr create` without `--base`, and a local `git merge` into
-  `develop` or `main`. If `sarah/exceptions.log` cannot be written, the
-  exception is not honoured (fails closed). The session-start `Exceptions:`
-  line is not added yet; it waits on the hook budget above. Step 13 must add
-  its paths to the installer's PREFIXES.
-- **From step 13:** the dispatch guard reads `- dispatch checks:` (absent means
-  all three) and `- limit:` (absent means 3; a malformed limit is not enforced,
-  and says so). A premise is current only if dated today; every Premises line
-  must be. The task is bound by the first `sarah/state/<slug>.md` in the
-  prompt; no prompt key at all allows. The three entries share one payload, so
-  `worktree.baseRef` and the include line install even when only the model
-  check is picked: slightly wider than "nothing unchosen is installed". The
-  installer gained `keys` (root `worktree` only) and `include`; PREFIXES did not
-  change. `.worktreeinclude` copying is a platform feature and is not tested.
-  `isolation` in the hook input rests on probe P2, not on the public docs.
-- The shell suite needs `git`, `python3` and `jq` on the runner; without `jq`
-  the hooks allow, by design, and their blocking cases fail.
-- Step 3's first commit is not green on its own (one worst-case assertion needs
-  step 4); the merge is.
+- Session-start output is 389 of 400 tokens worst case (chars/4; `token_budget.py`
+  rates it ~15% higher). No headroom.
+- **Before the push:** the unpublished range carries the maintainer's personal
+  address as author; rewrite it to the GitHub no-reply address once every slice is
+  merged (decided 2026-10-24). Published history stays as it is.
+- **The tracker has never met the live Trello API.** A manual smoke on a throwaway
+  board, credentials set by the user outside the session, belongs before release.
+- Guards need `git`, `python3` and `jq`; without `jq` they allow, by design.
+- The CI gitflow check ignores local exceptions; `gh pr create` without `--base`
+  and a local `git merge` into a permanent branch stay unguarded (documented).
+- Dispatch guard: the three entries share one payload, so `worktree.baseRef`
+  installs even when only the model check is picked. Its task count rests on an
+  orchestrator marking the task in progress, which no skill instructs yet, and
+  rows waiting on the user count as running (Gate 4, optional, not fixed).
+
+## Gate 4 review (2026-10-24)
+
+Two reviewers in clean contexts, correctness and security. No credential leak, no
+code execution through crafted input. Blocking findings, all re-verified, are
+being fixed in three slices from this branch:
+
+| Slice | Branch | Fixes |
+| --- | --- | --- |
+| Tracker | `feature/gate4-tracker` | tracker never wired (hook reads `## Tracker`; intake, report, sync in the rituals); `nobody` read as blocked; no Ready list; `cards/all`; frame forgery; unframed board text; `base_url` with `\` or `@`; `set_card` outside `sarah/state/` |
+| Guards | `feature/gate4-guards` | backslash continuation bypass; `env -i`, `/usr/bin/env`, path-to-git; tag pushes refused; `gh pr merge --auto` and `-R`; "Rule not checked" was invisible (exit-0 stderr is never shown) |
+| Permissions | `feature/gate4-permissions` | agent could self-grant and edit `sarah/habits.md`; push grant widened by a refspec and `-d`; forged records on `remove`; `.env` rules cwd-relative; missing destructive forms; merge on green CI becomes a revocable grant |
+
+Left for the user: drop routine always-ask rules (`rebase`, `--amend`,
+`branch -d`, `printenv`)?; the 55 `Claude-Session` trailers in public history;
+the stale D6 8,768-byte claim.
 
 ## Blocked
 
@@ -215,7 +192,7 @@ The new patterns listed in the UX spec §9 were approved with the design.
 | 2. Architecture approved | passed | 2026-10-24 |
 | 3. Design approved | passed | 2026-10-24 |
 | Plan approved (16 steps, ~140 tests, full depth) | passed | 2026-10-24 |
-| 4. Review | not run: next | — |
+| 4. Review | run; blocking fixes in progress | 2026-10-24 |
 | 5. Documented and committed | written in step 16; re-check after review | — |
 
 ## Found along the way
@@ -233,7 +210,7 @@ The new patterns listed in the UX spec §9 were approved with the design.
 
 ## Next
 
-1. Gate 4 review, in a clean context, on the items carried above.
+1. Merge the three Gate 4 slices, re-run everything (dash included).
 2. The live Trello smoke on a throwaway board, credentials set outside the session.
 3. The release: PR against `develop`, rewrite the unpublished range's author, tag.
 
