@@ -105,10 +105,10 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 2 | 7 executor and brief | `feature/habits-s07-executor` | merged (9d2096c) |
 | 3 | 8+9 decisions, short rituals | `feature/habits-s08-decisions-rituals` | merged |
 | 3 | 6+10 init interview, grants | `feature/habits-s06-init-grants` | merged |
-| 3 | 11+12 exceptions, gitflow, changelog fragment | `feature/habits-s11-exceptions-gitflow` | building |
+| 3 | 11+12 exceptions, gitflow, changelog fragment | `feature/habits-s11-exceptions-gitflow` | merged (9e7fdb7) |
 | 4 | 15 tracker | `feature/habits-s15-tracker` | merged |
 | 4 | 14 Stop hook | `feature/habits-s14-no-idle` | merged |
-| 4 | 13 dispatch guard | — | after 11 |
+| 4 | 13 dispatch guard | `feature/habits-s13-dispatch-guard` | building |
 | 5 | 16 docs gate and release prep | — | last |
 
 At most three slices run at once, each in its own worktree branched from this
@@ -143,6 +143,18 @@ engineer's plan, rather than a separate test engineer per slice.
   security review decides. The Stop hook reads "ready" as Phase `ready` with
   Waiting on `nobody`, now documented in the state template; its stop marker is
   dated and honoured only that day.
+- **From steps 11 and 12:** the exceptions library ships as its own payload,
+  `_lib`, installed next to each guard (`apply _lib gitflow`); a guard without
+  it allows and says so. Attribution has no settings key: with it off, the
+  gitflow guard refuses a commit carrying `Co-Authored-By`. The CI gitflow
+  check does not read exceptions, so a granted local exception still fails CI.
+  Not guarded: `gh pr create` without `--base`, and a local `git merge` into
+  `develop` or `main`. If `sarah/exceptions.log` cannot be written, the
+  exception is not honoured (fails closed). The session-start `Exceptions:`
+  line is not added yet; it waits on the hook budget above. Step 13 must add
+  its paths to the installer's PREFIXES.
+- The shell suite needs `git`, `python3` and `jq` on the runner; without `jq`
+  the hooks allow, by design, and their blocking cases fail.
 - Step 3's first commit is not green on its own (one worst-case assertion needs
   step 4); the merge is.
 
