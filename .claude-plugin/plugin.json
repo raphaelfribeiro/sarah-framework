@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "sarah",
   "displayName": "S.A.R.A.H.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Skills, Agents, Reviews & Adaptive Hierarchy. A structured development workflow for Claude Code that scales from a one-line fix to a whole product: specialist agents activate per phase, hard quality gates guard every merge, and every decision is presented to you as options with trade-offs. Be prepared. Judgment Day is a deploy on Friday.",
   "author": {
     "name": "Raphael Ribeiro",

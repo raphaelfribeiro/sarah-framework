@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-24
+
+The habits that earned their place. v0.1.0 gave a project structure (phases,
+state, gates) and no operating habits. This release adds a catalog of them,
+each tied to a failure it prevents, offered by `/sarah-init` in plain words and
+**installed only if you pick it**. Decline them all and nothing is installed and
+nothing can block you.
+
+### Added
+
+- **The habit catalog in `/sarah-init`.** Seven choices: a Trello board, a model
+  per task, a task re-check before it starts, a separate copy per task, keeping
+  working while work waits, protecting the main line, and a release-note line per
+  delivery. The interview covers the whole catalog every time and shows what each
+  one may stop, with technical names only on "details".
+- **`scripts/habits.py`, the installer.** Copies pinned, stamped payloads into the
+  project after you approve the exact diff, records them in `sarah/habits.md`,
+  registers their hooks, and removes only what it installed. A file you edited, or
+  one you already had, is a conflict you decide, never overwritten.
+- **Agreements that live in your project.** The plugin's own hooks still only
+  report. The checks that may block are files in your repository: the gitflow
+  guard with merge on green CI, the changelog-fragment guard, the dispatch guard
+  (model set, premise re-checked, task limit, own worktree) and a Stop hook that
+  blocks once while ready work waits. Exceptions need a reason and expire within
+  14 days.
+- **Autonomy grants.** Set at init, quoted in your words, revocable. Deleting for
+  good, rewriting history, spending money and touching credentials are always
+  asked, installed as `permissions.ask` rules.
+- **An `executor` agent**, dispatched with the model and effort each task
+  declares, answering in a fixed four-part report (done, proof, not finished,
+  requested tasks), plus a three-depth brief and a premises check before dispatch.
+- **A tracker seam.** `scripts/tracker.py` with a Trello adapter: intake of ready
+  cards, card sync, and a once-a-day audit as one self-closing card. Local state is
+  the source of truth; credentials come from `TRELLO_API_KEY` and `TRELLO_TOKEN`,
+  never from the chat, and a public board is refused.
+- **Working defaults** printed at session start (decisions as questions, no
+  "continue?" inside an approved plan, run it yourself, short plain reports,
+  verified facts, remembered decisions), each switchable in `sarah/habits.md`, and
+  lasting decisions kept in `sarah/decisions.md`.
+- **Habit status lines at session start** (habits, tracker, daily audit,
+  exceptions) inside a 400-token budget, and a size sensor for the state files.
+- **Shorter rituals.** `/ill-be-back` and `/hasta-la-vista` print at most ten lines,
+  verdict first; the close asks one question, and the agent commits.
+- **Release notes read `User-facing:` lines** from the changelog entries of
+  projects that chose the changelog habit.
+- **Tests.** Unit, integration, static and shell suites, run in CI.
+
+### Changed
+
+- With the gitflow habit installed, a feature branch merges without a human on
+  green CI. This supersedes "every merge has a human behind it" for those projects
+  only; cutting a release stays a user decision.
+- `sarah-bootstrap` points at `references/task-template.md` inside its own
+  directory, where a skill can read it, and a static test now checks every skill's
+  `references/` links.
+- The development `CLAUDE.md` moved to `.claude/CLAUDE.md`, so
+  `claude plugin validate . --strict` passes again.
+- `sarah/state.md` is held to 8 KB and each task file to 16 KB, measured at session
+  start.
+- The allowed-hosts list gains the Trello API and board-link hosts.
+
+### Known limits
+
+- **The tracker has never met the live Trello API.** It is tested against a local
+  stub; a smoke test on a throwaway board comes before any claim that it works.
+- **A forced platform model fallback is not reported**, and with
+  `CLAUDE_CODE_EFFORT_LEVEL` set the Agent tool loses per-call `effort`, so every
+  executor runs at that level. See [operating](docs/operating.md).
+- The habits rest on platform behaviour probed on Claude Code CLI 2.1.308 and not
+  promised by the public docs; re-probe on a major version.
+- Python 3 is needed by any habit that installs or calls a script, and `jq` by the
+  guards. Without them those habits are not offered.
+- **No study measures whether these habits help.** The v0.1.0 findings stand.
+- Grants in a team repository apply to every collaborator's agent.
+
 ## [0.1.0] - 2026-08-16
 
 First public release. S.A.R.A.H. is a Claude Code plugin that runs a structured
@@ -86,5 +161,6 @@ Stated here rather than discovered after installing.
   .githooks` is a manual step, because git offers no way around it.
   [CONTRIBUTING.md](CONTRIBUTING.md) says so.
 
-[Unreleased]: https://github.com/raphaelfribeiro/sarah-framework/compare/v0.1.0...develop
+[Unreleased]: https://github.com/raphaelfribeiro/sarah-framework/compare/v0.2.0...develop
+[0.2.0]: https://github.com/raphaelfribeiro/sarah-framework/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/raphaelfribeiro/sarah-framework/releases/tag/v0.1.0

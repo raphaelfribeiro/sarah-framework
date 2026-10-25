@@ -6,14 +6,14 @@
 | --- | --- |
 | **Default level** | 3 |
 | **Mode** | greenfield |
-| **Released** | `v0.1.0`, 2026-08-16 |
+| **Released** | `v0.1.0`, 2026-08-16 (`0.2.0` prepared on the habits branch, not tagged) |
 
 ## In flight
 
 | Task | File | Phase | Level | Waiting on | Since |
 | --- | --- | --- | --- | --- | --- |
 | Measurement pilot | `sarah/state/measurement-pilot.md` | running, outside this repo — 44 sessions, 43 of 47 slices | 2 | the pilot to finish; a partial read began 2026-10-24 | 2026-08-16 |
-| Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | implement (plan approved) | 3 | nothing: building | 2026-10-24 |
+| Habits that earned their place | `sarah/state/the-habits-that-earned-their-place.md` | implement complete, docs gate done | 3 | Gate 4 review, then the live Trello smoke, then the release | 2026-10-24 |
 
 **Reopened 2026-10-24 by the maintainer's decision**, with the pilot still running: the
 user's own install stays pinned to `v0.1.0`, so work here cannot reach the pilot.
@@ -48,8 +48,10 @@ introduces; the long form of each lesson below is in the changelog and git histo
   something leaves.
 - **Framework v2's subtractive thesis is unproven** and still the live question.
 - **Gate 5 requires a commit, and nothing enforces it at runtime.**
-- **The eight steps live in three places that must agree:** `README.md`,
-  `skills/sarah-init/SKILL.md` and `skills/sarah-bootstrap/SKILL.md`.
+- **The eight steps live in five places that must agree** (names and order):
+  `README.md`, `skills/sarah-init/SKILL.md`, `skills/sarah-bootstrap/SKILL.md`,
+  `skills/sarah-bootstrap/references/itinerary.md` and `skills/sarah-status/SKILL.md`.
+  Compared after step 16: they agree; the itinerary table abbreviates the names.
 
 ## Publication
 

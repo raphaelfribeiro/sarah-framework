@@ -28,8 +28,8 @@ loads into context, when, and at what cost.
 | Content | Markdown with YAML frontmatter | Skills, agents, and templates are prose read by the model |
 | Manifests | JSON | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` |
 | Hooks | POSIX `sh` | No bashisms; runs on macOS, Linux, and Git Bash |
-| Scripts | Python 3, standard library only | Token measurement for `/sarah-compact`; habit installer and tracker adapter (v0.2.0, designed). Required of a user only when they choose a habit that installs or calls a script |
-| CI | GitHub Actions | `validate.yml`: manifest validation, frontmatter and size linting, the bootstrap token budget, and two leak guards. `release.yml`: fires on `v*` and calls `validate.yml` rather than repeating it |
+| Scripts | Python 3, standard library only | Token measurement for `/sarah-compact`; habit installer and tracker adapter (v0.2.0). Required of a user only when they choose a habit that installs or calls a script |
+| CI | GitHub Actions | `validate.yml`: manifest validation, frontmatter and size linting, payload script checks, the unit, static and shell suites, the bootstrap token budget, and two leak guards. `release.yml`: fires on `v*` and calls `validate.yml` rather than repeating it |
 | Distribution | Git tag on `main` | No deploy step and no server. A tag push builds the GitHub Release; see `docs/operating.md` |
 
 ## 3. System shape
@@ -52,19 +52,19 @@ repository root), and a **project running S.A.R.A.H. on itself**.
   generation strips.
 - **`docs/`** — documentation of the framework for humans, not for the model.
 
-### Plugin side and user-project side (v0.2.0, designed — [architecture](docs/specs/the-habits-that-earned-their-place.architecture.md))
+### Plugin side and user-project side (v0.2.0 — [architecture](docs/specs/the-habits-that-earned-their-place.architecture.md))
 
 The habits catalog splits ownership in two. **The plugin side** ships and
 updates with the plugin:
 - one `executor` agent, dispatched with a per-call model and effort ([ADR-006](docs/adr/006-one-executor-per-call-model-and-effort.md));
-- the conversation defaults, printed by the session-start hook ([ADR-007](docs/adr/007-conversation-defaults-in-session-start-hook.md));
-- `scripts/habits.py`, which installs from pinned payloads in `skills/sarah-init/habits/`;
-- `scripts/tracker.py` with one adapter per tracker ([ADR-009](docs/adr/009-tracker-adapter-local-state-env-credential.md)).
+- the conversation defaults, printed by the session-start hook with the habit status lines ([ADR-007](docs/adr/007-conversation-defaults-in-session-start-hook.md));
+- `scripts/habits.py`, which installs from pinned payloads in `skills/sarah-init/habits/` and records grants;
+- `scripts/tracker.py` with one `tracker_<name>.py` adapter per tracker ([ADR-009](docs/adr/009-tracker-adapter-local-state-env-credential.md)).
 
 **The user-project side** is written only by the user's choice and belongs to
 their project:
-- `sarah/habits.md`;
-- the blocking checks in `sarah/hooks/`, registered in the project's `.claude/settings.json`;
+- `sarah/habits.md`, `sarah/decisions.md` and `sarah/exceptions.log`;
+- the checks in `sarah/hooks/` (gitflow, changelog fragment, dispatch guard, no-idle, and the shared `_lib` exceptions library), registered in the project's `.claude/settings.json`, plus the always-ask rules and the worktree keys;
 - optionally one CI workflow for R13 ([ADR-008](docs/adr/008-agreements-owned-by-the-users-project.md)).
 
 Nothing crosses from the project back into the plugin. An installed agreement
@@ -127,10 +127,10 @@ worse than none — it is trusted without being read.
 | --- | --- | --- |
 | Claude Code plugin API | Everything: skill loading, agents, hooks, `${CLAUDE_PLUGIN_ROOT}` | Hard dependency. Schema changes break the framework; CI validates the manifests against the installed CLI |
 | Second-model CLI (`codex`, `gemini`, …) | Adversarial review at gate 4 | Detected at runtime. Absent, review falls back to a fresh subagent with clean context, silently |
-| Tracker (Trello first), via `scripts/tracker.py` adapters | Intake, card sync, daily audit at the first session of the day (v0.2.0, opt-in) | Never raised unless chosen. Local state is the source of truth: unreachable means continue, and the next sync reconciles. A 401 says "renew it" once, with no retry. Board text is untrusted data. Credential from an environment variable or the OS keychain |
+| Tracker (Trello first), via `scripts/tracker.py` adapters | Intake, card sync, daily audit at the first session of the day (v0.2.0, opt-in). Configured by `tracker:` and `board:` in `sarah/habits.md` | Never raised unless chosen. Local state is the source of truth: unreachable means continue, and the next sync reconciles. A 401 says "renew it" once, with no retry. Board text is untrusted data. Credential from an environment variable only. Not yet run against the live API |
 | `python3` on the user's machine | Habit installer and tracker | Absent: those habits are offered with the prerequisite stated, never half-installed |
 | `git` | State inspection during `/sarah-init` and the commit and push hooks | Degrades to greenfield assumptions; hooks exit 0 |
-| `jq` | Parsing hook payloads | Hooks fall back to positional parsing, then to a reduced message |
+| `jq` | Parsing hook payloads | Plugin hooks fall back to positional parsing, then to a reduced message. Installed guards allow without it, and say so |
 
 Every boundary except the plugin API is optional by construction. A default
 install with nothing else present is a supported and fully functional
@@ -215,10 +215,10 @@ for them this table is the authority.
   executed here. Treat it as untested code until a contributor with a second CLI
   reports otherwise.
 - **`claude plugin validate` checks manifests, not content.** CI now covers the
-  500-line body ceiling, skill frontmatter, and the bootstrap token budget. Two
-  things it still does not cover: **agent frontmatter fields** and **whether an
-  internal link resolves**. A dead link in a skill is invisible until a model
-  follows it and finds nothing.
+  500-line body ceiling, skill frontmatter, and the bootstrap token budget. One
+  thing it still does not cover: **agent frontmatter fields**. A skill's
+  `references/` links are checked by a static test (each must resolve inside that
+  skill's own directory, as a regular file); links elsewhere are not.
 - **Nothing verifies that the plugin installs.** CI validates structure — a
   manifest parses, a body fits, a hook exits 0. Whether a skill *fires*, whether
   a gate *holds*, and whether the plugin loads at all from a published tag are
@@ -232,7 +232,8 @@ for them this table is the authority.
   the executor naming its own model, and `permissions.ask` holding in permissive
   modes were all probed on CLI 2.1.308 and held. **`CLAUDE_CODE_EFFORT_LEVEL`
   removes per-call effort without a word**, and a forced fallback could not be
-  provoked, so that case is unverified. Re-probe on a CLI major version.
+  provoked, so that case (F17) is unverified. Re-probe on a CLI major version;
+  `docs/operating.md` states both limits to users.
 
   Also documented: the platform's model fallback never fires on a rate limit
   (429), so the orchestrator re-dispatches itself.
@@ -245,12 +246,13 @@ for them this table is the authority.
 | Path | Purpose |
 | --- | --- |
 | `.claude-plugin/` | Plugin and marketplace manifests |
-| `skills/` | Skill definitions; one directory per skill |
-| `agents/` | Specialist personas, loaded per phase |
-| `hooks/` | Hook registration and POSIX shell scripts |
+| `skills/` | Skill definitions; one directory per skill. `sarah-init/habits/` holds the installable payloads; `references/` holds what a skill reads at runtime |
+| `agents/` | Specialist personas, loaded per phase, and the `executor` |
+| `hooks/` | Hook registration, POSIX shell scripts, `conversation-defaults.txt` |
 | `templates/` | Artifacts copied into the user's project |
 | `docs/` | Framework documentation for humans, including the walkthroughs and the comparative studies under `docs/study/` |
-| `scripts/` | Python helpers; token measurement for `/sarah-compact` |
+| `scripts/` | Python helpers: token measurement, `habits.py` installer, `tracker.py` and its adapters, the allowed-hosts list |
 | `.github/` | CI workflows and the issue and pull request templates |
 | `.githooks/` | Versioned pre-push guard; opt-in per clone with `core.hooksPath` |
 | `sarah/` | This repository's own S.A.R.A.H. state |
+| `tests/` | Unit, integration, static and shell suites; `python3 -m unittest discover -s tests -t .` and `sh tests/shell/run.sh` |
