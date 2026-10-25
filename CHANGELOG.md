@@ -7,10 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-25
+
+Documentation only. Nothing the plugin runs has changed.
+
 ### Documentation
 
 - The README says how to update from an earlier version, and how a project set
   up before 0.2.0 gets the habits catalog.
+- The branching guide describes the protection the origin actually enforces:
+  `main` and `develop` refuse deletion and non-fast-forward pushes.
 
 ## [0.2.0] - 2026-10-24
 
