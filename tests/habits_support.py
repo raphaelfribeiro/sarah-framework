@@ -34,13 +34,14 @@ HOOK = "#!/bin/sh\n# payload body\nexit 0\n"
 def make_plugin(base, habits=None, version="0.2.0"):
     """Build a plugin root holding the given habits.
 
-    habits maps a name to {"files": {rel: text}, "settings": [...], "requires": [...]}.
+    habits maps a name to {"files": {rel: text}, "settings": [...], "requires": [...], "ask": [...]}.
     """
     plugin = Path(base) / "plugin"
     (plugin / ".claude-plugin").mkdir(parents=True)
     (plugin / ".claude-plugin" / "plugin.json").write_text(json.dumps({"name": "sarah", "version": version}))
     for name, spec in (habits or {}).items():
         payload = plugin / "skills" / "sarah-init" / "habits" / name
+        payload.mkdir(parents=True, exist_ok=True)
         for rel, text in spec.get("files", {}).items():
             target = payload / "files" / rel
             target.parent.mkdir(parents=True, exist_ok=True)
@@ -48,6 +49,8 @@ def make_plugin(base, habits=None, version="0.2.0"):
             if rel.endswith(".sh"):
                 target.chmod(0o755)
         meta = {"description": "test habit", "requires": spec.get("requires", []), "settings": spec.get("settings", [])}
+        if "ask" in spec:
+            meta["ask"] = spec["ask"]
         (payload / "habit.json").write_text(json.dumps(meta))
     return plugin
 

@@ -15,10 +15,23 @@ Usage:
     habits.py [--project DIR] [--plugin-root DIR] apply  [--resolve PATH=ACTION] [HABIT ...]
     habits.py [--project DIR] [--plugin-root DIR] remove [HABIT ...]
     habits.py [--project DIR] [--plugin-root DIR] status
+    habits.py [--project DIR] [--plugin-root DIR] plan|apply --none
+    habits.py [--project DIR] grant add ACTION --scope SCOPE --quote WORDS
+    habits.py [--project DIR] grant revoke ACTION [--scope SCOPE]
+    habits.py [--project DIR] grant list
+    habits.py [--project DIR] grant allow [--write]
 
 `plan` writes nothing and lists, one action per line, exactly what `apply` (or
 `remove`, with --remove) would do. `apply` and `remove` act on the habits named
-and leave every other habit alone. Naming no habit changes nothing.
+and leave every other habit alone. Naming no habit changes nothing; `apply --none`
+is the explicit way to record that the user declined everything.
+
+Autonomy grants (ADR-010) are rows in the Autonomy section of sarah/habits.md.
+A row needs the user's quoted words. An always-asked action (destructive, money,
+credentials) can never be granted. `grant allow` only shows the allow rules a
+grant implies; `--write` puts them in .claude/settings.local.json, the user's
+personal file, and nothing else in this script ever writes an `allow` rule.
+A payload may declare `ask` rules, which only tighten.
 
 Conflicts are never resolved silently. A stamped file the user edited, or an
 unstamped file already at a target path, is reported and left as it is until the
@@ -49,6 +62,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path, PurePosixPath
 
 NAME = re.compile(r"[a-z0-9_][a-z0-9_-]{0,39}")
@@ -62,12 +76,32 @@ STAMP = re.compile(rb"# sarah-habit: ([a-z0-9_][a-z0-9_-]*) (\S+) sha256:([0-9a-
 PREFIXES = ("sarah/hooks/", ".github/workflows/sarah-")
 
 SETTINGS = ".claude/settings.json"
+SETTINGS_LOCAL = ".claude/settings.local.json"
 HABITS_MD = "sarah/habits.md"
 GITIGNORE = ".gitignore"
 IGNORE_LINE = "sarah/.local/"
 REQUIRES = ("git", "gh", "remote")
 SECTIONS = ("Chosen", "Settings", "Conversation defaults", "Tracker", "Autonomy", "Manifest", "Exceptions")
 TMP_PREFIX = ".sarah-tmp-"
+
+# A payload may tighten permissions and never loosen them.
+FORBIDDEN_KEYS = ("allow", "deny", "defaultMode", "permissions")
+ASK_RULE = re.compile(r"(Bash|Read|Edit|Write)\([^()\r\n]+\)")
+GRANT_TEXT = {
+    "action": re.compile(r"[A-Za-z0-9][A-Za-z0-9 ._/*-]{0,59}"),
+    "scope": re.compile(r"[A-Za-z0-9][A-Za-z0-9 ._/*:@-]{0,79}"),
+}
+HOST = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,62}")
+GRANT_HEAD = ["| action | scope | granted | said |", "| --- | --- | --- | --- |"]
+DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+QUOTE_MAX = 200
+# Words that put an action on the fixed always-ask list. The list itself is the
+# `ask` rules of the always-ask payload; this only stops a grant for one.
+ALWAYS_ASKED_WORDS = frozenset("""
+delete deleting deletion destroy rm force forced forcepush rewrite rewriting history rebase amend
+spend spending money pay payment purchase buy
+password passwords credential credentials secret secrets token tokens key keys
+""".split())
 
 RESOLUTIONS = {"edited": ("overwrite", "keep"), "unmanaged": ("adopt", "wrap", "skip")}
 
@@ -302,6 +336,20 @@ class HabitsFile:
         keep = [l for l in (self.body("Settings") or []) if not re.fullmatch(r"- gitignore: \w+", l.strip())]
         self.set_body("Settings", keep + ([f"- gitignore: {value}"] if value else []))
 
+    def records(self, prefix):
+        """The values of `- <prefix>: value` lines in Settings: what the engine
+        added to a settings file, so that it removes only that."""
+        out = []
+        for line in self.body("Settings") or []:
+            m = re.fullmatch(rf"- {prefix}: (.+)", line.strip())
+            if m and m.group(1) not in out:
+                out.append(m.group(1))
+        return out
+
+    def set_records(self, prefix, values):
+        keep = [l for l in (self.body("Settings") or []) if not re.fullmatch(rf"- {prefix}: .+", l.strip())]
+        self.set_body("Settings", keep + [f"- {prefix}: {v}" for v in values])
+
     def state(self):
         return (self.chosen, self.rows, self.gitignore)
 
@@ -329,18 +377,20 @@ def load_habits_md(root: Path):
     return HabitsFile(data.decode("utf-8", errors="replace")), True
 
 
-def compose_habits_md(habits: HabitsFile, chosen, rows, gitignore) -> HabitsFile:
+def compose_habits_md(habits: HabitsFile, chosen, rows, gitignore, records=None) -> HabitsFile:
     habits.ensure_sections()
     habits.set_body("Chosen", [f"- {c}" for c in chosen])
     habits.set_body("Manifest", render_manifest(rows).splitlines())
     habits.set_gitignore(gitignore)
+    for prefix, values in (records or {}).items():
+        habits.set_records(prefix, values)
     return habits
 
 
 # --- settings.json -----------------------------------------------------------
 
 
-def read_settings(path: Path):
+def read_settings(path: Path, label: str = SETTINGS):
     """(object, had_bom, existed). Invalid content is Refused, never replaced."""
     data = read_file(path)
     if data is None:
@@ -350,9 +400,9 @@ def read_settings(path: Path):
         text = data.decode("utf-8-sig")
         obj = json.loads(text) if text.strip() else {}
     except (UnicodeDecodeError, ValueError) as e:
-        raise Refused(f"{SETTINGS} is not valid JSON ({e}); fix it by hand, nothing was changed")
+        raise Refused(f"{label} is not valid JSON ({e}); fix it by hand, nothing was changed")
     if not isinstance(obj, dict):
-        raise Refused(f"{SETTINGS} is not a JSON object; fix it by hand, nothing was changed")
+        raise Refused(f"{label} is not a JSON object; fix it by hand, nothing was changed")
     return obj, bom, True
 
 
@@ -434,6 +484,54 @@ def remove_settings(obj, habit):
     return obj, removed
 
 
+def _perm_list(obj, kind, create, label=SETTINGS):
+    perms = obj.get("permissions")
+    if perms is None:
+        if not create:
+            return None
+        perms = obj["permissions"] = {}
+    if not isinstance(perms, dict):
+        raise Refused(f"{label}: `permissions` is not an object; fix it by hand")
+    rules = perms.get(kind)
+    if rules is None:
+        if not create:
+            return None
+        rules = perms[kind] = []
+    if not isinstance(rules, list):
+        raise Refused(f"{label}: permissions.{kind} is not a list; fix it by hand")
+    return rules
+
+
+def add_rules(obj, kind, wanted, label=SETTINGS):
+    """Append the rules not already present; returns the ones added. Nothing the
+    user wrote is moved or rewritten."""
+    added = []
+    rules = _perm_list(obj, kind, create=False, label=label)
+    for rule in wanted:
+        if rules is not None and rule in rules:
+            continue
+        rules = _perm_list(obj, kind, create=True, label=label) if rules is None else rules
+        rules.append(rule)
+        added.append(rule)
+    return added
+
+
+def drop_rules(obj, kind, rules_to_drop, label=SETTINGS):
+    """Remove exactly these rules, then any container that is left empty."""
+    rules = _perm_list(obj, kind, create=False, label=label)
+    if rules is None:
+        return 0
+    keep = [r for r in rules if r not in rules_to_drop]
+    gone = len(rules) - len(keep)
+    if keep:
+        obj["permissions"][kind] = keep
+    else:
+        del obj["permissions"][kind]
+        if not obj["permissions"]:
+            del obj["permissions"]
+    return gone
+
+
 def command_for(rel: str) -> str:
     # Absolute through the environment, never relative: a hook run from a
     # subdirectory would otherwise fail open with exit 127.
@@ -444,8 +542,8 @@ def command_for(rel: str) -> str:
 
 
 class Payload:
-    def __init__(self, name, files, settings, requires):
-        self.name, self.files, self.settings, self.requires = name, files, settings, requires
+    def __init__(self, name, files, settings, requires, ask=()):
+        self.name, self.files, self.settings, self.requires, self.ask = name, files, settings, requires, list(ask)
 
 
 def plugin_version(plugin: Path) -> str:
@@ -467,6 +565,12 @@ def load_payload(plugin: Path, name: str) -> Payload:
         meta = json.loads((base / "habit.json").read_text())
     except (OSError, ValueError) as e:
         raise Refused(f"habit {name}: cannot read habit.json ({e})")
+    for key in FORBIDDEN_KEYS:
+        if key in meta:
+            raise Refused(f"habit {name}: a payload may only add `ask` rules, never `{key}`")
+    ask = meta.get("ask", [])
+    if not isinstance(ask, list) or any(not isinstance(r, str) or not ASK_RULE.fullmatch(r) for r in ask):
+        raise Refused(f"habit {name}: `ask` must list rules like Bash(rm -rf *), one per entry")
     requires = meta.get("requires", [])
     if not isinstance(requires, list) or any(r not in REQUIRES for r in requires):
         raise Refused(f"habit {name}: `requires` may only list {', '.join(REQUIRES)}")
@@ -490,7 +594,7 @@ def load_payload(plugin: Path, name: str) -> Payload:
         if s["file"] not in files:
             raise Refused(f"habit {name}: settings entry names {s['file']}, which the payload does not ship")
         settings.append((s["event"], s.get("matcher") or "", s["file"]))
-    return Payload(name, files, settings, requires)
+    return Payload(name, files, settings, requires, dict.fromkeys(ask))
 
 
 def unmet(root: Path, requirement: str) -> bool:
@@ -520,6 +624,8 @@ class Plan:
         self.ignore_action = None
         self.pending = False   # a conflict is waiting for the user
         self.warnings = []
+        self.ask_added = []    # (habit, rule) written to permissions.ask by this run
+        self.records = {}      # Settings lines the engine owns, by prefix
 
 
 def parse_resolutions(items):
@@ -654,10 +760,20 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
     plan.rows = final_rows
     plan.chosen = chosen + [p.name for p in payloads if p.name not in chosen]
 
-    if wanted_settings:
+    asks_wanted = [(p.name, r) for p in payloads for r in p.ask]
+    old_asks = habits_md.records("ask")
+    plan.records = {"ask": list(old_asks)}
+    if wanted_settings or asks_wanted:
         obj, bom, existed = read_settings(contain(root, SETTINGS))
         before = copy.deepcopy(obj)
         merged = merge_settings(copy.deepcopy(obj), wanted_settings)
+        for habit, rule in asks_wanted:
+            if add_rules(merged, "ask", [rule]):
+                plan.ask_added.append((habit, rule))
+                record = f"{habit} {rule}"
+                if record not in plan.records["ask"]:
+                    plan.records["ask"].append(record)
+                plan.lines.append(f"settings add ask {rule}")
         if merged != before:
             have = set()
             for event, _, command in wanted_settings:
@@ -683,7 +799,8 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
             plan.gitignore = "existing"
 
     new_state = (plan.chosen, plan.rows, plan.gitignore)
-    plan.habits_md = (habits_md, new_state != old_state or not (root / HABITS_MD).exists() and bool(plan.chosen))
+    changed = new_state != old_state or plan.records["ask"] != old_asks
+    plan.habits_md = (habits_md, changed or not (root / HABITS_MD).exists() and bool(plan.chosen))
     if plan.habits_md[1]:
         plan.lines.append("habits.md update")
     return plan
@@ -694,11 +811,11 @@ def execute_apply(root: Path, plan: Plan) -> None:
     any point leaves rows `status` reports as missing and a re-run completes."""
     habits_md, dirty = plan.habits_md
     if dirty:
-        compose_habits_md(habits_md, plan.chosen, plan.rows, plan.gitignore)
+        compose_habits_md(habits_md, plan.chosen, plan.rows, plan.gitignore, plan.records)
         atomic_write(contain(root, HABITS_MD), habits_md.render().encode("utf-8"), 0o644)
     for rel, data, mode, _ in plan.writes:
         atomic_write(contain(root, rel), data, mode)
-    if plan.settings:
+    if plan.settings or plan.ask_added:
         merged, bom = plan.settings_obj
         atomic_write(contain(root, SETTINGS), dump_settings(merged, bom), 0o644)
     if plan.ignore_action == "append":
@@ -739,7 +856,9 @@ def do_remove(root: Path, names, dry: bool):
 
     sp = contain(root, SETTINGS)
     raw = read_file(sp)
-    needs_settings = raw is not None and any(f"sarah/hooks/{n}/".encode() in raw for n in targets)
+    ask_records = habits_md.records("ask")
+    mine = [r.split(" ", 1) for r in ask_records if r.split(" ", 1)[0] in targets]
+    needs_settings = raw is not None and (any(f"sarah/hooks/{n}/".encode() in raw for n in targets) or bool(mine))
     if needs_settings:
         settings_obj, bom, _ = read_settings(sp)   # Refused here aborts before anything is touched
         for n in targets:
@@ -747,6 +866,10 @@ def do_remove(root: Path, names, dry: bool):
             if count:
                 removed_any_setting = True
                 lines.append(f"settings {verb('removed', 'remove')} {n} ({count} entr{'y' if count == 1 else 'ies'})")
+        for _, rule in mine:
+            if drop_rules(settings_obj, "ask", [rule]):
+                removed_any_setting = True
+                lines.append(f"settings {verb('removed', 'remove')} ask {rule}")
 
     for habit, rel, sha in rows:
         if habit not in targets:
@@ -792,7 +915,8 @@ def do_remove(root: Path, names, dry: bool):
                     gp.unlink()
             gitignore = None
         if exists:
-            compose_habits_md(habits_md, left, remaining, gitignore)
+            kept_asks = [r for r in ask_records if r.split(" ", 1)[0] not in targets]
+            compose_habits_md(habits_md, left, remaining, gitignore, {"ask": kept_asks})
             atomic_write(contain(root, HABITS_MD), habits_md.render().encode("utf-8"), 0o644)
     elif any(n in chosen for n in targets):
         lines.append("habits.md update")
@@ -840,12 +964,192 @@ def do_status(root: Path, plugin: Path):
         if wants and f"sarah/hooks/{habit}/".encode() not in raw:
             lines.append(f"missing settings entry for {habit} (run apply again)")
             problems = True
+    for habit in chosen:
+        try:
+            wanted = load_payload(plugin, habit).ask
+        except Refused:
+            continue
+        if wanted:
+            try:
+                have = _perm_list(read_settings(contain(root, SETTINGS))[0], "ask", create=False) or []
+            except Refused as e:
+                lines.append(str(e))
+                problems = True
+                continue
+            for rule in wanted:
+                if rule not in have:
+                    lines.append(f"missing ask rule {rule} for {habit} (run apply again)")
+                    problems = True
     if chosen:
         data = read_file(contain(root, GITIGNORE)) or b""
         if IGNORE_LINE not in [l.strip() for l in data.decode("utf-8", errors="replace").splitlines()]:
             lines.append(f"missing {GITIGNORE} entry {IGNORE_LINE} (run apply again)")
             problems = True
     return lines, problems
+
+
+# --- autonomy grants -----------------------------------------------------------
+
+
+def always_asked(text: str) -> bool:
+    """True when a grant's wording names a destructive, money or credential action."""
+    return bool(set(re.findall(r"[a-z0-9]+", str(text).lower())) & ALWAYS_ASKED_WORDS)
+
+
+def check_grant_text(kind: str, value) -> str:
+    """The value, or Refused. A grant lands in a Markdown table, so a pipe or a
+    newline in it would forge a second row."""
+    text = value.strip() if isinstance(value, str) else ""
+    if kind == "quote":
+        text = " ".join(text.replace("|", "/").split())
+        if not text:
+            raise Refused("a grant needs the user's own words (--quote); nothing was recorded")
+        if len(text) > QUOTE_MAX:
+            raise Refused(f"the quote is over {QUOTE_MAX} characters; give the shortest words that carry the instruction")
+        return text
+    if not GRANT_TEXT[kind].fullmatch(text):
+        raise Refused(f"not a usable {kind}: {value!r} (plain words, no | and no line breaks)")
+    return text
+
+
+def allow_rules(action: str, scope: str):
+    """The allow rules a grant implies, or [] when no pattern exists. Shown to the
+    user as a diff; never written unless the user asks (grant allow --write)."""
+    if action == "push-feature":
+        if scope != "feature/*":
+            raise Refused("push-feature covers feature/* only; it cannot be widened")
+        return [f"Bash(git push {flag}origin feature/*)" for flag in ("", "-u ", "--set-upstream ")]
+    if action == "ssh":
+        if not HOST.fullmatch(scope):
+            raise Refused(f"ssh takes one named host, no wildcards: {scope!r}")
+        return [f"Bash(ssh {scope} *)"]
+    return []
+
+
+def parse_grants(lines):
+    """(rows, warnings, line indexes of rows)."""
+    rows, warnings, where = [], [], []
+    for n, line in enumerate(lines):
+        t = line.strip()
+        if not t.startswith("|"):
+            continue
+        cells = [c.strip() for c in t.strip("|").split("|")]
+        if cells == ["action", "scope", "granted", "said"] or all(re.fullmatch(r"-+", c) for c in cells):
+            continue
+        if len(cells) == 4 and cells[0] and cells[1] and DATE.fullmatch(cells[2]) and cells[3]:
+            rows.append(tuple(cells))
+            where.append(n)
+        else:
+            warnings.append(f"ignored malformed autonomy row {n + 1}")
+    return rows, warnings, where
+
+
+def load_grants(root: Path):
+    habits, exists = load_habits_md(root)
+    body = habits.body("Autonomy") or []
+    rows, warnings, where = parse_grants(body)
+    return habits, exists, body, rows, warnings, where
+
+
+def write_habits(root: Path, habits: HabitsFile):
+    habits.ensure_sections()
+    atomic_write(contain(root, HABITS_MD), habits.render().encode("utf-8"), 0o644)
+
+
+def grant_add(root: Path, action, scope, quote):
+    action, scope, quote = check_grant_text("action", action), check_grant_text("scope", scope), check_grant_text("quote", quote)
+    if always_asked(action):
+        raise Refused(f"That one is always asked, whatever you allow: {action}. I will keep asking.")
+    allow_rules(action, scope)  # a scope the pattern cannot take is refused before anything is written
+    habits, _, body, rows, _, where = load_grants(root)
+    if any(r[0] == action and r[1] == scope for r in rows):
+        return [f"Already allowed: {action} {scope}."]
+    row = f"| {action} | {scope} | {date.today().isoformat()} | {quote} |"
+    if where:
+        body = body[: where[-1] + 1] + [row] + body[where[-1] + 1:]
+    else:
+        body = body + ([""] if body else []) + GRANT_HEAD + [row]
+    habits.ensure_sections()
+    habits.set_body("Autonomy", body)
+    write_habits(root, habits)
+    return [f'Allowed from now on: {action} {scope} (you said: "{quote}").']
+
+
+def read_local(root: Path):
+    return read_settings(contain(root, SETTINGS_LOCAL), SETTINGS_LOCAL)
+
+
+def grant_revoke(root: Path, action, scope):
+    habits, _, body, rows, _, where = load_grants(root)
+    hit = [(i, r) for i, r in zip(where, rows) if r[0] == action and (scope is None or r[1] == scope)]
+    if not hit:
+        raise Refused(f"no such grant: {action}{' ' + scope if scope else ''}")
+    ours = habits.records("allow")
+    drop = [rule for _, r in hit for rule in allow_rules_safe(r[0], r[1]) if rule in ours]
+    lines = []
+    if drop:
+        obj, bom, _ = read_local(root)   # Refused here aborts before the row is touched
+        drop_rules(obj, "allow", drop, SETTINGS_LOCAL)
+        path = contain(root, SETTINGS_LOCAL)
+        if obj == {}:
+            path.unlink()
+            prune_dirs(root, path)
+        else:
+            atomic_write(path, dump_settings(obj, bom), 0o644)
+        habits.set_records("allow", [r for r in ours if r not in drop])
+        lines += [f"settings.local.json: removed {rule}" for rule in drop]
+    gone = {i for i, _ in hit}
+    habits.set_body("Autonomy", [l for n, l in enumerate(body) if n not in gone])
+    write_habits(root, habits)
+    return lines + [f"Revoked: {', '.join(f'{r[0]} {r[1]}' for _, r in hit)}."]
+
+
+def allow_rules_safe(action, scope):
+    try:
+        return allow_rules(action, scope)
+    except Refused:
+        return []
+
+
+def grant_list(root: Path):
+    _, _, _, rows, warnings, _ = load_grants(root)
+    if not rows:
+        return warnings + ["grants: none"]
+    return warnings + [f"{a} | {s} | {d}" for a, s, d, _ in rows]
+
+
+def grant_allow(root: Path, write: bool):
+    habits, _, _, rows, warnings, _ = load_grants(root)
+    obj, bom, _ = read_local(root)
+    have = _perm_list(obj, "allow", create=False, label=SETTINGS_LOCAL) or []
+    lines = list(warnings)
+    new = []
+    for action, scope, _, _ in rows:
+        rules = allow_rules_safe(action, scope)
+        if not rules:
+            lines.append(f"no pattern for {action} {scope}: nothing to add; the platform asks each time")
+        new += [r for r in rules if r not in have and r not in new]
+    if not new:
+        return lines + ["nothing to add"]
+    lines.append(f"{SETTINGS_LOCAL} (your personal file, not shared)")
+    lines += [f"+ allow {r}" for r in new]
+    if not write:
+        return lines + ["shown only; nothing was written (add --write after the user says yes)"]
+    add_rules(obj, "allow", new, SETTINGS_LOCAL)
+    atomic_write(contain(root, SETTINGS_LOCAL), dump_settings(obj, bom), 0o644)
+    habits.ensure_sections()
+    habits.set_records("allow", habits.records("allow") + [r for r in new if r not in habits.records("allow")])
+    write_habits(root, habits)
+    return lines + ["written"]
+
+
+def declined_all(root: Path, dry: bool):
+    """Record that the user chose no habit, so a re-run knows. Nothing else."""
+    if (root / HABITS_MD).exists():
+        return ["nothing to do"]
+    if not dry:
+        write_habits(root, HabitsFile())
+    return ["create sarah/habits.md (no habits chosen)"]
 
 
 # --- command line ------------------------------------------------------------
@@ -861,9 +1165,22 @@ def build_parser():
         sp.add_argument("habits", nargs="*")
         if name != "remove":
             sp.add_argument("--resolve", action="append", default=[], metavar="PATH=ACTION")
+            sp.add_argument("--none", action="store_true", help="record that the user declined every habit")
         if name == "plan":
             sp.add_argument("--remove", action="store_true", help="plan a removal instead of an install")
     sub.add_parser("status")
+    gp = sub.add_parser("grant", help="autonomy grants (ADR-010)")
+    verbs = gp.add_subparsers(dest="verb", required=True)
+    add = verbs.add_parser("add")
+    add.add_argument("action")
+    add.add_argument("--scope", required=True)
+    add.add_argument("--quote", default="", help="the user's own words, quoted")
+    rev = verbs.add_parser("revoke")
+    rev.add_argument("action")
+    rev.add_argument("--scope")
+    verbs.add_parser("list")
+    al = verbs.add_parser("allow", help="show the allow rules the grants imply; --write puts them in settings.local.json")
+    al.add_argument("--write", action="store_true")
     return ap
 
 
@@ -890,6 +1207,23 @@ def main(argv=None) -> int:
             lines, pending = do_remove(root, args.habits, dry=args.command == "plan")
             emit(lines or ["nothing to do"])
             return 3 if pending and args.command == "remove" else 0
+
+        if args.command == "grant":
+            if args.verb == "add":
+                emit(grant_add(root, args.action, args.scope, args.quote))
+            elif args.verb == "revoke":
+                emit(grant_revoke(root, args.action, args.scope))
+            elif args.verb == "list":
+                emit(grant_list(root))
+            else:
+                emit(grant_allow(root, args.write))
+            return 0
+
+        if args.none:
+            if args.habits:
+                raise Refused("--none declines everything; it cannot be combined with habit names")
+            emit(declined_all(root, dry=args.command == "plan"))
+            return 0
 
         plan = build_apply_plan(root, plugin, args.habits, parse_resolutions(args.resolve))
         emit(plan.warnings)
