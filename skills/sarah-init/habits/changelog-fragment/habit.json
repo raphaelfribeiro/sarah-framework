@@ -1,0 +1,7 @@
+{
+  "description": "Changelog fragment per delivery (R14). A PreToolUse check on Bash that refuses gh pr create unless the branch adds a sarah/changelog/ entry with a User-facing line. May block; exceptions per R16.",
+  "requires": ["git", "gh"],
+  "settings": [
+    {"event": "PreToolUse", "matcher": "Bash", "file": "sarah/hooks/changelog-fragment/guard.sh"}
+  ]
+}

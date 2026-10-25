@@ -7,19 +7,19 @@ description: Orient before doing any development work in a S.A.R.A.H. project. R
 
 Skills, Agents, Reviews & Adaptive Hierarchy. The machines write the code. You command the mission.
 
-This skill runs before the work, not instead of it. It costs a few hundred tokens and prevents the two failures that make AI-assisted development untrustworthy: acting without knowing the system, and applying heavy process to light work.
+This skill runs before the work, not instead of it. It prevents the two failures that make AI-assisted development untrustworthy: acting without knowing the system, and applying heavy process to light work.
 
 ## 1. Orient
 
 Read, in this order, and read **only** these:
 
 1. `sarah/state.md` — the index: what is in flight, and what each piece waits on.
-2. `sarah/state/<slug>.md` for the task this request belongs to, if one exists. **Only that one.** Reading every task file is how a five-task project starts costing five times as much to orient.
+2. `sarah/state/<slug>.md` for the task this request belongs to, if one exists. **Only that one.** Reading every task file makes orientation cost grow with the task count.
 3. `ARCHI.md` — the architecture map, sections relevant to the request.
 
 **Work that is starting gets its file before it starts.** Create `sarah/state/<branch-slug>.md` from `references/task-template.md`, and add its row to the index — at Level 2 and above, with the itinerary the user just approved. One task, one file, one branch, which is why parallel work no longer collides. A task with no file is invisible to the index, to `/sarah-status` and to tomorrow's session, and this step is the one that gets skipped.
 
-Never read a full spec, PRD, or architecture document as a routine step. If a routine step needs more than roughly 30k tokens of input, it is the wrong step — narrow it.
+Never read a full spec, PRD or architecture document routinely. If a routine step needs more than roughly 30k tokens of input, it is the wrong step — narrow it.
 
 If `sarah/state.md` does not exist, this project is not initialized. Say so and offer `/sarah-init`. Do not silently invent state.
 
@@ -34,7 +34,7 @@ Classify before acting. Getting this wrong in either direction is the most expen
 | **2 — Medium** | Feature touching several components, a new boundary, or a schema change. | Lean spec + plan. Phases 5–6 in full, phases 1–4 abbreviated to what the change actually needs. |
 | **3 — Large** | New product, new subsystem, or anything with unsettled requirements. | Full pipeline, all phases, all gates. |
 
-When the level is genuinely ambiguous, ask the user with the two candidate levels and what each costs. Do not guess upward to be safe: over-classifying is the single most common failure of workflow frameworks.
+When the level is genuinely ambiguous, ask the user with the two candidate levels and what each costs. Do not guess upward to be safe: over-classifying is the most common failure here.
 
 Record the level in `sarah/state.md`.
 
@@ -54,7 +54,7 @@ Load the phase skill. It brings its own specialists. **Never load the full roste
 
 **At Level 2 and above, propose the itinerary and let the user set it.** Read `references/itinerary.md` and present all eight steps as a table: in or out, the reason *from this request* rather than from the level, and the cost in the user's time. Then stop and let them answer. The level proposes; the user disposes, including dropping a step you marked in — record the choice in `sarah/state.md` and do not argue. Documentation is the one row that cannot be dropped.
 
-At Level 0 and 1, skip the table. Announce the route in one line, naming any step stepped over. Eight rows to justify a typo fix is the ceremony this framework exists to prevent.
+At Level 0 and 1, skip the table. Announce the route in one line, naming any step stepped over. Eight rows to justify a typo fix is the ceremony to avoid.
 
 Two requests do not belong on this ladder at all:
 
@@ -73,7 +73,7 @@ These hold at every level unless the row says otherwise. Full text: `docs/qualit
 4. **The author never reviews.** Review happens in a separate context before merge.
 5. **Documented and committed is part of done.** The task's file always; at Level 2+ also `ARCHI.md`, `README.md` and `sarah/changelog/` when each applies. Every phase ends with a commit on a `feature/*` branch. If it isn't documented, it isn't done — if it isn't committed, it didn't happen.
 
-Every gate has a guardian. Every merge has a human behind it.
+Every gate has a guardian. Every merge has a human behind it, unless the project opted in to the gitflow habit: then a feature branch merges on green CI (ADR-010).
 
 ## 5. How decisions get made
 

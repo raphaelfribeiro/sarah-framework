@@ -1,0 +1,5 @@
+{
+  "description": "Shared library for installed agreements: exception lookup (R16), hook input reading, command splitting. Registers nothing. Installed together with any habit that blocks.",
+  "requires": [],
+  "settings": []
+}
