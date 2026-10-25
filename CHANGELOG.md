@@ -76,7 +76,8 @@ nothing can block you.
   judge the usual invocation forms; `sh -c`, `eval`, `xargs`, `sudo` and
   variables are not parsed, and an agent determined to get round them can.
 - **The tracker has never met the live Trello API.** It is tested against a local
-  stub; a smoke test on a throwaway board comes before any claim that it works.
+  stub and ships untested against the real service; a smoke test on a throwaway
+  board comes before any claim that it works.
 - **A forced platform model fallback is not reported**, and with
   `CLAUDE_CODE_EFFORT_LEVEL` set the Agent tool loses per-call `effort`, so every
   executor runs at that level. See [operating](docs/operating.md).

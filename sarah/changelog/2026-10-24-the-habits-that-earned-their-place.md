@@ -57,8 +57,8 @@ raises the bar for a mistaken agent and is no boundary against a hostile one.
 ## Deliberately not done
 
 - **The tracker has not been smoke-tested against live Trello.** Endpoints and
-  fields were written from memory and tested against a stub. That test, with the
-  maintainer's own credentials set outside the session, comes before the release.
+  fields were written from memory and tested against a stub. The maintainer chose
+  to release without that test; it ships as a known limit.
 - **A forced model fallback is not reported**, and `CLAUDE_CODE_EFFORT_LEVEL`
   removes per-call effort. Both are written down in `docs/operating.md`.
 - **No study measures whether the habits help.** The pilot is the first reading
