@@ -109,32 +109,8 @@ a=$(HOOK_SOURCE=startup run_hook "$p" "$STUB")
 b=$(HOOK_SOURCE=compact run_hook "$p" "$STUB")
 assert_eq "source compact prints what startup prints" "$a" "$b"
 
-# --- budget (US6): every optional line present ------------------------------
-
-p=$(mk_project worst)
-long=$(printf 'y%.0s' $(seq 1 300))
-cat >"$p/sarah/state.md" <<STATE
-# S.A.R.A.H. state
-
-| | |
-| --- | --- |
-| **Default level** | 3 |
-| **Phase** | $long |
-| **Current task** | $long |
-
-## In flight
-
-| Task | File | Phase | Level | Waiting on | Since |
-| --- | --- | --- | --- | --- | --- |
-| A | \`sarah/state/a.md\` | implement | 3 | nothing | 2026-01-01 |
-| B | \`sarah/state/b.md\` | implement | 3 | nothing | 2026-01-01 |
-STATE
-pad "$p/sarah/state.md" 20000
-for i in 1 2 3 4 5 6; do f="$p/sarah/state/task-with-a-fairly-long-name-$i.md"; : >"$f"; pad "$f" 30000; done
-out=$(run_hook "$p" "$STUB")
-t=$(tokens "$out")
-assert_le "worst-case hook output in tokens (chars/4)" "$t" 400
-assert_contains "worst case still carries the index line" "$out" "Size: sarah/state.md"
+# The 400-token budget, with every optional line present, is asserted in
+# test_session_start_habits.sh: it needs the habit lines to be meaningful.
 
 # --- exit 0 on every path (US9) ---------------------------------------------
 
