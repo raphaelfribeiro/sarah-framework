@@ -1,6 +1,6 @@
 # Habits that earned their place — an opt-in catalog offered by `/sarah-init`
 
-**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** review passed; push and PR next · **Updated:** 2026-10-24
+**Branch:** `feature/the-habits-that-earned-their-place` · **Level:** 3 · **Phase:** merged into `develop`; release next · **Updated:** 2026-10-24
 
 ## The problem, as agreed
 
@@ -220,8 +220,12 @@ The new patterns listed in the UX spec §9 were approved with the design.
 
 ## Next
 
-1. Rewrite the unpublished range's author, push, open the PR against `develop`.
-2. The release cut, on the user's yes.
+Done: the unpublished range carries the GitHub noreply address and no session
+links; pushed, PR #1 into `develop`, CI green, merged on green as the user
+authorised. On the first CI run the machine-path guard read the runner's own
+bytecode; it now reads tracked files only.
+
+1. The release cut and the `v0.2.0` tag, on the user's yes.
 
 Test-plan section 10 finding 2 (the Premises format) is resolved by the task
 template's `## Premises` section. Architecture D6's 8,768-byte claim is left as
