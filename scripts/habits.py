@@ -112,7 +112,7 @@ QUOTE_MAX = 200
 # Words that put an action on the fixed always-ask list. The list itself is the
 # `ask` rules of the always-ask payload; this only stops a grant for one.
 ALWAYS_ASKED_WORDS = frozenset("""
-delete deleting deletion destroy rm force forced forcepush rewrite rewriting history rebase amend
+delete deleting deletion destroy wipe drop rm force forced forcepush rewrite rewriting history rebase amend
 spend spending money pay payment purchase buy
 password passwords credential credentials secret secrets token tokens key keys
 """.split())
@@ -1234,11 +1234,22 @@ def check_grant_text(kind: str, value) -> str:
 
 def allow_rules(action: str, scope: str):
     """The allow rules a grant implies, or [] when no pattern exists. Shown to the
-    user as a diff; never written unless the user asks (grant allow --write)."""
+    user as a diff; never written unless the user asks (grant allow --write).
+
+    push-feature is a pattern on text, and `*` also matches a second refspec
+    (`feature/x:main`, `feature/x main`). The always-ask list asks on those
+    forms, but a pattern cannot prove the scope: the gitflow guard and
+    server-side branch protection are the real controls (ADR-010)."""
     if action == "push-feature":
         if scope != "feature/*":
-            raise Refused("push-feature covers feature/* only; it cannot be widened")
+            raise Refused("push-feature is granted for feature/* only")
         return [f"Bash(git push {flag}origin feature/*)" for flag in ("", "-u ", "--set-upstream ")]
+    if action == "merge-on-green":
+        # A recorded, revocable row and no allow rule: the gitflow guard and CI do
+        # the checking, the row is what makes merging unattended legitimate.
+        if scope != "feature/*":
+            raise Refused("merge-on-green covers feature/* only")
+        return []
     if action == "ssh":
         if not HOST.fullmatch(scope):
             raise Refused(f"ssh takes one named host, no wildcards: {scope!r}")
