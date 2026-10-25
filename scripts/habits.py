@@ -718,6 +718,7 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
     owner = {rel: (habit, sha) for habit, rel, sha in rows}
 
     new_rows_for = {}
+    adopt_records = {}   # files the user chose to let a habit own although it did not write them
     wanted_settings = []
     for p in payloads:
         mine = {rel: sha for habit, rel, sha in rows if habit == p.name}
@@ -774,6 +775,7 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
             else:  # unmanaged
                 if forced == "adopt":
                     plan.lines.append(f"adopt {target}")
+                    adopt_records[target] = f"{p.name} {target}"
                     out_rows[target] = digest(data)
                 elif forced == "skip":
                     plan.lines.append(f"skip {target} (yours, left alone)")
@@ -806,7 +808,11 @@ def build_apply_plan(root: Path, plugin: Path, names, resolutions) -> Plan:
 
     asks_wanted = [(p.name, r) for p in payloads for r in p.ask]
     old_asks = habits_md.records("ask")
-    plan.records = {"ask": list(old_asks), "key": habits_md.records("key"), "include": habits_md.records("include")}
+    plan.records = {"ask": list(old_asks), "key": habits_md.records("key"), "include": habits_md.records("include"),
+                    "adopt": habits_md.records("adopt")}
+    for rel, record in adopt_records.items():
+        if record not in plan.records["adopt"]:
+            plan.records["adopt"].append(record)
     old_records = copy.deepcopy(plan.records)
     keys_wanted = [(p.name, *k) for p in payloads for k in p.keys]
     if wanted_settings or asks_wanted or keys_wanted:
@@ -926,8 +932,68 @@ def prune_dirs(root: Path, path: Path) -> None:
         parent = parent.parent
 
 
-def do_remove(root: Path, names, dry: bool):
-    """(lines, pending). Deletes only manifest files whose hash still matches."""
+def declared_key(payload, spec: str):
+    """The (root, leaf, value) a `- key:` record claims, when the habit's own
+    payload declares exactly that (or, with no payload to check, when it is at
+    least a well-formed key under an allowed root). None otherwise."""
+    path, _, raw_value = spec.partition("=")
+    m = KEY_PATH.fullmatch(path)
+    if not m or m.group(1) not in KEY_ROOTS:
+        return None
+    try:
+        value = json.loads(raw_value)
+    except ValueError:
+        return None
+    if payload is None:
+        return (m.group(1), m.group(2), value)
+    for root_key, leaf, declared in payload.keys:
+        if (root_key, leaf) == (m.group(1), m.group(2)) and declared == value and type(declared) is type(value):
+            return (root_key, leaf, value)
+    return None
+
+
+def trusted_records(habits_md, targets, payloads, lines):
+    """The ask, key and include records of the habits being removed that the
+    habit's own payload backs. habits.md is a committed file, so a record is a
+    claim: one that does not match is ignored and reported, never acted on."""
+    ask, keys, include = [], [], []
+    for r in habits_md.records("ask"):
+        habit, _, rule = r.partition(" ")
+        if habit not in targets:
+            continue
+        payload = payloads.get(habit)
+        if ASK_RULE.fullmatch(rule) and (payload is None or rule in payload.ask):
+            ask.append((habit, rule))
+        else:
+            lines.append(f"ignored ask record {rule!r} for {habit} (not in the habit's own list)")
+    for r in habits_md.records("key"):
+        habit, _, spec = r.partition(" ")
+        if habit not in targets:
+            continue
+        if declared_key(payloads.get(habit), spec):
+            keys.append((habit, spec))
+        else:
+            lines.append(f"ignored key record {spec!r} for {habit} (not a key the habit declares)")
+    for r in habits_md.records("include"):
+        habit, _, line = r.partition(" ")
+        if habit not in targets:
+            continue
+        payload = payloads.get(habit)
+        try:
+            check_include(habit, line)
+            ok = payload is None or line in payload.include
+        except Refused:
+            ok = False
+        if ok:
+            include.append((habit, line))
+        else:
+            lines.append(f"ignored include record {line!r} for {habit} (not a line the habit declares)")
+    return ask, keys, include
+
+
+def do_remove(root: Path, plugin: Path, names, dry: bool):
+    """(lines, pending). Deletes only manifest files whose hash still matches and
+    that this habit stamped or the user let it adopt."""
     lines, pending = [], False
     habits_md, exists = load_habits_md(root)
     chosen, rows, gitignore = habits_md.state()
@@ -942,8 +1008,13 @@ def do_remove(root: Path, names, dry: bool):
     sp = contain(root, SETTINGS)
     raw = read_file(sp)
     ask_records = habits_md.records("ask")
-    mine = [r.split(" ", 1) for r in ask_records if r.split(" ", 1)[0] in targets]
-    key_records = [r.split(" ", 1) for r in habits_md.records("key") if r.split(" ", 1)[0] in targets]
+    payloads = {}
+    for n in targets:
+        try:
+            payloads[n] = load_payload(plugin, n)
+        except Refused:
+            payloads[n] = None   # a habit this plugin no longer ships: records get the syntax checks only
+    mine, key_records, mine_include_pairs = trusted_records(habits_md, targets, payloads, lines)
     needs_settings = raw is not None and (any(f"sarah/hooks/{n}/".encode() in raw for n in targets) or bool(mine) or bool(key_records))
     if needs_settings:
         settings_obj, bom, _ = read_settings(sp)   # Refused here aborts before anything is touched
@@ -975,7 +1046,7 @@ def do_remove(root: Path, names, dry: bool):
                 pending = True
 
     include_records = habits_md.records("include")
-    mine_include = [r.split(" ", 1)[1] for r in include_records if r.split(" ", 1)[0] in targets and " " in r]
+    mine_include = [line for _, line in mine_include_pairs]
     inc_path = contain(root, WORKTREEINCLUDE)
     inc_data = read_file(inc_path) if mine_include else None
     inc_left = None
@@ -986,6 +1057,7 @@ def do_remove(root: Path, names, dry: bool):
                 inc_left = [l for l in inc_left if l.strip() != line]
                 lines.append(f"{verb('removed', 'remove')} {WORKTREEINCLUDE} line {line}")
 
+    adopted = habits_md.records("adopt")
     for habit, rel, sha in rows:
         if habit not in targets:
             continue
@@ -1001,6 +1073,10 @@ def do_remove(root: Path, names, dry: bool):
             lines.append(f"gone {rel}")
         elif not path.is_file():
             lines.append(f"kept {rel} not a regular file")
+            pending = True
+        elif (content_digest(data) == sha or digest(data) == sha) and not (
+                (split_stamp(data)[0] or {}).get("habit") == habit or f"{habit} {rel}" in adopted):
+            lines.append(f"kept {rel} not stamped by {habit} and not adopted (yours; no longer managed)")
             pending = True
         elif content_digest(data) == sha or digest(data) == sha:
             lines.append(f"{verb('removed', 'remove')} {rel}")
@@ -1038,7 +1114,8 @@ def do_remove(root: Path, names, dry: bool):
             kept_asks = [r for r in ask_records if r.split(" ", 1)[0] not in targets]
             kept_keys = [r for r in habits_md.records("key") if r.split(" ", 1)[0] not in targets]
             kept_include = [r for r in include_records if r.split(" ", 1)[0] not in targets]
-            compose_habits_md(habits_md, left, remaining, gitignore, {"ask": kept_asks, "key": kept_keys, "include": kept_include})
+            kept_adopt = [r for r in adopted if r.split(" ", 1)[0] not in targets]
+            compose_habits_md(habits_md, left, remaining, gitignore, {"ask": kept_asks, "key": kept_keys, "include": kept_include, "adopt": kept_adopt})
             atomic_write(contain(root, HABITS_MD), habits_md.render().encode("utf-8"), 0o644)
     elif any(n in chosen for n in targets):
         lines.append("habits.md update")
@@ -1347,7 +1424,7 @@ def main(argv=None) -> int:
             return 1 if problems else 0
 
         if args.command == "remove" or (args.command == "plan" and args.remove):
-            lines, pending = do_remove(root, args.habits, dry=args.command == "plan")
+            lines, pending = do_remove(root, plugin, args.habits, dry=args.command == "plan")
             emit(lines or ["nothing to do"])
             return 3 if pending and args.command == "remove" else 0
 
