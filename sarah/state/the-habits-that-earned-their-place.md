@@ -108,8 +108,8 @@ probes **all held** on CLI 2.1.308, so no fallback applies.
 | 3 | 11+12 exceptions, gitflow, changelog fragment | `feature/habits-s11-exceptions-gitflow` | merged (9e7fdb7) |
 | 4 | 15 tracker | `feature/habits-s15-tracker` | merged |
 | 4 | 14 Stop hook | `feature/habits-s14-no-idle` | merged |
-| 4 | 13 dispatch guard | `feature/habits-s13-dispatch-guard` | building |
-| 4 | 3b session-start habit lines (Habits, Tracker, Audit, Exceptions) | `feature/habits-s03b-session-lines` | building |
+| 4 | 13 dispatch guard | `feature/habits-s13-dispatch-guard` | merged (babeda3) |
+| 4 | 3b session-start habit lines (Habits, Tracker, Audit, Exceptions) | `feature/habits-s03b-session-lines` | merged (5d41187) |
 | 5 | 16 docs gate and release prep | — | last |
 
 At most three slices run at once, each in its own worktree branched from this
@@ -118,8 +118,11 @@ engineer's plan, rather than a separate test engineer per slice.
 
 **Carried from merged slices, to settle before review:**
 
-- The session-start hook's worst case is ~356 of 400 tokens. The Habits, Tracker,
-  Audit and Exceptions lines still to come need ~70, so older lines must shrink.
+- The session-start hook now prints Habits, Tracker, Audit and Exceptions;
+  worst case 389 of 400 tokens, after shortening the bootstrap pointer, the
+  in-flight lines and the cell cut (60 to 40 characters). "Waiting for
+  credentials" shows once, on the Habits line. The tracker records
+  `Last status:` under `## Tracker` for the hook to read.
 - The test plan's `SARAH_TODAY` seam was not built; dates are controlled by a
   `date` shadowed on `PATH`, as the phase rules require.
 - Token budgets in tests use chars/4, the measure CI already uses for the
@@ -154,6 +157,16 @@ engineer's plan, rather than a separate test engineer per slice.
   exception is not honoured (fails closed). The session-start `Exceptions:`
   line is not added yet; it waits on the hook budget above. Step 13 must add
   its paths to the installer's PREFIXES.
+- **From step 13:** the dispatch guard reads `- dispatch checks:` (absent means
+  all three) and `- limit:` (absent means 3; a malformed limit is not enforced,
+  and says so). A premise is current only if dated today; every Premises line
+  must be. The task is bound by the first `sarah/state/<slug>.md` in the
+  prompt; no prompt key at all allows. The three entries share one payload, so
+  `worktree.baseRef` and the include line install even when only the model
+  check is picked: slightly wider than "nothing unchosen is installed". The
+  installer gained `keys` (root `worktree` only) and `include`; PREFIXES did not
+  change. `.worktreeinclude` copying is a platform feature and is not tested.
+  `isolation` in the hook input rests on probe P2, not on the public docs.
 - The shell suite needs `git`, `python3` and `jq` on the runner; without `jq`
   the hooks allow, by design, and their blocking cases fail.
 - Step 3's first commit is not green on its own (one worst-case assertion needs
