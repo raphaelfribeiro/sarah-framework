@@ -12,7 +12,7 @@
       "source": "./",
       "displayName": "S.A.R.A.H.",
       "description": "Skills, Agents, Reviews & Adaptive Hierarchy. A structured development workflow for Claude Code that scales from a one-line fix to a whole product: specialist agents activate per phase, hard quality gates guard every merge, and every decision is presented to you as options with trade-offs.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "author": {
         "name": "Raphael Ribeiro",
         "url": "https://github.com/raphaelfribeiro"

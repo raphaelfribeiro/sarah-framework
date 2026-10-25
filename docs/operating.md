@@ -87,11 +87,36 @@ run against a fresh project. That is expensive, it is not automated, and it is
 not part of this pipeline. Treat structural green as necessary and never as
 sufficient.
 
+## What v0.2.0 leans on, and where it is blind
+
+The habits catalog rests on platform behaviour the public documentation does not
+promise. Four probes on Claude Code CLI 2.1.308 held: per-call `effort` on the
+Agent tool, the Agent input reaching a `PreToolUse` hook, a subagent naming the
+model it ran on, and `permissions.ask` still prompting in permissive modes. Re-run
+them on a CLI major version; a green CI cannot say whether they still hold.
+
+Two limits are stated rather than hidden:
+
+- **A forced platform model fallback is not reported (the F17 gap).** The executor
+  names the model it ran on, and that matched the dispatched model in 6 of 6
+  ordinary calls. A forced fallback could not be provoked on demand, so whether
+  the report would name the fallback model is unverified. The orchestrator's own
+  check of the report is the only cover.
+- **With `CLAUDE_CODE_EFFORT_LEVEL` set, the Agent tool loses its per-call
+  `effort` parameter** (fact F5 in section 0 of the
+  [architecture](specs/the-habits-that-earned-their-place.architecture.md)). Every
+  executor then runs at that level, whatever its task file declares, and nothing
+  says so at the time. If you rely on per-task effort, leave the variable unset.
+
+The platform's own fallback never fires on a rate limit (429), so the
+orchestrator re-dispatches itself. The tracker has been tested against a local
+stub only; it has not yet met the live Trello API.
+
 ## The way back
 
 Written now, because an incident is the worst moment to design one.
 
-**For a user.** Pin the previous tag instead of tracking `main`:
+**For a user.** Pin the previous tag instead of tracking `main`. The same works going forward: a project that wants no surprise installs a chosen tag and moves it when it decides to. Habits already installed into a project are the project's own and are not touched by a plugin update or downgrade.
 
 ```
 /plugin uninstall sarah@sarah-framework
