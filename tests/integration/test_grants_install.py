@@ -27,7 +27,7 @@ class Base(HabitsCase):
     def habits_md(self):
         return (self.project / "sarah" / "habits.md").read_text()
 
-    def local_settings(self):
+    def settings_local(self):
         p = self.project / ".claude" / "settings.local.json"
         return json.loads(p.read_text()) if p.exists() else None
 
@@ -188,7 +188,7 @@ class GrantRows(Base):
 
     def test_add_never_writes_an_allow_rule(self):
         self.grant("add", "push-feature", "--scope", "feature/*", "--quote", "go")
-        self.assertIsNone(self.local_settings())
+        self.assertIsNone(self.settings_local())
         self.assertFalse((self.project / ".claude" / "settings.json").exists())
 
     def test_an_always_asked_action_cannot_be_granted(self):
@@ -272,7 +272,7 @@ class AllowRules(Base):
     def test_write_adds_the_rules_to_the_personal_file_only(self):
         code, out = self.grant("allow", "--write")
         self.assertEqual(code, 0, out)
-        local = self.local_settings()
+        local = self.settings_local()
         self.assertTrue(local["permissions"]["allow"])
         self.assertFalse((self.project / ".claude" / "settings.json").exists(), "the shared file is never given allow rules")
         for rule in local["permissions"]["allow"]:
@@ -287,7 +287,7 @@ class AllowRules(Base):
     def test_existing_personal_settings_are_kept(self):
         self.write(".claude/settings.local.json", json.dumps({"permissions": {"allow": ["Bash(ls)"]}, "env": {"A": "1"}}))
         self.grant("allow", "--write")
-        local = self.local_settings()
+        local = self.settings_local()
         self.assertEqual(local["env"], {"A": "1"})
         self.assertEqual(local["permissions"]["allow"][0], "Bash(ls)")
         self.assertGreater(len(local["permissions"]["allow"]), 1)
@@ -297,7 +297,7 @@ class AllowRules(Base):
         self.grant("allow", "--write")
         code, out = self.grant("revoke", "push-feature", "--scope", "feature/*")
         self.assertEqual(code, 0, out)
-        self.assertEqual(self.local_settings(), {"permissions": {"allow": ["Bash(ls)"]}})
+        self.assertEqual(self.settings_local(), {"permissions": {"allow": ["Bash(ls)"]}})
         self.assertNotIn("git push", self.habits_md())
 
     def test_revoke_deletes_a_personal_file_it_emptied(self):
@@ -310,7 +310,7 @@ class AllowRules(Base):
         self.write(".claude/settings.local.json", json.dumps({"permissions": {"allow": [rule]}}))
         self.grant("allow", "--write")
         self.grant("revoke", "push-feature", "--scope", "feature/*")
-        self.assertIn(rule, self.local_settings()["permissions"]["allow"])
+        self.assertIn(rule, self.settings_local()["permissions"]["allow"])
 
     def test_invalid_personal_settings_are_never_clobbered(self):
         self.write(".claude/settings.local.json", "{oops")
@@ -330,7 +330,7 @@ class AllowRules(Base):
         self.run_cli("apply", "always-ask")
         asks = set(self.settings()["permissions"]["ask"])
         self.grant("allow", "--write")
-        self.assertFalse(asks & set(self.local_settings()["permissions"]["allow"]))
+        self.assertFalse(asks & set(self.settings_local()["permissions"]["allow"]))
 
     def test_revoking_after_removing_the_grants_section_row_by_hand_is_safe(self):
         self.grant("allow", "--write")

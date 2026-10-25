@@ -72,10 +72,13 @@ allowed_for() {
 while read -r _local_ref local_sha _remote_ref remote_sha; do
 	all_zeros "$local_sha" && continue
 
+	# A new branch has no remote side to diff against. Its messages are the
+	# commits no remote has yet: whatever is already published is out of reach,
+	# and re-reading it would block every first push on history nobody can fix.
 	if all_zeros "$remote_sha"; then
-		commits="$local_sha"
+		commits=("$local_sha" --not --remotes)
 	else
-		commits="${remote_sha}..${local_sha}"
+		commits=("${remote_sha}..${local_sha}")
 	fi
 
 	allowed="$(allowed_for "$local_sha" | grep -vE '^\s*(#|$)' | tr -d ' ')"
@@ -110,7 +113,7 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
 	# Messages get the same treatment as content. A hostname written into a commit
 	# message is published exactly as widely as one written into a file, and this
 	# repository has one commit message that proves it is an easy thing to do.
-	msgs="$(git log --format='%h %s%n%b' "$commits" 2>/dev/null || true)"
+	msgs="$(git log --format='%h %s%n%b' "${commits[@]}" 2>/dev/null || true)"
 
 	msg_unlisted=''
 	while read -r host; do
